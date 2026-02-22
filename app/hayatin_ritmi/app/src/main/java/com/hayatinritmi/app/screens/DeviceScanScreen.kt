@@ -31,7 +31,7 @@ import com.hayatinritmi.app.data.model.ScannedDevice
 import com.hayatinritmi.app.ui.components.GlassOutlinedButton
 import com.hayatinritmi.app.ui.components.IconCircle
 import com.hayatinritmi.app.ui.components.StatusBadge
-import com.hayatinritmi.app.ui.theme.*
+import com.hayatinritmi.app.viewmodel.DeviceScanViewModel
 
 @Composable
 fun DeviceScanScreen(
@@ -40,20 +40,23 @@ fun DeviceScanScreen(
 ) {
     val scannedDevices by viewModel.scannedDevices.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
+    // viewModel.isScanning() mantığı connection state üzerinden yönetilmiş, burada ufak bir düzeltme yaptım
     val isScanning = connectionState == ConnectionState.SCANNING
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            // DEĞİŞTİ: Sabit siyah yerine temanın arka plan rengi
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Ambient lights
+        // Ambient lights (Arkada parlayan ışık)
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = (-50).dp)
                 .size(350.dp)
-                .background(NeonBlue.copy(alpha = 0.15f), CircleShape)
+                // DEĞİŞTİ: NeonBlue yerine temanın ikincil (secondary) rengi
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), CircleShape)
                 .blur(100.dp)
         )
 
@@ -76,7 +79,8 @@ fun DeviceScanScreen(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Geri",
-                        tint = TextPrimary
+                        // DEĞİŞTİ: Geri ikonu rengi
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -84,12 +88,14 @@ fun DeviceScanScreen(
                     Text(
                         "Cihaz Tarama",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = TextPrimary
+                        // DEĞİŞTİ: Başlık rengi
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         if (isScanning) "Cihaz aranıyor..." else "Taramayı başlatın",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextTertiary
+                        // DEĞİŞTİ: Alt başlık rengi (Soluk yazı)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -109,7 +115,8 @@ fun DeviceScanScreen(
                     Icon(
                         Icons.Default.BluetoothSearching,
                         contentDescription = null,
-                        tint = NeonBlue.copy(alpha = 0.3f),
+                        // DEĞİŞTİ: Boş durum ikonu rengi
+                        tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
                         modifier = Modifier.size(80.dp)
                     )
                 }
@@ -124,7 +131,8 @@ fun DeviceScanScreen(
                     if (isScanning) viewModel.stopScan() else viewModel.startScan()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                accentColor = if (isScanning) RosePrimary else NeonBlue,
+                // DEĞİŞTİ: Durdururken Primary (Pembe/Kırmızı), Tararken Secondary (Mavi) renk alıyor
+                accentColor = if (isScanning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 height = 56.dp,
                 icon = if (isScanning) Icons.Default.Stop else Icons.Default.BluetoothSearching
             )
@@ -136,7 +144,8 @@ fun DeviceScanScreen(
                 Text(
                     "BULUNAN CİHAZLAR",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextDisabled,
+                    // DEĞİŞTİ: Liste başlığı rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     letterSpacing = 2.sp
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -176,6 +185,9 @@ fun RadarAnimation() {
         label = "ring3"
     )
 
+    // DEĞİŞTİ: Animasyon rengini temadan alıyoruz
+    val radarColor = MaterialTheme.colorScheme.secondary
+
     Box(contentAlignment = Alignment.Center) {
         listOf(scale1, scale2, scale3).forEach { scale ->
             val alpha = (1f - (scale - 0.3f) / 1.2f).coerceIn(0f, 0.5f)
@@ -183,17 +195,17 @@ fun RadarAnimation() {
                 modifier = Modifier
                     .size(120.dp)
                     .scale(scale)
-                    .border(2.dp, NeonBlue.copy(alpha = alpha), CircleShape)
+                    .border(2.dp, radarColor.copy(alpha = alpha), CircleShape)
             )
         }
         // Center icon
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .background(NeonBlue.copy(alpha = 0.2f), CircleShape),
+                .background(radarColor.copy(alpha = 0.2f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.Bluetooth, contentDescription = null, tint = NeonBlue, modifier = Modifier.size(24.dp))
+            Icon(Icons.Default.Bluetooth, contentDescription = null, tint = radarColor, modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -214,15 +226,18 @@ fun DeviceListItem(
             .fillMaxWidth()
             .defaultMinSize(minHeight = 48.dp)
             .clip(shape)
-            .background(GlassWhite)
+            // DEĞİŞTİ: GlassWhite yerine temanın yüzey (kart) rengi
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 1.dp,
-                if (isConnected) Emerald500.copy(alpha = 0.3f) else GlassBorder,
+                // DEĞİŞTİ: Bağlıysa yeşil (tertiary), değilse normal kenarlık rengi
+                if (isConnected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant,
                 shape
             )
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = Color.White.copy(alpha = 0.08f)),
+                // DEĞİŞTİ: Tıklama efekti (ripple) yazı rengine (onBackground) bağlandı ki gündüz siyah, gece beyaz dalgalansın
+                indication = ripple(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)),
                 enabled = !isConnecting && !isConnected,
                 role = Role.Button,
                 onClick = onClick
@@ -233,7 +248,8 @@ fun DeviceListItem(
         // Bluetooth icon — using IconCircle component
         IconCircle(
             icon = Icons.Default.Bluetooth,
-            color = NeonBlue,
+            // DEĞİŞTİ: İkon rengi mavi
+            color = MaterialTheme.colorScheme.secondary,
             size = 40.dp,
             iconSize = 20.dp
         )
@@ -244,12 +260,14 @@ fun DeviceListItem(
             Text(
                 device.name,
                 style = MaterialTheme.typography.titleSmall,
-                color = TextPrimary
+                // DEĞİŞTİ: Cihaz adı rengi
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 device.macAddress,
                 style = MaterialTheme.typography.labelSmall,
-                color = TextTertiary
+                // DEĞİŞTİ: MAC adresi rengi
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -262,13 +280,15 @@ fun DeviceListItem(
             isConnected -> {
                 StatusBadge(
                     text = "BAĞLI",
-                    color = Emerald500
+                    // DEĞİŞTİ: Başarılı durumu rengi (Yeşil)
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
             isConnecting -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = NeonBlue,
+                    // DEĞİŞTİ: Yükleniyor rengi mavi
+                    color = MaterialTheme.colorScheme.secondary,
                     strokeWidth = 2.dp
                 )
             }
@@ -276,7 +296,8 @@ fun DeviceListItem(
                 Icon(
                     Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = TextDisabled
+                    // DEĞİŞTİ: Sağ ok rengi
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
         }
@@ -298,7 +319,8 @@ fun SignalBars(rssi: Int) {
                     .width(4.dp)
                     .height((6 + i * 4).dp)
                     .background(
-                        if (i <= strength) NeonBlue else BorderSubtle,
+                        // DEĞİŞTİ: Çeken kısımlar mavi, çekmeyen kısımlar temanın sınır çizgisi renginde
+                        if (i <= strength) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant,
                         RoundedCornerShape(1.dp)
                     )
             )

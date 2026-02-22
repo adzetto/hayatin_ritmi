@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.hayatinritmi.app.Screen
 import com.hayatinritmi.app.ui.theme.JakartaFont
-import com.hayatinritmi.app.ui.theme.RosePrimary
 
 // --- KAN GRUBU SEÇİCİ (Underline Style) ---
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,19 +61,20 @@ fun BloodTypeDropdown(
             readOnly = true,
             label = { Text("Kan Grubu", fontSize = 14.sp, fontFamily = JakartaFont, fontWeight = FontWeight.Medium) },
             leadingIcon = {
-                Icon(Icons.Default.Favorite, contentDescription = null, tint = RosePrimary, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
             },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(),
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White.copy(alpha = 0.8f),
-                cursorColor = RosePrimary,
-                focusedIndicatorColor = RosePrimary,
-                unfocusedIndicatorColor = Color.White.copy(alpha = 0.15f),
-                focusedLabelColor = RosePrimary,
-                unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                // DEĞİŞTİ: outlineVariant silikti, onSurfaceVariant'ın saydam hali kullanıldı
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent
             )
@@ -82,11 +82,11 @@ fun BloodTypeDropdown(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color(0xFF0F172A))
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
         ) {
             bloodTypes.forEach { selectionOption ->
                 DropdownMenuItem(
-                    text = { Text(selectionOption, color = Color.White, fontFamily = JakartaFont) },
+                    text = { Text(selectionOption, color = MaterialTheme.colorScheme.onSurface, fontFamily = JakartaFont) },
                     onClick = {
                         onOptionSelected(selectionOption)
                         expanded = false
@@ -105,7 +105,7 @@ fun UnderlineInput(
     onValueChange: (String) -> Unit,
     label: String,
     icon: ImageVector,
-    iconTint: Color = Color.White.copy(alpha = 0.4f),
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     modifier: Modifier = Modifier,
@@ -124,16 +124,17 @@ fun UnderlineInput(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            cursorColor = RosePrimary,
-            focusedIndicatorColor = RosePrimary,
-            unfocusedIndicatorColor = Color.White.copy(alpha = 0.15f),
-            focusedLabelColor = RosePrimary,
-            unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            // DEĞİŞTİ: Çizginin silikleşmesini önlemek için belirgin bir gri (onSurfaceVariant) kullanıldı
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedLeadingIconColor = RosePrimary.copy(alpha = 0.8f),
+            focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
             unfocusedLeadingIconColor = iconTint
         )
     )
@@ -151,14 +152,14 @@ fun SignUpScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Ambiyans Işıkları (HTML'deki orb-1 ve orb-2)
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-60).dp)
                 .size(300.dp)
-                .background(RosePrimary.copy(alpha = 0.15f), CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
                 .blur(80.dp)
         )
         Box(
@@ -166,7 +167,7 @@ fun SignUpScreen(navController: NavHostController) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 80.dp, y = 80.dp)
                 .size(350.dp)
-                .background(Color(0xFFBE123C).copy(alpha = 0.12f), CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f), CircleShape)
                 .blur(90.dp)
         )
 
@@ -183,15 +184,15 @@ fun SignUpScreen(navController: NavHostController) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), CircleShape) // DEĞİŞTİ: outlineVariant düzeltildi
                     .clickable { navController.popBackStack() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Geri",
-                    tint = Color.White.copy(alpha = 0.6f),
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -204,7 +205,7 @@ fun SignUpScreen(navController: NavHostController) {
                 fontFamily = JakartaFont,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 lineHeight = 36.sp
             )
 
@@ -214,14 +215,14 @@ fun SignUpScreen(navController: NavHostController) {
                 text = "Bu veriler acil durumlarda ilk müdahale ekipleriyle şifreli olarak paylaşılacaktır.",
                 fontFamily = JakartaFont,
                 fontSize = 14.sp,
-                color = Color.White.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
                 lineHeight = 20.sp
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // FORM ALANLARI (HTML'deki underline style)
+            // FORM ALANLARI
             UnderlineInput(
                 value = name,
                 onValueChange = { name = it },
@@ -231,7 +232,6 @@ fun SignUpScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Kan Grubu ve Şifre (yan yana - HTML'deki grid-cols-2 gibi)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -261,7 +261,7 @@ fun SignUpScreen(navController: NavHostController) {
                 onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 11) emergencyPhone = it },
                 label = "Acil Durum Kişisi (Tel No)",
                 icon = Icons.Default.LocalHospital,
-                iconTint = Color.White.copy(alpha = 0.4f),
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
                 keyboardType = KeyboardType.Phone
             )
 
@@ -279,10 +279,10 @@ fun SignUpScreen(navController: NavHostController) {
                         text = "OPSİYONEL",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.3f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         letterSpacing = 1.sp,
                         modifier = Modifier
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
+                            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(50)) // DEĞİŞTİ: outlineVariant düzeltildi
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -299,23 +299,27 @@ fun SignUpScreen(navController: NavHostController) {
                     checked = isChecked,
                     onCheckedChange = { isChecked = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = RosePrimary,
-                        uncheckedColor = Color.White.copy(alpha = 0.3f),
-                        checkmarkColor = Color.White
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        // DEĞİŞTİ: Checkbox'ın boş hali için belirgin bir gri/beyaz tonu (onSurfaceVariant) kullanıldı
+                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        checkmarkColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
 
+                val primaryColor = MaterialTheme.colorScheme.primary
+                val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+
                 val annotatedText = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = RosePrimary, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold)) {
                         append("Kullanım Koşullarını")
                     }
-                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.5f))) {
+                    withStyle(style = SpanStyle(color = textColor)) {
                         append(" ve tıbbi verilerimin uçtan uca şifrelenerek işlenmesine dair ")
                     }
-                    withStyle(style = SpanStyle(color = RosePrimary, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold)) {
                         append("KVKK Metnini")
                     }
-                    withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.5f))) {
+                    withStyle(style = SpanStyle(color = textColor)) {
                         append(" okudum, onaylıyorum.")
                     }
                 }
@@ -336,9 +340,10 @@ fun SignUpScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    // DEĞİŞTİ: Kodu Gönder butonundaki gibi glow efektini geri ekledik
                     .background(
                         brush = Brush.radialGradient(
-                            colors = listOf(RosePrimary.copy(alpha = 0.3f), Color.Transparent),
+                            colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent),
                             radius = 180f
                         ),
                         shape = RoundedCornerShape(16.dp)
@@ -358,14 +363,16 @@ fun SignUpScreen(navController: NavHostController) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            // DEĞİŞTİ: Buton üstündeki cam parlama efekti
                             .border(
                                 1.dp,
                                 Brush.verticalGradient(listOf(Color.White.copy(0.3f), Color.Transparent)),
                                 RoundedCornerShape(16.dp)
                             )
                             .background(
+                                // DEĞİŞTİ: Soluk primaryContainer yerine ana rengin güçlü hali kullanıldı
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(RosePrimary, Color(0xFF9F1239))
+                                    colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                                 ),
                                 shape = RoundedCornerShape(16.dp)
                             ),
@@ -377,7 +384,7 @@ fun SignUpScreen(navController: NavHostController) {
                                 fontFamily = JakartaFont,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = Color.White // Zemin koyu kırmızı/pembe olduğu için yazı tam beyaz kalmalı
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Icon(

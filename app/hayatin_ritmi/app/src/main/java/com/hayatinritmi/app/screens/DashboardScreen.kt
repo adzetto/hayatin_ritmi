@@ -42,8 +42,10 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
         ?: ConnectionState.DISCONNECTED
     val bpm = ecgViewModel?.bpm?.collectAsState()?.value ?: 0
 
+    // DEĞİŞTİ: Emerald500 yerine temanın tertiary (yeşil) rengini kullanıyoruz.
+    // AmberWarning ve NeutralGray özel uyarı renkleri olduğu için onları sabit bırakabiliriz.
     val statusColor = when (connectionState) {
-        ConnectionState.CONNECTED -> Emerald500
+        ConnectionState.CONNECTED -> MaterialTheme.colorScheme.tertiary
         ConnectionState.SCANNING, ConnectionState.CONNECTING -> AmberWarning
         ConnectionState.DISCONNECTED -> NeutralGray
     }
@@ -57,7 +59,8 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            // DEĞİŞTİ: Sabit siyah yerine temaya duyarlı arka plan
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // ── AMBİYANS IŞIKLARI ──────────────────────────────
         Box(
@@ -72,7 +75,8 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
                 .align(Alignment.BottomEnd)
                 .offset(x = 50.dp, y = 50.dp)
                 .size(300.dp)
-                .background(NeonBlue.copy(alpha = 0.2f), CircleShape)
+                // DEĞİŞTİ: NeonBlue yerine temanın ikincil rengi
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), CircleShape)
                 .blur(80.dp)
         )
 
@@ -100,9 +104,10 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
                         .clip(CircleShape)
                         .clickable(
                             interactionSource = interactionSource,
+                            // DEĞİŞTİ: Tıklama efekti rengi
                             indication = ripple(
                                 bounded = true,
-                                color = Emerald500.copy(alpha = 0.3f)
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                             ),
                             role = Role.Button,
                             onClick = { navController.navigate(Screen.ProMode.route) }
@@ -120,7 +125,8 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
             // ── BİLGİ KARTLARI (InfoCard from CommonComponents) ─
             InfoCard(
                 icon = Icons.Default.AutoAwesome,
-                iconColor = NeonBlue,
+                // DEĞİŞTİ: İkon rengi temadan alınıyor
+                iconColor = MaterialTheme.colorScheme.secondary,
                 title = "Yapay Zeka Notu",
                 description = "Bugün gayet iyi görünüyorsunuz. Düne göre stresiniz azaldı. İlacınızı aldıysanız günün tadını çıkarabilirsiniz."
             )
@@ -129,7 +135,7 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
 
             InfoCard(
                 icon = Icons.Default.PieChart,
-                iconColor = NeonBlue,
+                iconColor = MaterialTheme.colorScheme.secondary,
                 title = "Detaylı Rapor & EKG",
                 description = "Doktorunuz için teknik veriler",
                 showArrow = true,
@@ -160,7 +166,8 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
             Icon(
                 Icons.Default.Warning,
                 contentDescription = null,
-                tint = TextDisabled
+                // DEĞİŞTİ: Pasif görünüm için temanın outline rengi
+                tint = MaterialTheme.colorScheme.outlineVariant
             )
         }
     }
@@ -171,7 +178,7 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
 // ══════════════════════════════════════════════════════
 
 @Composable
-fun TopBarSection(statusText: String = "TİŞÖRT BAĞLI", statusColor: Color = Emerald500) {
+fun TopBarSection(statusText: String, statusColor: Color) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -181,7 +188,8 @@ fun TopBarSection(statusText: String = "TİŞÖRT BAĞLI", statusColor: Color = 
             Text(
                 text = "Merhaba, Ahmet",
                 style = MaterialTheme.typography.headlineSmall,
-                color = TextPrimary,
+                // DEĞİŞTİ: Yazı rengi
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.semantics { heading() }
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -195,12 +203,13 @@ fun TopBarSection(statusText: String = "TİŞÖRT BAĞLI", statusColor: Color = 
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .background(SurfaceElevated, CircleShape)
-                .border(1.dp, GlassBorder, CircleShape)
+                // DEĞİŞTİ: Profil arka planı temanın yüzey rengi
+                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                 .clip(CircleShape)
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = ripple(bounded = true, color = TextSecondary),
+                    indication = ripple(bounded = true, color = MaterialTheme.colorScheme.onSurfaceVariant),
                     role = Role.Button,
                     onClick = { /* Profil eylemi */ }
                 )
@@ -210,7 +219,8 @@ fun TopBarSection(statusText: String = "TİŞÖRT BAĞLI", statusColor: Color = 
             Icon(
                 Icons.Default.Person,
                 contentDescription = null,
-                tint = TextSecondary,
+                // DEĞİŞTİ: Profil ikonu rengi
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -245,24 +255,27 @@ fun BreathingCircleAnimation(bpm: Int = 0) {
         label = "glow"
     )
 
+    // DEĞİŞTİ: Animasyon rengi temadan (tertiary) alınıyor
+    val circleColor = MaterialTheme.colorScheme.tertiary
+
     Box(
         modifier = Modifier
             .size(220.dp)
             .scale(scale)
             .background(
                 brush = Brush.radialGradient(
-                    colors = listOf(Emerald500.copy(alpha = glowAlpha), Color.Transparent)
+                    colors = listOf(circleColor.copy(alpha = glowAlpha), Color.Transparent)
                 ),
                 shape = CircleShape
             )
-            .border(2.dp, EmeraldSubtle, CircleShape),
+            .border(2.dp, circleColor.copy(alpha = 0.2f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
-                tint = Emerald500,
+                tint = circleColor,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -270,12 +283,14 @@ fun BreathingCircleAnimation(bpm: Int = 0) {
                 text = if (bpm > 0) "$bpm" else "Güvendesiniz",
                 style = if (bpm > 0) MaterialTheme.typography.headlineLarge
                 else MaterialTheme.typography.headlineMedium,
-                color = TextPrimary
+                // DEĞİŞTİ: Yazı rengi
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = if (bpm > 0) "BPM" else "Kalp ritminiz stabil.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Emerald400
+                // DEĞİŞTİ: Alt yazı rengi
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -295,8 +310,9 @@ fun FloatingNavBar(
         modifier = modifier
             .fillMaxWidth(0.85f)
             .clip(RoundedCornerShape(30.dp))
-            .background(Surface1.copy(alpha = 0.95f))
-            .border(1.dp, GlassBorder, RoundedCornerShape(30.dp))
+            // DEĞİŞTİ: Menü arka planı temanın yüzey rengi
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(30.dp))
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -358,7 +374,8 @@ fun NavIcon(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isActive) Emerald500 else TextDisabled,
+            // DEĞİŞTİ: Aktif ikon yeşil (tertiary), pasif ikon soluk yazı rengi
+            tint = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.size(24.dp)
         )
     }

@@ -44,7 +44,8 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(RichBlack)
+            // DEĞİŞTİ: RichBlack yerine temanın dinamik arka plan rengi
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // 1. ARKA PLAN ISIKLARI
         Box(
@@ -52,7 +53,8 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                 .align(Alignment.TopStart)
                 .offset(x = (-100).dp, y = 50.dp)
                 .size(400.dp)
-                .background(NeonBlue.copy(alpha = 0.15f), CircleShape)
+                // DEĞİŞTİ: NeonBlue yerine temanın ikincil (mavi) rengi
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), CircleShape)
                 .blur(100.dp)
         )
         Box(
@@ -60,7 +62,8 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 100.dp, y = 100.dp)
                 .size(300.dp)
-                .background(NeonRed.copy(alpha = 0.1f), CircleShape)
+                // DEĞİŞTİ: NeonRed yerine temanın birincil (kırmızı/pembe) rengi
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
                 .blur(90.dp)
         )
 
@@ -80,9 +83,10 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Canli Monitor",
+                            text = "Canlı Monitör",
                             style = MaterialTheme.typography.headlineSmall,
-                            color = TextPrimary
+                            // DEĞİŞTİ: TextPrimary yerine temaya duyarlı yazı rengi
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         BlinkingDot()
@@ -92,13 +96,14 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                     }
                     Text(
                         text = when (connectionState) {
-                            ConnectionState.CONNECTED -> "SENSOR AKTIF"
-                            ConnectionState.CONNECTING -> "BAGLANIYOR..."
+                            ConnectionState.CONNECTED -> "SENSÖR AKTİF"
+                            ConnectionState.CONNECTING -> "BAĞLANIYOR..."
                             ConnectionState.SCANNING -> "TARANIYOR..."
-                            ConnectionState.DISCONNECTED -> "SENSOR BAGLI DEGIL"
+                            ConnectionState.DISCONNECTED -> "SENSÖR BAĞLI DEĞİL"
                         },
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextTertiary,
+                        // DEĞİŞTİ: Alt bilgi yazısı rengi
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 2.sp
                     )
                 }
@@ -106,7 +111,8 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                 // Mod Degistirici
                 Box(
                     modifier = Modifier
-                        .background(GlassMedium, RoundedCornerShape(50))
+                        // DEĞİŞTİ: GlassMedium yerine kart yüzey rengi
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(50))
                         .padding(4.dp)
                         .clickable { navController.popBackStack() }
                 ) {
@@ -114,18 +120,21 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                         Text(
                             text = "Sakin",
                             style = MaterialTheme.typography.labelSmall,
-                            color = TextSecondary,
+                            // DEĞİŞTİ: Seçili olmayan sekme yazısı
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 12.dp)
                         )
                         Box(
                             modifier = Modifier
-                                .background(NeonRed, RoundedCornerShape(50))
+                                // DEĞİŞTİ: Aktif sekme arka planı temanın ana rengi
+                                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "PRO",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = TextWhite
+                                // DEĞİŞTİ: Ana renk üzerindeki yazı her zaman beyaz/kontrast olmalı
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
@@ -142,12 +151,14 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                         fontSize = 80.sp,
                         letterSpacing = (-4).sp
                     ),
-                    color = TextPrimary
+                    // DEĞİŞTİ: Büyük sayı rengi
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "BPM",
                     style = MaterialTheme.typography.titleMedium,
-                    color = TextTertiary,
+                    // DEĞİŞTİ: BPM birim yazısı rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp, start = 8.dp)
                 )
             }
@@ -157,8 +168,9 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(GlassWhite, RoundedCornerShape(16.dp))
-                    .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                    // DEĞİŞTİ: Grafiğin dış kutusu arka planı
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                     .clip(RoundedCornerShape(16.dp))
             ) {
                 RealTimeEcgGraph(graphPoints)
@@ -169,39 +181,46 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
 
             // 5. AI ANALIZ KARTI
             GlassCard {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = NeonBlue, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "KLINIK AI ANALIZI",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = TextPrimary
+                Column(modifier = Modifier.padding(16.dp)) { // GlassCard içini düzenli tutmak için eklendi
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // DEĞİŞTİ: İkon rengi ikincil (mavi) renk
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "KLİNİK AI ANALİZİ",
+                                style = MaterialTheme.typography.labelMedium,
+                                // DEĞİŞTİ: Başlık rengi
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                        StatusBadge(
+                            text = if (connectionState == ConnectionState.CONNECTED) "CANLI TARAMA" else "BEKLEMEDE",
+                            // DEĞİŞTİ: Badge rengi
+                            color = if (connectionState == ConnectionState.CONNECTED) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    StatusBadge(
-                        text = if (connectionState == ConnectionState.CONNECTED) "CANLI TARAMA" else "BEKLEMEDE",
-                        color = if (connectionState == ConnectionState.CONNECTED) NeonBlue else TextTertiary
-                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val rhythmStatus = if (bpm in 60..100) "Düzenli (NSR)" else if (bpm > 0) "Analiz Ediliyor..." else "Veri Bekleniyor"
+                    // DEĞİŞTİ: Emerald500 yerine tertiary (yeşil) kullanıldı
+                    val rhythmColor = if (bpm in 60..100) MaterialTheme.colorScheme.tertiary else AmberWarning
+                    AnalysisRow("Sinüs Ritmi:", rhythmStatus, rhythmColor)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val rrText = if (bpm > 0) "Stabil (${String.format("%.2f", 60f / bpm)}s)" else "-- s"
+                    // DEĞİŞTİ: Yazı rengi
+                    AnalysisRow("R-R İnterval:", rrText, MaterialTheme.colorScheme.onBackground)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val sdnnText = if (hrv.sdnn > 0f) String.format("%.1f ms", hrv.sdnn) else "-- ms"
+                    AnalysisRow("SDNN:", sdnnText, MaterialTheme.colorScheme.tertiary)
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val rhythmStatus = if (bpm in 60..100) "Duzenli (NSR)" else if (bpm > 0) "Analiz Ediliyor..." else "Veri Bekleniyor"
-                val rhythmColor = if (bpm in 60..100) Emerald500 else AmberWarning
-                AnalysisRow("Sinus Ritmi:", rhythmStatus, rhythmColor)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val rrText = if (bpm > 0) "Stabil (${String.format("%.2f", 60f / bpm)}s)" else "-- s"
-                AnalysisRow("R-R Interval:", rrText, TextPrimary)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val sdnnText = if (hrv.sdnn > 0f) String.format("%.1f ms", hrv.sdnn) else "-- ms"
-                AnalysisRow("SDNN:", sdnnText, Emerald500)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -214,7 +233,8 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                     value = if (hrv.rmssd > 0f) String.format("%.0f", hrv.rmssd) else "--",
                     unit = "ms",
                     icon = Icons.Default.GraphicEq,
-                    color = NeonBlue
+                    // DEĞİŞTİ: İkincil renk (Mavi)
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 MetricCard(
                     modifier = Modifier.weight(1f),
@@ -222,6 +242,7 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
                     value = "98",
                     unit = "%",
                     icon = Icons.Default.WaterDrop,
+                    // CyanAccent tıbbi bir renk olduğu için sabit bırakılabilir
                     color = CyanAccent
                 )
             }
@@ -231,10 +252,11 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
 
 @Composable
 fun ConnectionStatusDot(connectionState: ConnectionState) {
+    // DEĞİŞTİ: Sabit hex renkleri yerine temanın renkleri kullanıldı
     val color = when (connectionState) {
-        ConnectionState.CONNECTED -> Color(0xFF10B981)
-        ConnectionState.CONNECTING, ConnectionState.SCANNING -> Color(0xFFFBBF24)
-        ConnectionState.DISCONNECTED -> Color(0xFFEF4444)
+        ConnectionState.CONNECTED -> MaterialTheme.colorScheme.tertiary // Yeşil
+        ConnectionState.CONNECTING, ConnectionState.SCANNING -> AmberWarning // Sarı
+        ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.error // Kırmızı
     }
     Box(
         modifier = Modifier
@@ -245,25 +267,27 @@ fun ConnectionStatusDot(connectionState: ConnectionState) {
 
 @Composable
 fun RealTimeEcgGraph(graphPoints: List<Float>) {
+    // DEĞİŞTİ: Canvas içindeki çizim renkleri temanın o anki durumuna bağlandı
+    val bgColor = MaterialTheme.colorScheme.surface
+    val gridColor = MaterialTheme.colorScheme.onSurface
+    val ecgLineColor = MaterialTheme.colorScheme.primary
+
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val midY = height / 2
 
         // Background
-        drawRect(color = Color.Black.copy(alpha = 0.5f))
+        // DEĞİŞTİ: Siyah yerine temanın kart/yüzey rengi
+        drawRect(color = bgColor)
 
-        // EKG Grid: minor lines every 0.04s, major lines every 0.2s
-        // At 250Hz, 4 seconds = 1000 samples displayed across width
-        // Minor grid: 0.04s = 10 samples -> width / 100 subdivisions
-        // Major grid: 0.2s = 50 samples -> width / 20 subdivisions
         val minorStepX = width / 100f
         val majorStepX = width / 20f
 
         // Minor vertical grid lines
         for (i in 0..(width / minorStepX).toInt()) {
             drawLine(
-                color = Color.White.copy(alpha = 0.03f),
+                // DEĞİŞTİ: Beyaz yerine temanın yazı renginin saydam hali
+                color = gridColor.copy(alpha = 0.05f),
                 start = Offset(i * minorStepX, 0f),
                 end = Offset(i * minorStepX, height)
             )
@@ -271,7 +295,7 @@ fun RealTimeEcgGraph(graphPoints: List<Float>) {
         // Major vertical grid lines
         for (i in 0..(width / majorStepX).toInt()) {
             drawLine(
-                color = Color.White.copy(alpha = 0.08f),
+                color = gridColor.copy(alpha = 0.1f),
                 start = Offset(i * majorStepX, 0f),
                 end = Offset(i * majorStepX, height),
                 strokeWidth = 1.5f
@@ -281,10 +305,10 @@ fun RealTimeEcgGraph(graphPoints: List<Float>) {
         // Horizontal grid lines
         val hGridStep = height / 8f
         for (i in 0..8) {
-            val alpha = if (i == 4) 0.1f else 0.04f
+            val alpha = if (i == 4) 0.15f else 0.05f
             val sw = if (i == 4) 1.5f else 1f
             drawLine(
-                color = Color.White.copy(alpha = alpha),
+                color = gridColor.copy(alpha = alpha),
                 start = Offset(0f, i * hGridStep),
                 end = Offset(width, i * hGridStep),
                 strokeWidth = sw
@@ -293,7 +317,6 @@ fun RealTimeEcgGraph(graphPoints: List<Float>) {
 
         if (graphPoints.isEmpty()) return@Canvas
 
-        // Auto-scale Y axis based on data range
         val maxVal = graphPoints.maxOrNull() ?: 1f
         val minVal = graphPoints.minOrNull() ?: -1f
         val range = (maxVal - minVal).coerceAtLeast(1f)
@@ -317,14 +340,15 @@ fun RealTimeEcgGraph(graphPoints: List<Float>) {
         // Glow effect
         drawPath(
             path = path,
-            color = NeonRed.copy(alpha = 0.3f),
+            // DEĞİŞTİ: Neon kırmızı yerine temanın ana rengi
+            color = ecgLineColor.copy(alpha = 0.3f),
             style = Stroke(width = 12f, cap = StrokeCap.Round)
         )
 
         // Main ECG trace
         drawPath(
             path = path,
-            color = NeonRed,
+            color = ecgLineColor,
             style = Stroke(
                 width = 3f,
                 cap = StrokeCap.Round,
@@ -346,11 +370,14 @@ fun BlinkingDot() {
         ), label = "alpha"
     )
 
+    // DEĞİŞTİ: Kırmızı yanıp sönen nokta temanın rengini aldı
+    val dotColor = MaterialTheme.colorScheme.primary
+
     Box(
         modifier = Modifier
             .size(8.dp)
-            .background(NeonRed.copy(alpha = alpha), CircleShape)
-            .border(1.dp, NeonRed.copy(alpha = 0.5f), CircleShape)
+            .background(dotColor.copy(alpha = alpha), CircleShape)
+            .border(1.dp, dotColor.copy(alpha = 0.5f), CircleShape)
     )
 }
 
@@ -366,6 +393,9 @@ fun ScanlineAnimation() {
         ), label = "scanline"
     )
 
+    // DEĞİŞTİ: Tarama çizgisi rengi
+    val scanColor = MaterialTheme.colorScheme.secondary
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val scanX = this.maxWidth * fraction
         Box(
@@ -375,7 +405,7 @@ fun ScanlineAnimation() {
                 .offset(x = scanX)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, NeonBlue, Color.Transparent)
+                        colors = listOf(Color.Transparent, scanColor, Color.Transparent)
                     )
                 )
         )
@@ -391,7 +421,8 @@ fun AnalysisRow(label: String, value: String, valueColor: Color) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = TextSecondary
+            // DEĞİŞTİ: Etiket rengi
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = value,
