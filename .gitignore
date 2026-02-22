@@ -1,0 +1,51 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# APK
+*.apk
+*.aab
+
+# Build artifacts
+build_result.txt
+build_output.txt
+build_log.txt
+build_log*.txt
+build_final.txt
+build_features.txt
+build_ui.txt
+run_build.bat
+build_debug.bat
+
+# Claude Code
+.claude/
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Kotlin
+*.class
+
+# Temp
+*.tmp
+*.bak
+*.swp
+
+# Word docs (keep in separate storage)
+*.docx
+
+# Dataset (too large for git)
+dataset/
+
+# Backup copies
+app/_yedek_HayatinRitmi/
