@@ -2,6 +2,7 @@ package com.hayatinritmi.app.screens
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.hayatinritmi.app.Screen
 import com.hayatinritmi.app.data.model.ConnectionState
@@ -382,7 +384,7 @@ fun SettingsScreen(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 4. EKLENEN KISIM: Acil Durum İzinleri (Temaya Uyumlu)
+                // 4. Acil Durum İzinleri
                 EmergencyPermissionSection()
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -474,34 +476,48 @@ fun SettingsMenuItem(
     }
 }
 
-// YENİ EKLENEN VE TEMAYA UYARLANAN KISIM
 @Composable
 fun EmergencyPermissionSection() {
     val context = LocalContext.current
 
-    // İzin durumlarını tuttuğumuz state'ler
-    var smsGranted by remember { mutableStateOf(false) }
-    var phoneGranted by remember { mutableStateOf(false) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
+    var smsGranted by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED)
+    }
+    var phoneGranted by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED)
+    }
+    // SADECE FINE (Kesin) konum varsa true kabul ediyoruz
+    var locationGranted by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+    }
 
+    var showRationaleDialog by remember { mutableStateOf(false) } // Ön bilgilendirme dialogu state'i
+    var showSettingsDialog by remember { mutableStateOf(false) }  // Ayarlara yönlendirme dialogu state'i
+
+    // Android'in çökmemesi için COARSE mecburen bu listede kalmalı
     val permissions = arrayOf(
         Manifest.permission.SEND_SMS,
-        Manifest.permission.CALL_PHONE
+        Manifest.permission.CALL_PHONE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { result ->
-        smsGranted = result[Manifest.permission.SEND_SMS] ?: false
-        phoneGranted = result[Manifest.permission.CALL_PHONE] ?: false
+        smsGranted = result[Manifest.permission.SEND_SMS] == true
+        phoneGranted = result[Manifest.permission.CALL_PHONE] == true
 
-        if (!smsGranted || !phoneGranted) {
+        // Kullanıcı yaklaşık (Coarse) verse bile, Kesin (Fine) vermediyse false sayıyoruz
+        locationGranted = result[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+        if (!smsGranted || !phoneGranted || !locationGranted) {
             showSettingsDialog = true
         }
     }
 
-    // Temaya uyumlu tıklanabilir satır tasarımı (SettingsMenuItem gibi)
     val interactionSource = remember { MutableInteractionSource() }
+    val allPermissionsGranted = smsGranted && phoneGranted && locationGranted
 
     Row(
         modifier = Modifier
@@ -510,14 +526,19 @@ fun EmergencyPermissionSection() {
                 interactionSource = interactionSource,
                 indication = ripple(color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
                 role = Role.Button,
-                onClick = { permissionLauncher.launch(permissions) }
+                onClick = {
+                    if (!allPermissionsGranted) {
+                        // Önce ön bilgilendirme ekranını göster
+                        showRationaleDialog = true
+                    }
+                }
             )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconCircle(
-            icon = Icons.Default.Warning, // Uyarı ikonu
-            color = MaterialTheme.colorScheme.error, // Hata/Uyarı rengi
+            icon = if (allPermissionsGranted) Icons.Default.HealthAndSafety else Icons.Default.Warning,
+            color = if (allPermissionsGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
             size = 36.dp,
             iconSize = 18.dp
         )
@@ -529,28 +550,48 @@ fun EmergencyPermissionSection() {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = if (smsGranted && phoneGranted) "İzinler sağlandı, sistem hazır" else "Otomatik arama ve SMS için izin verin",
+                text = if (allPermissionsGranted) "Tüm izinler sağlandı, sistem hazır" else "Acil SMS, Arama ve Kesin Konum izni gerekli",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (smsGranted && phoneGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+                color = if (allPermissionsGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
             )
         }
-        // Eğer izinler verilmişse onay tiki, verilmemişse kırmızı bir ok gösterelim
         Icon(
-            if (smsGranted && phoneGranted) Icons.Default.Check else Icons.Default.ChevronRight,
+            if (allPermissionsGranted) Icons.Default.Check else Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = if (smsGranted && phoneGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+            tint = if (allPermissionsGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
         )
     }
 
-    // Kullanıcı izinleri kalıcı reddettiyse Ayarlara yönlendirme Dialog'u
+    // ÖN BİLGİLENDİRME EKRANI
+    if (showRationaleDialog) {
+        AlertDialog(
+            onDismissRequest = { showRationaleDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            title = { Text("Önemli Bilgilendirme") },
+            text = { Text("Bir sonraki ekranda Android sizden konum izni isteyecektir. Ambulansın sizi tam olarak bulabilmesi için lütfen açılan pencerede \"Kesin\" veya \"Tam Konum\" seçeneğini işaretlediğinizden emin olun.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRationaleDialog = false
+                    // Kullanıcı anladıktan sonra asıl sistem izin penceresini açıyoruz
+                    permissionLauncher.launch(permissions)
+                }) {
+                    Text("Anladım", color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        )
+    }
+
+    // AYARLARA YÖNLENDİRME EKRANI (İzin reddedilirse veya yaklaşık konum seçilirse)
     if (showSettingsDialog) {
         AlertDialog(
             onDismissRequest = { showSettingsDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = MaterialTheme.colorScheme.onBackground,
             textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            title = { Text("İzin Gerekli") },
-            text = { Text("Acil durumlarda 112'yi arayabilmemiz ve yakınlarına SMS atabilmemiz için ayarlardan izinleri manuel olarak açmalısınız.") },
+            title = { Text("Kesin Konum ve İzinler Gerekli") },
+            text = { Text("Ambulansın sizi bulabilmesi ve acil durumlarda 112'yi arayabilmemiz için ayarlardan tüm izinleri (Özellikle 'Tam Konum' özelliğini) manuel olarak açmalısınız.") },
             confirmButton = {
                 TextButton(onClick = {
                     showSettingsDialog = false
