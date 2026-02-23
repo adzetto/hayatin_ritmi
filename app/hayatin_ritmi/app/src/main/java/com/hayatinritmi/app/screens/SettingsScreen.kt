@@ -1,5 +1,11 @@
 package com.hayatinritmi.app.screens
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +39,6 @@ import com.hayatinritmi.app.ui.components.GlassCard
 import com.hayatinritmi.app.ui.components.GlassOutlinedButton
 import com.hayatinritmi.app.ui.components.IconCircle
 import com.hayatinritmi.app.ui.components.StatusBadge
-import com.hayatinritmi.app.ui.theme.*
 import com.hayatinritmi.app.viewmodel.DeviceScanViewModel
 import com.hayatinritmi.app.viewmodel.EcgViewModel
 
@@ -53,7 +59,6 @@ fun SettingsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // DEĞİŞTİ: Sabit siyah yerine temaya duyarlı arka plan
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Arka Plan Işıkları
@@ -62,7 +67,6 @@ fun SettingsScreen(
                 .align(Alignment.TopStart)
                 .offset(x = (-50).dp, y = (-50).dp)
                 .size(300.dp)
-                // DEĞİŞTİ: NeonBlue yerine ikincil renk
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), CircleShape)
                 .blur(80.dp)
         )
@@ -71,7 +75,6 @@ fun SettingsScreen(
                 .align(Alignment.BottomEnd)
                 .offset(x = 50.dp, y = 50.dp)
                 .size(300.dp)
-                // DEĞİŞTİ: PurpleAccent yerine temanın yüzey varyantı veya ana rengi kullanılabilir
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
                 .blur(80.dp)
         )
@@ -88,7 +91,6 @@ fun SettingsScreen(
             Text(
                 text = "Ayarlar",
                 style = MaterialTheme.typography.headlineLarge,
-                // DEĞİŞTİ: Başlık rengi
                 color = MaterialTheme.colorScheme.onBackground
             )
 
@@ -105,7 +107,6 @@ fun SettingsScreen(
                         modifier = Modifier
                             .size(64.dp)
                             .background(
-                                // DEĞİŞTİ: Sabit renkler yerine temanın renkleri
                                 brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)),
                                 shape = CircleShape
                             )
@@ -114,14 +115,12 @@ fun SettingsScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                // DEĞİŞTİ: Avatar içi siyah yerine temanın arka planı
                                 .background(MaterialTheme.colorScheme.background, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = null,
-                                // DEĞİŞTİ: İkon rengi
                                 tint = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.size(32.dp)
                             )
@@ -132,20 +131,17 @@ fun SettingsScreen(
                         Text(
                             text = "Ahmet Yılmaz",
                             style = MaterialTheme.typography.titleLarge,
-                            // DEĞİŞTİ: İsim rengi
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "ahmet@example.com",
                             style = MaterialTheme.typography.bodySmall,
-                            // DEĞİŞTİ: E-posta rengi
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // Kan grubu badge
                     Box(
                         modifier = Modifier
-                            // DEĞİŞTİ: Badge arka planı ve çerçevesi
                             .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
                             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -155,14 +151,12 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Favorite,
                                 contentDescription = null,
-                                // DEĞİŞTİ: Kalp ikonu
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = "A Rh+",
                                 style = MaterialTheme.typography.labelSmall,
-                                // DEĞİŞTİ: Kan grubu yazısı
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -186,7 +180,6 @@ fun SettingsScreen(
                         Icon(
                             Icons.Default.Bluetooth,
                             contentDescription = null,
-                            // DEĞİŞTİ: Mavi ikon
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -194,13 +187,11 @@ fun SettingsScreen(
                         Text(
                             text = "BAĞLI CİHAZLAR",
                             style = MaterialTheme.typography.labelSmall,
-                            // DEĞİŞTİ: Üst başlık rengi
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     StatusBadge(
                         text = if (isDeviceConnected) "AKTİF" else "BAĞLI DEĞİL",
-                        // DEĞİŞTİ: Badge renkleri
                         color = if (isDeviceConnected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -210,20 +201,17 @@ fun SettingsScreen(
                         Text(
                             text = "Hayatın Ritmi Tişörtü",
                             style = MaterialTheme.typography.titleMedium,
-                            // DEĞİŞTİ: Cihaz adı
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Sensör Durumu: Mükemmel",
                             style = MaterialTheme.typography.bodySmall,
-                            // DEĞİŞTİ: Durum yazısı
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                         val calibrateInteraction = remember { MutableInteractionSource() }
                         Text(
                             text = "Cihazı Kalibre Et",
                             style = MaterialTheme.typography.labelMedium,
-                            // DEĞİŞTİ: Tıklanabilir link rengi
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier
                                 .padding(top = 8.dp)
@@ -241,16 +229,13 @@ fun SettingsScreen(
                         CircularProgressIndicator(
                             progress = { if (isDeviceConnected) batteryPercent / 100f else 0f },
                             modifier = Modifier.size(48.dp),
-                            // DEĞİŞTİ: Şarj dairesi rengi
                             color = if (isDeviceConnected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                             strokeWidth = 4.dp,
-                            // DEĞİŞTİ: Şarj dairesi boşluk rengi
                             trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                         Text(
                             text = if (isDeviceConnected) "$batteryPercent%" else "--%",
                             style = MaterialTheme.typography.bodySmall,
-                            // DEĞİŞTİ: Şarj yüzdesi yazısı
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -264,7 +249,6 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    // DEĞİŞTİ: Menü dış kutusu arka planı
                     .background(MaterialTheme.colorScheme.surface)
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp))
             ) {
@@ -277,7 +261,6 @@ fun SettingsScreen(
                 ) {
                     IconCircle(
                         icon = Icons.Default.Layers,
-                        // DEĞİŞTİ: İkon rengi
                         color = MaterialTheme.colorScheme.secondary,
                         size = 36.dp,
                         iconSize = 18.dp
@@ -287,20 +270,17 @@ fun SettingsScreen(
                         Text(
                             text = "Arayüz Modu",
                             style = MaterialTheme.typography.titleSmall,
-                            // DEĞİŞTİ: Menü yazısı
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Sakin veya Pro Mod seçimi",
                             style = MaterialTheme.typography.bodySmall,
-                            // DEĞİŞTİ: Menü alt yazısı
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // PRO / Sakin Toggle Pill
                     Row(
                         modifier = Modifier
-                            // DEĞİŞTİ: Geçiş butonu arka planı
                             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(50))
                             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(50))
                             .padding(2.dp),
@@ -314,7 +294,6 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    // DEĞİŞTİ: Aktif sekme rengi
                                     if (isProMode) MaterialTheme.colorScheme.secondary else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
@@ -340,7 +319,6 @@ fun SettingsScreen(
                             Text(
                                 text = "PRO",
                                 style = MaterialTheme.typography.labelSmall,
-                                // DEĞİŞTİ: Sekme yazı rengi
                                 color = if (isProMode) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -349,7 +327,6 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    // DEĞİŞTİ: Aktif sekme rengi
                                     if (!isProMode) MaterialTheme.colorScheme.secondary else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
@@ -375,20 +352,17 @@ fun SettingsScreen(
                             Text(
                                 text = "Sakin",
                                 style = MaterialTheme.typography.labelSmall,
-                                // DEĞİŞTİ: Sekme yazı rengi
                                 color = if (!isProMode) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
 
-                // DEĞİŞTİ: Ayırıcı çizgiler
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 // 2. Hayat Kurtarma Profili
                 SettingsMenuItem(
                     icon = Icons.Default.HealthAndSafety,
-                    // DEĞİŞTİ: İkon renkleri temaya bağlandı
                     iconColor = MaterialTheme.colorScheme.primary,
                     title = "Hayat Kurtarma Profili",
                     subtitle = "Acil durum kişileri ve doktor bilgisi"
@@ -408,10 +382,14 @@ fun SettingsScreen(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 4. Bildirim Tercihleri
+                // 4. EKLENEN KISIM: Acil Durum İzinleri (Temaya Uyumlu)
+                EmergencyPermissionSection()
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                // 5. Bildirim Tercihleri
                 SettingsMenuItem(
                     icon = Icons.Default.Notifications,
-                    // AmberWarning kalsa da olur ama sistemle uyumlu olması adına temaya bağlayabiliriz, uyarı rengi (error) ya da secondary verebiliriz.
                     iconColor = MaterialTheme.colorScheme.error,
                     title = "Bildirim Tercihleri",
                     subtitle = "AI uyarıları ve asistan sesleri"
@@ -427,7 +405,6 @@ fun SettingsScreen(
                 text = "Çıkış Yap",
                 onClick = { navController.navigate(Screen.Login.route) { popUpTo(0) } },
                 modifier = Modifier.fillMaxWidth(),
-                // DEĞİŞTİ: Çıkış butonu rengi
                 accentColor = MaterialTheme.colorScheme.primary,
                 height = 56.dp,
                 icon = Icons.AutoMirrored.Filled.Logout
@@ -439,7 +416,6 @@ fun SettingsScreen(
             Text(
                 text = "HAYATIN RİTMİ - BİGG PROTOTİP V1.0",
                 style = MaterialTheme.typography.labelSmall,
-                // DEĞİŞTİ: Versiyon yazı rengi
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 letterSpacing = 2.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -464,7 +440,6 @@ fun SettingsMenuItem(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                // DEĞİŞTİ: Menü tıklama efekti rengi
                 indication = ripple(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)),
                 role = Role.Button,
                 onClick = onClick
@@ -483,21 +458,115 @@ fun SettingsMenuItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                // DEĞİŞTİ: Menü item başlığı
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                // DEĞİŞTİ: Menü item açıklaması
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Icon(
             Icons.Default.ChevronRight,
             contentDescription = null,
-            // DEĞİŞTİ: Sağ ok ikonu
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+// YENİ EKLENEN VE TEMAYA UYARLANAN KISIM
+@Composable
+fun EmergencyPermissionSection() {
+    val context = LocalContext.current
+
+    // İzin durumlarını tuttuğumuz state'ler
+    var smsGranted by remember { mutableStateOf(false) }
+    var phoneGranted by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+
+    val permissions = arrayOf(
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.CALL_PHONE
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { result ->
+        smsGranted = result[Manifest.permission.SEND_SMS] ?: false
+        phoneGranted = result[Manifest.permission.CALL_PHONE] ?: false
+
+        if (!smsGranted || !phoneGranted) {
+            showSettingsDialog = true
+        }
+    }
+
+    // Temaya uyumlu tıklanabilir satır tasarımı (SettingsMenuItem gibi)
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
+                role = Role.Button,
+                onClick = { permissionLauncher.launch(permissions) }
+            )
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconCircle(
+            icon = Icons.Default.Warning, // Uyarı ikonu
+            color = MaterialTheme.colorScheme.error, // Hata/Uyarı rengi
+            size = 36.dp,
+            iconSize = 18.dp
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Acil Durum İzinleri",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = if (smsGranted && phoneGranted) "İzinler sağlandı, sistem hazır" else "Otomatik arama ve SMS için izin verin",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (smsGranted && phoneGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+            )
+        }
+        // Eğer izinler verilmişse onay tiki, verilmemişse kırmızı bir ok gösterelim
+        Icon(
+            if (smsGranted && phoneGranted) Icons.Default.Check else Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = if (smsGranted && phoneGranted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+        )
+    }
+
+    // Kullanıcı izinleri kalıcı reddettiyse Ayarlara yönlendirme Dialog'u
+    if (showSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showSettingsDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            title = { Text("İzin Gerekli") },
+            text = { Text("Acil durumlarda 112'yi arayabilmemiz ve yakınlarına SMS atabilmemiz için ayarlardan izinleri manuel olarak açmalısınız.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSettingsDialog = false
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                }) {
+                    Text("Ayarlara Git", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSettingsDialog = false }) {
+                    Text("Vazgeç", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         )
     }
 }
