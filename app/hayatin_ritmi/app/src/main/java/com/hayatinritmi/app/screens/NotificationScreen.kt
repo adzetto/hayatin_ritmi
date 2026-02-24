@@ -33,14 +33,16 @@ fun NotificationScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            // DEĞİŞTİ: Sabit siyah yerine temanın arka plan rengi
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Arka Plan Isiklari
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-50).dp)
                 .size(350.dp)
-                .background(NeonBlue.copy(alpha = 0.15f), CircleShape)
+                // DEĞİŞTİ: NeonBlue yerine ikincil renk
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), CircleShape)
                 .blur(90.dp)
         )
         Box(
@@ -48,7 +50,8 @@ fun NotificationScreen(navController: NavHostController) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 60.dp, y = 60.dp)
                 .size(300.dp)
-                .background(Color(0xFFE11D48).copy(alpha = 0.1f), CircleShape)
+                // DEĞİŞTİ: Sabit kırmızı yerine ana renk kapsayıcısı (primaryContainer)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f), CircleShape)
                 .blur(80.dp)
         )
 
@@ -66,13 +69,15 @@ fun NotificationScreen(navController: NavHostController) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Geri",
-                        tint = TextPrimary
+                        // DEĞİŞTİ: Geri butonu rengi
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 Text(
                     text = "Bildirim Ayarları",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = TextPrimary
+                    // DEĞİŞTİ: Başlık rengi
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -81,7 +86,8 @@ fun NotificationScreen(navController: NavHostController) {
             // --- KRİTİK GÜVENLİK (Kapatilamaz) ---
             SectionHeader(
                 icon = Icons.Default.Shield,
-                iconColor = Emerald500,
+                // DEĞİŞTİ: Emerald500 yerine üçüncül (tertiary) renk
+                iconColor = MaterialTheme.colorScheme.tertiary,
                 title = "KRİTİK GÜVENLİK (KAPATILAMAZ)"
             )
 
@@ -95,7 +101,8 @@ fun NotificationScreen(navController: NavHostController) {
                     isEnabled = true,
                     onToggle = {}
                 )
-                HorizontalDivider(color = BorderSubtle)
+                // DEĞİŞTİ: Ayırıcı çizgi rengi temanın silik çizgi rengine bağlandı
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 NotificationItem(
                     title = "Cihaz Bağlantı Durumu",
                     description = "Tişört şarjı biterse veya Bluetooth koparsa uyarır.",
@@ -114,14 +121,16 @@ fun NotificationScreen(navController: NavHostController) {
                 Icon(
                     Icons.Default.Info,
                     contentDescription = null,
-                    tint = TextDisabled,
+                    // DEĞİŞTİ: Bilgi ikonu rengi
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Hayati güvenliğiniz için bu bildirimler zorunludur.",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextDisabled
+                    // DEĞİŞTİ: Bilgi yazısı rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
 
@@ -130,7 +139,8 @@ fun NotificationScreen(navController: NavHostController) {
             // --- AKILLI ASİSTAN (Opsiyonel) ---
             SectionHeader(
                 icon = Icons.Default.AutoAwesome,
-                iconColor = NeonBlue,
+                // DEĞİŞTİ: NeonBlue yerine ikincil renk
+                iconColor = MaterialTheme.colorScheme.secondary,
                 title = "AKILLI ASİSTAN (OPSİYONEL)"
             )
 
@@ -144,7 +154,7 @@ fun NotificationScreen(navController: NavHostController) {
                     isEnabled = medicineReminder,
                     onToggle = { medicineReminder = it }
                 )
-                HorizontalDivider(color = BorderSubtle)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 NotificationItem(
                     title = "Günlük AI Sağlık Özeti",
                     description = "Her sabah dünün analizi ve bugünün tavsiyelerini gönderir.",
@@ -172,7 +182,8 @@ private fun SectionHeader(icon: ImageVector, iconColor: Color, title: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelSmall,
-            color = TextTertiary
+            // DEĞİŞTİ: Bölüm başlığı rengi
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -197,14 +208,16 @@ private fun NotificationItem(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = TextPrimary
+                    // DEĞİŞTİ: Liste elemanı başlığı
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 if (isLocked) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         Icons.Default.Lock,
                         contentDescription = null,
-                        tint = TextDisabled,
+                        // DEĞİŞTİ: Kilit ikonu
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.size(12.dp)
                     )
                 }
@@ -213,7 +226,8 @@ private fun NotificationItem(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextTertiary
+                // DEĞİŞTİ: Açıklama metni
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -223,7 +237,8 @@ private fun NotificationItem(
             checked = isEnabled,
             onCheckedChange = onToggle,
             isLocked = isLocked,
-            activeColor = if (isLocked) Emerald500 else NeonBlue
+            // DEĞİŞTİ: Açık/Kapalı buton renkleri temaya bağlandı
+            activeColor = if (isLocked) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
         )
     }
 }

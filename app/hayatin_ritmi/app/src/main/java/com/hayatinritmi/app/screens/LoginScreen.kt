@@ -37,7 +37,6 @@ import androidx.navigation.NavHostController
 import com.hayatinritmi.app.Screen
 import com.hayatinritmi.app.ui.components.GlassOutlinedButton
 import com.hayatinritmi.app.ui.components.GradientButton
-import com.hayatinritmi.app.ui.theme.*
 
 // --- UNDERLINE STYLE INPUT ---
 @Composable
@@ -59,7 +58,7 @@ fun PremiumInput(
             )
         },
         leadingIcon = {
-            Icon(icon, contentDescription = null, tint = TextTertiary, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -68,17 +67,17 @@ fun PremiumInput(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = TextPrimary,
-            unfocusedTextColor = TextPrimary,
-            cursorColor = RosePrimary,
-            focusedIndicatorColor = RosePrimary,
-            unfocusedIndicatorColor = BorderMedium,
-            focusedLabelColor = RosePrimary,
-            unfocusedLabelColor = TextTertiary,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedLeadingIconColor = RosePrimary,
-            unfocusedLeadingIconColor = TextTertiary
+            focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }
@@ -97,25 +96,16 @@ fun EkgAnimation(modifier: Modifier = Modifier) {
         label = "ekg_phase"
     )
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
 
-        // EKG noktaları (normalize edilmiş)
         val points = listOf(
-            0f to 0.5f,
-            0.2f to 0.5f,
-            0.25f to 0.17f,
-            0.3f to 0.83f,
-            0.35f to 0.5f,
-            0.5f to 0.5f,
-            0.55f to 0.33f,
-            0.6f to 0.5f,
-            0.8f to 0.5f,
-            0.85f to 0f,
-            0.9f to 0.93f,
-            0.95f to 0.5f,
-            1f to 0.5f
+            0f to 0.5f, 0.2f to 0.5f, 0.25f to 0.17f, 0.3f to 0.83f,
+            0.35f to 0.5f, 0.5f to 0.5f, 0.55f to 0.33f, 0.6f to 0.5f,
+            0.8f to 0.5f, 0.85f to 0f, 0.9f to 0.93f, 0.95f to 0.5f, 1f to 0.5f
         )
 
         val path = Path()
@@ -126,11 +116,10 @@ fun EkgAnimation(modifier: Modifier = Modifier) {
             else path.lineTo(x, y)
         }
 
-        // Draw with animated dash
         val pathLength = w * 1.5f
         drawPath(
             path = path,
-            color = RosePrimary.copy(alpha = 0.8f + (phase * 0.2f)),
+            color = primaryColor.copy(alpha = 0.8f + (phase * 0.2f)),
             style = Stroke(
                 width = 2.5.dp.toPx(),
                 cap = StrokeCap.Round,
@@ -142,10 +131,9 @@ fun EkgAnimation(modifier: Modifier = Modifier) {
             )
         )
 
-        // Glow effect
         drawPath(
             path = path,
-            color = RosePrimary.copy(alpha = 0.3f),
+            color = primaryColor.copy(alpha = 0.3f),
             style = Stroke(
                 width = 6.dp.toPx(),
                 cap = StrokeCap.Round,
@@ -166,20 +154,19 @@ fun LoginScreen(navController: NavHostController) {
     var password by remember { mutableStateOf("") }
     var showBiometricSheet by remember { mutableStateOf(false) }
 
-    // Biyometrik Bottom Sheet state
     val sheetState = rememberModalBottomSheetState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Ambiyans Işıkları
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-100).dp)
                 .size(350.dp)
-                .background(RosePrimary.copy(alpha = 0.15f), CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
                 .blur(100.dp)
         )
         Box(
@@ -187,7 +174,7 @@ fun LoginScreen(navController: NavHostController) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 80.dp, y = 100.dp)
                 .size(300.dp)
-                .background(RoseDark.copy(alpha = 0.12f), CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), CircleShape)
                 .blur(90.dp)
         )
 
@@ -197,7 +184,6 @@ fun LoginScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            // EKG Animasyonu
             EkgAnimation(
                 modifier = Modifier
                     .width(200.dp)
@@ -208,13 +194,13 @@ fun LoginScreen(navController: NavHostController) {
             Text(
                 text = "Hayatın Ritmi",
                 style = MaterialTheme.typography.headlineLarge,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
                 text = "YAPAY ZEKA DESTEKLİ TAKİP",
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 4.sp),
-                color = RosePrimary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp, bottom = 60.dp)
             )
 
@@ -237,7 +223,6 @@ fun LoginScreen(navController: NavHostController) {
                 keyboardType = KeyboardType.Password
             )
 
-            // Şifremi Unuttum Linki
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -247,10 +232,10 @@ fun LoginScreen(navController: NavHostController) {
                 Text(
                     text = "Şifremi Unuttum",
                     style = MaterialTheme.typography.labelMedium,
-                    color = RosePrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = true, color = RosePrimary),
+                        indication = ripple(bounded = true, color = MaterialTheme.colorScheme.primary),
                         onClick = { navController.navigate(Screen.ForgotPassword.route) }
                     )
                 )
@@ -258,16 +243,16 @@ fun LoginScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // GİRİŞ YAP BUTONU
             GradientButton(
                 text = "Giriş Yap",
                 onClick = { showBiometricSheet = true },
-                modifier = Modifier.padding(horizontal = 24.dp)
+                modifier = Modifier.padding(horizontal = 24.dp),
+                // DEĞİŞTİ: Şeffaf (primaryContainer) renk yerine tok ve tam kapalı (solid) bir gradient verildi.
+                colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // DEVELOPER SIGN IN BUTONU
             GlassOutlinedButton(
                 text = "Developer Sign In",
                 onClick = {
@@ -277,7 +262,9 @@ fun LoginScreen(navController: NavHostController) {
                 },
                 modifier = Modifier.padding(horizontal = 24.dp),
                 icon = Icons.Default.Code,
-                height = 48.dp
+                height = 48.dp,
+                // DEĞİŞTİ: Butonun rengi arka planla karışmasın diye temanın ana zıt rengine (siyah/beyaz) bağlandı.
+                accentColor = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -286,16 +273,16 @@ fun LoginScreen(navController: NavHostController) {
                 Text(
                     text = "Hesabın yok mu?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Kayıt Ol",
                     style = MaterialTheme.typography.titleSmall,
-                    color = RosePrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = true, color = RosePrimary),
+                        indication = ripple(bounded = true, color = MaterialTheme.colorScheme.primary),
                         onClick = { navController.navigate(Screen.SignUp.route) }
                     )
                 )
@@ -308,13 +295,12 @@ fun LoginScreen(navController: NavHostController) {
         ModalBottomSheet(
             onDismissRequest = {
                 showBiometricSheet = false
-                // Sheet kapatılınca dashboard'a git
                 navController.navigate(Screen.Dashboard.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
             },
             sheetState = sheetState,
-            containerColor = Surface1,
+            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
             dragHandle = {
                 Box(
@@ -322,7 +308,7 @@ fun LoginScreen(navController: NavHostController) {
                         .padding(top = 16.dp)
                         .width(48.dp)
                         .height(4.dp)
-                        .background(BorderFocus, RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(50))
                 )
             }
         ) {
@@ -333,18 +319,17 @@ fun LoginScreen(navController: NavHostController) {
                     .padding(top = 16.dp, bottom = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Parmak İzi İkonu
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .background(RoseSubtle, CircleShape)
-                        .border(1.dp, RosePrimary.copy(alpha = 0.2f), CircleShape),
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Fingerprint,
                         contentDescription = null,
-                        tint = RosePrimary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(40.dp)
                     )
                 }
@@ -354,7 +339,7 @@ fun LoginScreen(navController: NavHostController) {
                 Text(
                     text = "Daha Hızlı Giriş Yapın",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -362,13 +347,12 @@ fun LoginScreen(navController: NavHostController) {
                 Text(
                     text = "Bundan sonraki girişlerinizde şifre girmeden, sadece parmak izi veya yüz tanıma ile giriş yapmak ister misiniz?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Evet, Aktifleştir Butonu
                 GradientButton(
                     text = "Evet, Aktifleştir",
                     onClick = {
@@ -377,12 +361,13 @@ fun LoginScreen(navController: NavHostController) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    icon = Icons.Default.Check
+                    icon = Icons.Default.Check,
+                    // DEĞİŞTİ: Burada da silikleşmeyi önlemek için tok renkler verdik.
+                    colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Şimdi Değil Butonu
                 TextButton(
                     onClick = {
                         showBiometricSheet = false
@@ -397,7 +382,7 @@ fun LoginScreen(navController: NavHostController) {
                     Text(
                         text = "Şimdi Değil",
                         style = MaterialTheme.typography.titleMedium,
-                        color = TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

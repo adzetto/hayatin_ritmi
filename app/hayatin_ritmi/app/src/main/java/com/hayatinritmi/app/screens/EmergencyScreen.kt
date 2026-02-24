@@ -50,7 +50,8 @@ fun EmergencyScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            // DEĞİŞTİ: Sabit siyah (Color.Black) yerine temanın ana arka planı
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // 1. KIRMIZI ALARM ARKA PLANI
         Box(
@@ -58,7 +59,8 @@ fun EmergencyScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(AlarmRed.copy(alpha = alpha), Color.Black),
+                        // DEĞİŞTİ: Kırmızı alarm rengi sabit kalıyor ama köşelere doğru siyah yerine temanın arka planına (gündüzse beyaza, geceyse siyaha) eriyor.
+                        colors = listOf(AlarmRed.copy(alpha = alpha), MaterialTheme.colorScheme.background),
                         radius = 800f
                     )
                 )
@@ -75,7 +77,8 @@ fun EmergencyScreen(navController: NavHostController) {
             Icon(
                 imageVector = Icons.Default.Warning,
                 contentDescription = "Uyarı",
-                tint = TextPrimary,
+                // DEĞİŞTİ: TextPrimary yerine arka plan zıt rengi
+                tint = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.size(80.dp)
             )
 
@@ -84,7 +87,8 @@ fun EmergencyScreen(navController: NavHostController) {
             Text(
                 text = "KRİTİK RİTİM\nBOZUKLUĞU",
                 style = MaterialTheme.typography.headlineLarge,
-                color = TextPrimary,
+                // DEĞİŞTİ: Yazı rengi
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
 
@@ -93,7 +97,8 @@ fun EmergencyScreen(navController: NavHostController) {
             Text(
                 text = "Kalp atışlarınızda ciddi düzensizlik tespit edildi.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = TextSecondary,
+                // DEĞİŞTİ: TextSecondary yerine temanın soluk yazı rengi
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
@@ -105,14 +110,17 @@ fun EmergencyScreen(navController: NavHostController) {
                     CircularProgressIndicator(
                         progress = { countdown / 10f },
                         modifier = Modifier.size(160.dp),
-                        color = TextPrimary,
+                        // DEĞİŞTİ: Çemberin dolan kısmı
+                        color = MaterialTheme.colorScheme.onBackground,
                         strokeWidth = 8.dp,
-                        trackColor = GlassBorder,
+                        // DEĞİŞTİ: Çemberin boş kısmı
+                        trackColor = MaterialTheme.colorScheme.outlineVariant,
                     )
                     Text(
                         text = countdown.toString(),
                         style = MaterialTheme.typography.displayLarge,
-                        color = TextPrimary
+                        // DEĞİŞTİ: Sayı rengi
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
 
@@ -121,32 +129,38 @@ fun EmergencyScreen(navController: NavHostController) {
                 Text(
                     text = statusText,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
+                    // DEĞİŞTİ: Alt yazı rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
             } else if (countdown == 0) {
                 Box(
                     modifier = Modifier
                         .size(160.dp)
-                        .background(Color.White, CircleShape),
+                        // DEĞİŞTİ: Telefon ikonunun arkasındaki beyaz yuvarlak, temanın kart (surface) rengine bağlandı
+                        .background(MaterialTheme.colorScheme.surface, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Call, contentDescription = null, tint = AlarmRed, modifier = Modifier.size(64.dp))
+                    // DEĞİŞTİ: AlarmRed Theme.kt içinde error olarak tanımlıydı, oradan çektik
+                    Icon(Icons.Default.Call, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(64.dp))
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = "112 ARANIYOR...",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = TextPrimary
+                    // DEĞİŞTİ: Başlık rengi
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             } else {
                 // İPTAL EDİLDİ
-                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Emerald500, modifier = Modifier.size(100.dp))
+                // DEĞİŞTİ: Emerald500 Theme.kt içinde tertiary olarak tanımlıydı
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(100.dp))
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Alarm İptal Edildi",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = TextPrimary
+                    // DEĞİŞTİ: Başlık rengi
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -159,7 +173,8 @@ fun EmergencyScreen(navController: NavHostController) {
                         text = "İYİYİM, İPTAL ET",
                         onClick = { isCancelled = true },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = listOf(Color.White, Color.White.copy(alpha = 0.85f)),
+                        // DEĞİŞTİ: Buton renkleri temaya uyumlu hale getirildi (Kart rengi kullanıldı)
+                        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant),
                         height = 64.dp
                     )
 
@@ -169,7 +184,8 @@ fun EmergencyScreen(navController: NavHostController) {
                         text = "HEMEN YARDIM ÇAĞIR",
                         onClick = { countdown = 0 },
                         modifier = Modifier.fillMaxWidth(),
-                        accentColor = Color.White,
+                        // DEĞİŞTİ: Alt butonun çizgisi ve yazısı
+                        accentColor = MaterialTheme.colorScheme.onBackground,
                         height = 56.dp
                     )
                 }
@@ -178,7 +194,8 @@ fun EmergencyScreen(navController: NavHostController) {
                     text = "Ana Ekrana Dön",
                     onClick = { navController.popBackStack() },
                     modifier = Modifier.fillMaxWidth(),
-                    accentColor = TextSecondary
+                    // DEĞİŞTİ: İkincil renk
+                    accentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -42,16 +43,20 @@ fun GlassCard(
     val shape = RoundedCornerShape(cornerRadius)
     val interactionSource = remember { MutableInteractionSource() }
 
+    // DEĞİŞTİ: Sabit beyaz yerine, temanın yazı renginin (zıt rengin) saydam hali kullanıldı.
+    // Böylece gündüz siyahımsı bir şeffaflık, gece beyazımsı bir şeffaflık olur.
+    val baseColor = MaterialTheme.colorScheme.onBackground
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color.White.copy(alpha = glassAlpha))
-            .border(1.dp, Color.White.copy(alpha = borderAlpha), shape)
+            .background(baseColor.copy(alpha = glassAlpha))
+            .border(1.dp, baseColor.copy(alpha = borderAlpha), shape)
             .then(
                 if (onClick != null) Modifier.clickable(
                     interactionSource = interactionSource,
-                    indication = ripple(color = Color.White.copy(alpha = 0.08f)),
+                    indication = ripple(color = baseColor.copy(alpha = 0.08f)),
                     role = Role.Button,
                     onClick = onClick
                 ) else Modifier
@@ -76,17 +81,19 @@ fun InfoCard(
 ) {
     val shape = RoundedCornerShape(20.dp)
     val interactionSource = remember { MutableInteractionSource() }
+    // DEĞİŞTİ: Kartın cam efekti temaya bağlandı
+    val baseColor = MaterialTheme.colorScheme.onBackground
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(1.dp, Color.White.copy(alpha = 0.08f), shape)
+            .background(baseColor.copy(alpha = 0.05f))
+            .border(1.dp, baseColor.copy(alpha = 0.08f), shape)
             .then(
                 if (onClick != null) Modifier.clickable(
                     interactionSource = interactionSource,
-                    indication = ripple(color = Color.White.copy(alpha = 0.08f)),
+                    indication = ripple(color = baseColor.copy(alpha = 0.08f)),
                     role = Role.Button,
                     onClick = onClick
                 ) else Modifier
@@ -110,13 +117,15 @@ fun InfoCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                color = TextPrimary
+                // DEĞİŞTİ: TextPrimary yerine onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextTertiary,
+                // DEĞİŞTİ: TextTertiary yerine onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
             )
         }
@@ -126,7 +135,8 @@ fun InfoCard(
             Icon(
                 androidx.compose.material.icons.Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = TextDisabled,
+                // DEĞİŞTİ: Ok ikonu rengi
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -142,13 +152,18 @@ fun GradientButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    colors: List<Color> = listOf(RosePrimary, RoseDark),
+    // DEĞİŞTİ: Varsayılan renkler temanın ana rengine bağlandı
+    colors: List<Color> = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer),
     enabled: Boolean = true,
     height: Dp = 56.dp,
     icon: ImageVector? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val shape = RoundedCornerShape(16.dp)
+
+    // Gradient butonlar ana eylem butonudur.
+    // Üzerindeki yazı, zemin rengi ne olursa olsun okunabilmesi için genelde kontrast bir renkte (beyaz veya onPrimary) tutulur.
+    val textColor = MaterialTheme.colorScheme.onPrimary
 
     Box(
         modifier = modifier
@@ -157,7 +172,7 @@ fun GradientButton(
             .clip(shape)
             .background(
                 brush = if (enabled) Brush.horizontalGradient(colors)
-                else Brush.horizontalGradient(listOf(NeutralGray.copy(alpha = 0.3f), NeutralGray.copy(alpha = 0.2f)))
+                else Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
             )
             .border(
                 1.dp,
@@ -177,13 +192,13 @@ fun GradientButton(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (icon != null) {
-                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = textColor, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (enabled) Color.White else TextDisabled,
+                color = if (enabled) textColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 letterSpacing = 0.5.sp
             )
         }
@@ -199,7 +214,8 @@ fun GlassOutlinedButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    accentColor: Color = NeonBlue,
+    // Eğer dışarıdan renk verilmezse ikincil (mavi) renk varsayılan olur
+    accentColor: Color = MaterialTheme.colorScheme.secondary,
     height: Dp = 52.dp,
     icon: ImageVector? = null
 ) {
@@ -299,10 +315,12 @@ fun PremiumSwitch(
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
     isLocked: Boolean = false,
-    activeColor: Color = NeonBlue
+    activeColor: Color = MaterialTheme.colorScheme.secondary
 ) {
+    // DEĞİŞTİ: Switch'in boş arka planı (track) temaya bağlandı
+    val baseColor = MaterialTheme.colorScheme.onSurfaceVariant
     val trackColor = animateColorAsState(
-        targetValue = if (checked) activeColor else Color.White.copy(alpha = 0.15f),
+        targetValue = if (checked) activeColor else baseColor.copy(alpha = 0.15f),
         animationSpec = tween(250),
         label = "track"
     )
@@ -311,9 +329,10 @@ fun PremiumSwitch(
         checked = checked,
         onCheckedChange = if (isLocked) null else onCheckedChange,
         colors = SwitchDefaults.colors(
-            checkedThumbColor = Color.White,
+            // DEĞİŞTİ: Switch'in yuvarlağı (thumb) artık temaya duyarlı
+            checkedThumbColor = MaterialTheme.colorScheme.surface,
             checkedTrackColor = trackColor.value,
-            uncheckedThumbColor = Color.White.copy(alpha = 0.8f),
+            uncheckedThumbColor = MaterialTheme.colorScheme.surfaceVariant,
             uncheckedTrackColor = trackColor.value,
             uncheckedBorderColor = Color.Transparent,
             checkedBorderColor = Color.Transparent
@@ -335,11 +354,13 @@ fun MetricCard(
     color: Color
 ) {
     val shape = RoundedCornerShape(18.dp)
+    // DEĞİŞTİ: Kart arka planı (Glass effect) temaya bağlandı
+    val baseColor = MaterialTheme.colorScheme.onBackground
 
     Box(
         modifier = modifier
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.05f))
+            .background(baseColor.copy(alpha = 0.05f))
             .border(1.dp, color.copy(alpha = 0.1f), shape)
             .padding(18.dp)
     ) {
@@ -350,7 +371,8 @@ fun MetricCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextTertiary
+                    // DEĞİŞTİ: Başlık rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -358,13 +380,15 @@ fun MetricCard(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.displaySmall.copy(fontSize = 30.sp),
-                    color = TextPrimary
+                    // DEĞİŞTİ: Değer (Sayı) rengi
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextTertiary,
+                    // DEĞİŞTİ: Birim rengi
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
             }

@@ -6,11 +6,11 @@ import androidx.compose.ui.graphics.Color
 //  HAYATIN RİTMİ — Medikal Premium Dark Design Tokens
 // ══════════════════════════════════════════════════════
 
-// ── ZEMIN ───────────────────────────────────────────
+// ── ZEMIN (GECE) ───────────────────────────────────────────
 val RichBlack        = Color(0xFF050505)
 val DeepNavy         = Color(0xFF060A13)
 
-// ── YÜZEY KATMANLARI (Glassmorphism Derinlik) ──────
+// ── YÜZEY KATMANLARI (GECE) ──────
 val Surface0         = Color(0xFF0A0A0A)
 val Surface1         = Color(0xFF111111)
 val Surface2         = Color(0xFF1A1A1A)
@@ -24,19 +24,19 @@ val GlassBright      = Color(0x1FFFFFFF)
 val GlassBorder      = Color(0x15FFFFFF)
 val GlassHighlight   = Color(0x26FFFFFF)
 
-// ── KENARLIK & AYIRICI ─────────────────────────────
+// ── KENARLIK & AYIRICI (GECE) ─────────────────────────────
 val BorderSubtle     = Color(0x0DFFFFFF)
 val BorderMedium     = Color(0x1AFFFFFF)
 val BorderFocus      = Color(0x33FFFFFF)
 
-// ── METİN HİYERARŞİSİ ─────────────────────────────
+// ── METİN HİYERARŞİSİ (GECE) ─────────────────────────────
 val TextWhite        = Color(0xFFFFFFFF)
 val TextPrimary      = Color(0xF2FFFFFF)
 val TextSecondary    = Color(0x99FFFFFF)
 val TextTertiary     = Color(0x66FFFFFF)
 val TextDisabled     = Color(0x4DFFFFFF)
 
-// ── ANA VURGU (Rose) ──────────────────────────────
+// ── ANA VURGU (Rose - Hem gece hem gündüz kullanılabilir) ──────────────────────────────
 val RosePrimary      = Color(0xFFE11D48)
 val RoseLight        = Color(0xFFFB7185)
 val RoseDark         = Color(0xFF9F1239)
@@ -66,3 +66,23 @@ val PurpleAccent     = Color(0xFF8B5CF6)
 val PurpleSubtle     = Color(0x1A8B5CF6)
 
 val NeutralGray      = Color(0xFF6B7280)
+
+
+// ══════════════════════════════════════════════════════
+//  YENİ EKLENEN: AÇIK TEMA (GÜNDÜZ) RENKLERİ
+// ══════════════════════════════════════════════════════
+
+// ── ZEMİN VE YÜZEY (GÜNDÜZ) ───────────────────────────────────
+val LightBackground  = Color(0xFFF8F9FA) // Kırık beyaz arka plan
+val LightSurface0    = Color(0xFFFFFFFF) // Tam beyaz kartlar
+val LightSurface1    = Color(0xFFF1F5F9) // Çok hafif gri yüzeyler
+val LightSurface2    = Color(0xFFE2E8F0) // Biraz daha gri
+
+// ── METİN (GÜNDÜZ) ───────────────────────────────────────────
+val LightTextPrimary = Color(0xFF0F172A) // Koyu lacivert/siyaha yakın (Tam siyah göz yorar)
+val LightTextSecondary = Color(0xFF475569) // Gri metinler
+val LightTextTertiary  = Color(0xFF94A3B8) // Açık gri metinler
+
+// ── KENARLIK (GÜNDÜZ) ─────────────────────────────────────────
+val LightBorderMedium = Color(0xFFCBD5E1) // Belirgin gündüz çizgileri
+val LightBorderSubtle = Color(0xFFF1F5F9) // Silik gündüz çizgileri

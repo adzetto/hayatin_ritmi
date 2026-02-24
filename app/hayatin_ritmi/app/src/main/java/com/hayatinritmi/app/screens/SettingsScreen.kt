@@ -53,7 +53,8 @@ fun SettingsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            // DEĞİŞTİ: Sabit siyah yerine temaya duyarlı arka plan
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Arka Plan Işıkları
         Box(
@@ -61,7 +62,8 @@ fun SettingsScreen(
                 .align(Alignment.TopStart)
                 .offset(x = (-50).dp, y = (-50).dp)
                 .size(300.dp)
-                .background(NeonBlue.copy(alpha = 0.15f), CircleShape)
+                // DEĞİŞTİ: NeonBlue yerine ikincil renk
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), CircleShape)
                 .blur(80.dp)
         )
         Box(
@@ -69,7 +71,8 @@ fun SettingsScreen(
                 .align(Alignment.BottomEnd)
                 .offset(x = 50.dp, y = 50.dp)
                 .size(300.dp)
-                .background(PurpleAccent.copy(alpha = 0.15f), CircleShape)
+                // DEĞİŞTİ: PurpleAccent yerine temanın yüzey varyantı veya ana rengi kullanılabilir
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
                 .blur(80.dp)
         )
 
@@ -85,7 +88,8 @@ fun SettingsScreen(
             Text(
                 text = "Ayarlar",
                 style = MaterialTheme.typography.headlineLarge,
-                color = TextPrimary
+                // DEĞİŞTİ: Başlık rengi
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -96,12 +100,13 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Avatar — gradient border with NeonBlue → RosePrimary
+                    // Avatar — gradient border
                     Box(
                         modifier = Modifier
                             .size(64.dp)
                             .background(
-                                brush = Brush.linearGradient(listOf(NeonBlue, RosePrimary)),
+                                // DEĞİŞTİ: Sabit renkler yerine temanın renkleri
+                                brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)),
                                 shape = CircleShape
                             )
                             .padding(2.dp)
@@ -109,13 +114,15 @@ fun SettingsScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.Black, CircleShape),
+                                // DEĞİŞTİ: Avatar içi siyah yerine temanın arka planı
+                                .background(MaterialTheme.colorScheme.background, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = null,
-                                tint = TextPrimary,
+                                // DEĞİŞTİ: İkon rengi
+                                tint = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.size(32.dp)
                             )
                         }
@@ -125,19 +132,22 @@ fun SettingsScreen(
                         Text(
                             text = "Ahmet Yılmaz",
                             style = MaterialTheme.typography.titleLarge,
-                            color = TextPrimary
+                            // DEĞİŞTİ: İsim rengi
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "ahmet@example.com",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
+                            // DEĞİŞTİ: E-posta rengi
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // Kan grubu badge
                     Box(
                         modifier = Modifier
-                            .background(RoseSubtle, RoundedCornerShape(8.dp))
-                            .border(1.dp, RosePrimary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            // DEĞİŞTİ: Badge arka planı ve çerçevesi
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -145,13 +155,15 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Favorite,
                                 contentDescription = null,
-                                tint = RosePrimary,
+                                // DEĞİŞTİ: Kalp ikonu
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = "A Rh+",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = TextPrimary
+                                // DEĞİŞTİ: Kan grubu yazısı
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
@@ -174,19 +186,22 @@ fun SettingsScreen(
                         Icon(
                             Icons.Default.Bluetooth,
                             contentDescription = null,
-                            tint = NeonBlue,
+                            // DEĞİŞTİ: Mavi ikon
+                            tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "BAĞLI CİHAZLAR",
                             style = MaterialTheme.typography.labelSmall,
-                            color = TextPrimary
+                            // DEĞİŞTİ: Üst başlık rengi
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     StatusBadge(
                         text = if (isDeviceConnected) "AKTİF" else "BAĞLI DEĞİL",
-                        color = if (isDeviceConnected) Emerald500 else NeutralGray
+                        // DEĞİŞTİ: Badge renkleri
+                        color = if (isDeviceConnected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -195,25 +210,28 @@ fun SettingsScreen(
                         Text(
                             text = "Hayatın Ritmi Tişörtü",
                             style = MaterialTheme.typography.titleMedium,
-                            color = TextPrimary
+                            // DEĞİŞTİ: Cihaz adı
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Sensör Durumu: Mükemmel",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextTertiary
+                            // DEĞİŞTİ: Durum yazısı
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                         val calibrateInteraction = remember { MutableInteractionSource() }
                         Text(
                             text = "Cihazı Kalibre Et",
                             style = MaterialTheme.typography.labelMedium,
-                            color = NeonBlue,
+                            // DEĞİŞTİ: Tıklanabilir link rengi
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier
                                 .padding(top = 8.dp)
                                 .clickable(
                                     interactionSource = calibrateInteraction,
                                     indication = ripple(
                                         bounded = false,
-                                        color = NeonBlue.copy(alpha = 0.15f)
+                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
                                     ),
                                     onClick = { }
                                 )
@@ -223,14 +241,17 @@ fun SettingsScreen(
                         CircularProgressIndicator(
                             progress = { if (isDeviceConnected) batteryPercent / 100f else 0f },
                             modifier = Modifier.size(48.dp),
-                            color = if (isDeviceConnected) Emerald500 else NeutralGray,
+                            // DEĞİŞTİ: Şarj dairesi rengi
+                            color = if (isDeviceConnected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                             strokeWidth = 4.dp,
-                            trackColor = GlassBright
+                            // DEĞİŞTİ: Şarj dairesi boşluk rengi
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                         Text(
                             text = if (isDeviceConnected) "$batteryPercent%" else "--%",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextPrimary
+                            // DEĞİŞTİ: Şarj yüzdesi yazısı
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -243,8 +264,9 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .background(GlassWhite)
-                    .border(1.dp, GlassBorder, RoundedCornerShape(20.dp))
+                    // DEĞİŞTİ: Menü dış kutusu arka planı
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp))
             ) {
                 // 1. Arayüz Modu — PRO / Sakin toggle
                 Row(
@@ -255,7 +277,8 @@ fun SettingsScreen(
                 ) {
                     IconCircle(
                         icon = Icons.Default.Layers,
-                        color = NeonBlue,
+                        // DEĞİŞTİ: İkon rengi
+                        color = MaterialTheme.colorScheme.secondary,
                         size = 36.dp,
                         iconSize = 18.dp
                     )
@@ -264,19 +287,22 @@ fun SettingsScreen(
                         Text(
                             text = "Arayüz Modu",
                             style = MaterialTheme.typography.titleSmall,
-                            color = TextPrimary
+                            // DEĞİŞTİ: Menü yazısı
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Sakin veya Pro Mod seçimi",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextTertiary
+                            // DEĞİŞTİ: Menü alt yazısı
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // PRO / Sakin Toggle Pill
                     Row(
                         modifier = Modifier
-                            .background(GlassBright, RoundedCornerShape(50))
-                            .border(1.dp, BorderSubtle, RoundedCornerShape(50))
+                            // DEĞİŞTİ: Geçiş butonu arka planı
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(50))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(50))
                             .padding(2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -288,19 +314,20 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    if (isProMode) NeonBlue else Color.Transparent,
+                                    // DEĞİŞTİ: Aktif sekme rengi
+                                    if (isProMode) MaterialTheme.colorScheme.secondary else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
                                 .then(
                                     if (isProMode) Modifier.border(
                                         1.dp,
-                                        NeonBlue.copy(alpha = 0.5f),
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                         RoundedCornerShape(50)
                                     ) else Modifier
                                 )
                                 .clickable(
                                     interactionSource = proInteraction,
-                                    indication = ripple(color = NeonBlue.copy(alpha = 0.2f)),
+                                    indication = ripple(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
                                     role = Role.Tab,
                                     onClick = {
                                         isProMode = true
@@ -313,7 +340,8 @@ fun SettingsScreen(
                             Text(
                                 text = "PRO",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (isProMode) Color.White else TextSecondary
+                                // DEĞİŞTİ: Sekme yazı rengi
+                                color = if (isProMode) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         // Sakin
@@ -321,19 +349,20 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    if (!isProMode) NeonBlue else Color.Transparent,
+                                    // DEĞİŞTİ: Aktif sekme rengi
+                                    if (!isProMode) MaterialTheme.colorScheme.secondary else Color.Transparent,
                                     RoundedCornerShape(50)
                                 )
                                 .then(
                                     if (!isProMode) Modifier.border(
                                         1.dp,
-                                        NeonBlue.copy(alpha = 0.5f),
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                         RoundedCornerShape(50)
                                     ) else Modifier
                                 )
                                 .clickable(
                                     interactionSource = sakinInteraction,
-                                    indication = ripple(color = NeonBlue.copy(alpha = 0.2f)),
+                                    indication = ripple(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
                                     role = Role.Tab,
                                     onClick = {
                                         isProMode = false
@@ -346,40 +375,44 @@ fun SettingsScreen(
                             Text(
                                 text = "Sakin",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (!isProMode) Color.White else TextSecondary
+                                // DEĞİŞTİ: Sekme yazı rengi
+                                color = if (!isProMode) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
 
-                HorizontalDivider(color = BorderSubtle)
+                // DEĞİŞTİ: Ayırıcı çizgiler
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 2. Hayat Kurtarma Profili — Rose
+                // 2. Hayat Kurtarma Profili
                 SettingsMenuItem(
                     icon = Icons.Default.HealthAndSafety,
-                    iconColor = RosePrimary,
+                    // DEĞİŞTİ: İkon renkleri temaya bağlandı
+                    iconColor = MaterialTheme.colorScheme.primary,
                     title = "Hayat Kurtarma Profili",
                     subtitle = "Acil durum kişileri ve doktor bilgisi"
                 ) {
                     navController.navigate(Screen.SignUp.route)
                 }
 
-                HorizontalDivider(color = BorderSubtle)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 3. Veri Paylaşımı — Emerald
+                // 3. Veri Paylaşımı
                 SettingsMenuItem(
                     icon = Icons.Default.FileDownload,
-                    iconColor = Emerald500,
+                    iconColor = MaterialTheme.colorScheme.tertiary,
                     title = "Veri Paylaşımı",
                     subtitle = "EKG Raporlarını PDF olarak indir"
                 ) { }
 
-                HorizontalDivider(color = BorderSubtle)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 4. Bildirim Tercihleri — Amber
+                // 4. Bildirim Tercihleri
                 SettingsMenuItem(
                     icon = Icons.Default.Notifications,
-                    iconColor = AmberWarning,
+                    // AmberWarning kalsa da olur ama sistemle uyumlu olması adına temaya bağlayabiliriz, uyarı rengi (error) ya da secondary verebiliriz.
+                    iconColor = MaterialTheme.colorScheme.error,
                     title = "Bildirim Tercihleri",
                     subtitle = "AI uyarıları ve asistan sesleri"
                 ) {
@@ -394,7 +427,8 @@ fun SettingsScreen(
                 text = "Çıkış Yap",
                 onClick = { navController.navigate(Screen.Login.route) { popUpTo(0) } },
                 modifier = Modifier.fillMaxWidth(),
-                accentColor = RosePrimary,
+                // DEĞİŞTİ: Çıkış butonu rengi
+                accentColor = MaterialTheme.colorScheme.primary,
                 height = 56.dp,
                 icon = Icons.AutoMirrored.Filled.Logout
             )
@@ -405,7 +439,8 @@ fun SettingsScreen(
             Text(
                 text = "HAYATIN RİTMİ - BİGG PROTOTİP V1.0",
                 style = MaterialTheme.typography.labelSmall,
-                color = TextDisabled,
+                // DEĞİŞTİ: Versiyon yazı rengi
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 letterSpacing = 2.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -417,7 +452,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsMenuItem(
     icon: ImageVector,
-    iconColor: Color = NeonBlue,
+    iconColor: Color,
     title: String,
     subtitle: String,
     onClick: () -> Unit
@@ -429,7 +464,8 @@ fun SettingsMenuItem(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = Color.White.copy(alpha = 0.08f)),
+                // DEĞİŞTİ: Menü tıklama efekti rengi
+                indication = ripple(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)),
                 role = Role.Button,
                 onClick = onClick
             )
@@ -447,18 +483,21 @@ fun SettingsMenuItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                color = TextPrimary
+                // DEĞİŞTİ: Menü item başlığı
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextTertiary
+                // DEĞİŞTİ: Menü item açıklaması
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Icon(
             Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = TextDisabled
+            // DEĞİŞTİ: Sağ ok ikonu
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }

@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.hayatinritmi.app.ui.theme.JakartaFont
-import com.hayatinritmi.app.ui.theme.RosePrimary
 import kotlinx.coroutines.delay
 
 @Composable
@@ -41,14 +40,14 @@ fun ForgotPasswordScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Ambiyans Işıkları
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-60).dp)
                 .size(300.dp)
-                .background(RosePrimary.copy(alpha = 0.15f), CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
                 .blur(80.dp)
         )
         Box(
@@ -56,7 +55,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 80.dp, y = 80.dp)
                 .size(350.dp)
-                .background(Color(0xFFBE123C).copy(alpha = 0.12f), CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f), CircleShape)
                 .blur(90.dp)
         )
 
@@ -106,15 +105,15 @@ private fun StepOnePhoneInput(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                 .clickable { onBack() },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Geri",
-                tint = Color.White.copy(alpha = 0.6f),
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -125,7 +124,7 @@ private fun StepOnePhoneInput(
         Icon(
             Icons.Default.Shield,
             contentDescription = null,
-            tint = RosePrimary,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(56.dp)
         )
 
@@ -136,7 +135,7 @@ private fun StepOnePhoneInput(
             fontFamily = JakartaFont,
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -145,14 +144,13 @@ private fun StepOnePhoneInput(
             text = "Hesabınıza kayıtlı telefon numarasını girin. Size 4 haneli bir güvenlik kodu göndereceğiz.",
             fontFamily = JakartaFont,
             fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
             lineHeight = 22.sp
         )
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Telefon Input
         PremiumInput(
             value = phoneNumber,
             onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 11) onPhoneChanged(it) },
@@ -163,15 +161,16 @@ private fun StepOnePhoneInput(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Kodu Gönder Butonu
+        // Kodu Gönder Butonu Alanı
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 40.dp)
                 .height(56.dp)
+                // DEĞİŞTİ: Orijinal parlama efektini (glow) geri ekledik
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(RosePrimary.copy(alpha = 0.3f), Color.Transparent),
+                        colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent),
                         radius = 180f
                     ),
                     shape = RoundedCornerShape(16.dp)
@@ -187,14 +186,16 @@ private fun StepOnePhoneInput(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        // DEĞİŞTİ: Üstten gelen o hafif beyaz parlama efektini geri ekledik
                         .border(
                             1.dp,
                             Brush.verticalGradient(listOf(Color.White.copy(0.3f), Color.Transparent)),
                             RoundedCornerShape(16.dp)
                         )
                         .background(
+                            // DEĞİŞTİ: Solukluk yaratan primaryContainer yerine orijinal canlı koyu pembe/kırmızı tonunu verdik
                             brush = Brush.horizontalGradient(
-                                colors = listOf(RosePrimary, Color(0xFF9F1239))
+                                colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                             ),
                             shape = RoundedCornerShape(16.dp)
                         ),
@@ -205,7 +206,7 @@ private fun StepOnePhoneInput(
                         fontFamily = JakartaFont,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White // Buton zemini koyu renk olduğu için yazı her zaman tam beyaz olmalı
                     )
                 }
             }
@@ -223,7 +224,6 @@ private fun StepTwoOtpVerify(
     val focusRequesters = remember { List(4) { FocusRequester() } }
     var resendTimer by remember { mutableIntStateOf(59) }
 
-    // Geri sayım timer'ı
     LaunchedEffect(resendTimer) {
         if (resendTimer > 0) {
             delay(1000L)
@@ -231,7 +231,6 @@ private fun StepTwoOtpVerify(
         }
     }
 
-    // İlk kutuya otomatik focus
     LaunchedEffect(Unit) {
         focusRequesters[0].requestFocus()
     }
@@ -247,15 +246,15 @@ private fun StepTwoOtpVerify(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                 .clickable { onBack() },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Geri",
-                tint = Color.White.copy(alpha = 0.6f),
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -267,7 +266,7 @@ private fun StepTwoOtpVerify(
             fontFamily = JakartaFont,
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -276,7 +275,7 @@ private fun StepTwoOtpVerify(
             text = "Telefonunuza gönderilen 4 haneli doğrulama kodunu girin.",
             fontFamily = JakartaFont,
             fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
             lineHeight = 22.sp
         )
@@ -294,7 +293,6 @@ private fun StepTwoOtpVerify(
                     onValueChange = { newValue ->
                         if (newValue.length <= 1 && newValue.all { it.isDigit() }) {
                             otpFields[i] = newValue
-                            // Sonraki kutuya atla
                             if (newValue.isNotEmpty() && i < 3) {
                                 focusRequesters[i + 1].requestFocus()
                             }
@@ -320,7 +318,7 @@ private fun StepTwoOtpVerify(
                 text = "Kodu almadınız mı? ",
                 fontFamily = JakartaFont,
                 fontSize = 14.sp,
-                color = Color.White.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium
             )
             Text(
@@ -328,7 +326,7 @@ private fun StepTwoOtpVerify(
                 else "Tekrar Gönder",
                 fontFamily = JakartaFont,
                 fontSize = 14.sp,
-                color = RosePrimary,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable {
                     if (resendTimer == 0) resendTimer = 59
@@ -346,7 +344,7 @@ private fun StepTwoOtpVerify(
                 .height(56.dp)
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(RosePrimary.copy(alpha = 0.3f), Color.Transparent),
+                        colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent),
                         radius = 180f
                     ),
                     shape = RoundedCornerShape(16.dp)
@@ -369,7 +367,7 @@ private fun StepTwoOtpVerify(
                         )
                         .background(
                             brush = Brush.horizontalGradient(
-                                colors = listOf(RosePrimary, Color(0xFF9F1239))
+                                colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                             ),
                             shape = RoundedCornerShape(16.dp)
                         ),
@@ -403,16 +401,18 @@ private fun OtpInputBox(
             .size(width = 68.dp, height = 76.dp)
             .focusRequester(focusRequester)
             .background(
-                if (isFocused) RosePrimary.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f),
+                if (isFocused) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.03f),
                 RoundedCornerShape(16.dp)
             )
             .border(
                 2.dp,
-                if (isFocused) RosePrimary else Color.White.copy(alpha = 0.1f),
+                if (isFocused) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.outlineVariant,
                 RoundedCornerShape(16.dp)
             ),
         textStyle = TextStyle(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = JakartaFont,
