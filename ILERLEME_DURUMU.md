@@ -8,9 +8,28 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ## 📅 Genel Durum
 - **Başlangıç Tarihi:** 19 Şubat 2026
-- **Mevcut Faz:** FAZ 3 (Acil Durum & Yapay Zeka Entegrasyonu)
+- **Mevcut Faz:** FAZ 3 (İleri DSP, DCA-CNN AI & Acil Durum Sistemi)
 - **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DCA-CNN ile analiz etmek ve acil durum uyarısı göndermek.
-- **Mimari:** Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
+- **Mimari:** Clean Architecture — `domain/` (model + interface) → `data/` (bluetooth + repository) → `presentation/` (screen + viewmodel) | Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
+
+### 🗂️ Proje Yapısı (İki Paralel Dizin)
+| Dizin | Amaç | Derleme |
+|---|---|---|
+| `app/hayatin_ritmi/` | FAZ 1-2 prototipi, tüm ekranlar + BLE | ✅ Derlenir (Gradle 8.9) |
+| `mobile/` | **Aktif üretim projesi** — Clean Architecture, FAZ 3 hedefli | ✅ Derlenir (Gradle 8.13, 24 Şub 2026 düzeltmesiyle) |
+
+### 🔀 Pull Request Geçmişi (24 Şubat 2026)
+| PR | Branch | Yazar | Değişiklikler |
+|---|---|---|---|
+| #1 | `feature/light-mode` | ONURKULAN | Light/Dark tema altyapısı: `LightColorScheme`, `isSystemInDarkTheme()`, 9 ekran + CommonComponents MaterialTheme token'larına geçiş |
+| #2 | `feature/izinler` | ONURKULAN | AndroidManifest: `SEND_SMS`, `CALL_PHONE`, `ACCESS_FINE/COARSE_LOCATION`; SettingsScreen runtime izin akışı (`rememberLauncherForActivityResult`) |
+
+### 🔧 Derleme Düzeltmeleri (24 Şubat 2026)
+- ✅ `mobile/` — Java 25 uyumsuzluğu: `gradle.properties` → `org.gradle.java.home=C:\\Program Files\\Android\\Android Studio\\jbr` (Java 21 JBR)
+- ✅ `BleEcgRepository.kt` + `MockEcgRepository.kt` — Eksik `EcgPacketParser` import'u eklendi
+- ✅ `CommonComponents.kt` — `Icons.Default.ChevronRight` yok (extended pakette bile mevcut değil) → `Icons.AutoMirrored.Filled.ArrowForwardIos` ile değiştirildi
+- ✅ `DeviceScanScreen.kt` — Eksik `DeviceScanViewModel` import'u eklendi (`presentation.viewmodel` paketi)
+- **BUILD SUCCESSFUL** — 35 actionable task, 37 saniye
 
 ---
 
@@ -86,14 +105,15 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] MTU optimizasyonu (247 byte, `requestMtu()`)
 
 ### 2.4 — Veri Türleri & Protokol ✅
-- [x] **Ham EKG Verisi (ADS1293)**
-    - [x] 10-byte paket: `[Header:0xAA][Kanal:1B][Timestamp:4B LE uint32][EKG:3B BE int24][Checksum:XOR]`
-    - [x] `EcgPacketParser.kt` — Header doğrulama, checksum XOR, 24-bit sign extension
-    - [x] Örnekleme hızı: 250 Hz (`BleConstants.SAMPLE_RATE_HZ`)
+- [x] **Ham EKG Verisi (4× ADS1293 — 12 Derivasyon)**
+    - [x] 43-byte çok-kanallı çerçeve: `[Header:0xAA][FrameSeq:1B][Timestamp:4B LE uint32][12×Lead:36B BE int24][Checksum:XOR]`
+    - [x] `EcgPacketParser.kt` — 43-byte çerçeve ayrıştırma, her çerçeve 12 `EcgSample` üretir, checksum XOR, 24-bit sign extension
+    - [x] Throughput: 250 Hz × 43 byte = 10.750 byte/sn = 86 kbps (BLE 5.0 2 Mbps kapasitesinin %4,3'i)
+    - [x] Örnekleme hızı: 250 Hz (`BleConstants.SAMPLE_RATE_HZ`), kanal sayısı: 12 (`BleConstants.CHANNEL_COUNT`)
 - [x] **Voltaj Dönüşümü**
     - [x] `EcgSample.fromRawAdc()` — `voltageUv = (rawAdc * 2.4V) / (2^23 * 6) * 1_000_000`
 - [x] **Veri Modelleri (Kotlin)**
-    - [x] `EcgSample.kt` — timestamp, channel, rawAdc, voltageUv + `fromRawAdc()` companion
+    - [x] `EcgSample.kt` — timestamp, channel (0–11 = I/II/III/aVR/aVL/aVF/V1–V6), rawAdc, voltageUv + `fromRawAdc()` companion
     - [x] `DeviceStatus.kt` — batteryPercent, isElectrodeConnected, isCharging, signalQuality + `fromByte()` companion
     - [x] `ScannedDevice.kt` — name, macAddress, rssi
     - [x] `ConnectionState.kt` — DISCONNECTED, SCANNING, CONNECTING, CONNECTED
@@ -126,10 +146,10 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] 30 FPS UI güncellemesi (her 8 sample = ~33ms)
     - [x] StateFlow: `graphPoints`, `bpm`, `hrv`, `deviceStatus`, `connectionState`
 - [x] **Mock Veri Üreteci** (`MockBleManager.kt`)
-    - [x] Gerçekçi PQRST dalga formu şablonu (250 nokta/döngü)
-    - [x] ~72 BPM temel hız + sinüzoidal HRV
+    - [x] Standart 12-lead morfoloji simülasyonu — her derivasyon için gerçekçi PQRST genlik/polarite katsayıları
+    - [x] ∼72 BPM temel hız + sinüzoidal HRV
     - [x] Baseline wander (0.3 Hz), 50 Hz hat gürültüsü, rastgele kas artefaktı
-    - [x] 10-byte BLE paketi üretimi (header + channel + timestamp + ADC + XOR checksum)
+    - [x] 43-byte çok-kanallı BLE çerçesi üretimi (header + frameSeq + timestamp + 12 lead + XOR checksum)
 
 ### 2.7 — Foreground Service (Arka Plan Bağlantısı) ✅
 - [x] **EcgForegroundService** (`service/EcgForegroundService.kt`)
@@ -147,100 +167,152 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ---
 
-## 🔄 FAZ 3: Sinyal Kalitesi, Yapay Zeka & Acil Durum
-**Amaç:** Araştırma önerisindeki ileri sinyal işleme, DCA-CNN yapay zeka modeli ve acil durum sistemini implement etmek.
-**Kaynak:** 2209-A Araştırma Önerisi Formu — Bölüm 3 (DSP), Bölüm 4 (DCA-CNN), Bölüm 5 (Mobil Uygulama)
+## 🔄 FAZ 3: İleri DSP, DCA-CNN Yapay Zeka & Acil Durum Sistemi
+**Amaç:** Araştırma önerisindeki ileri sinyal işleme algoritmalarını, DCA-CNN modelini ve acil durum sistemini tam olarak implement etmek.
+**Kaynak:** 2209-A Araştırma Önerisi — Bölüm 3 (DSP), Bölüm 4 (DCA-CNN), Bölüm 5 (Mobil Uygulama)
+**Takvim (Araştırma Önerisinden):** 01.12.2025–28.02.2026 → 01.03.2026–30.04.2026
+**Plan Dosyası:** `docs/plans/2026-02-24-phase3-dsp-ai-emergency-plan.md`
 
-### 3.1 — İleri Sinyal İşleme (Araştırma Önerisinden)
-- [ ] **Bazal Düzeltme (Moving Average L=256)**
-    - [ ] Kayan ortalama ile DC ofset ve bazal sürüklenme kaldırma
-    - [ ] O(1) kümülatif toplam farkı ile gerçek zamanlı güncelleme
-- [ ] **6. Derece Butterworth Bant Geçiren (0.5–40 Hz)**
-    - [ ] Bilinear dönüşüm ile SOS (Second-Order Section) tasarımı
-    - [ ] Mevcut EcgFilter'ı SOS tabanlı 6. derece Butterworth'a yükseltme
-- [ ] **Dalgacık Tabanlı Gürültü Azaltma (Daubechies-4)**
-    - [ ] 4-6 seviye çok çözünürlüklü ayrıştırma
-    - [ ] Donoho evrensel eşiği: `τ = σ * sqrt(2 * ln(N))`, σ = MAD/0.6745
-    - [ ] Yumuşak eşikleme (soft thresholding) — P ve T dalgaları korunur
-    - [ ] IDWT ile gürültüsü azaltılmış sinyal elde etme
-- [ ] **Sinyal Kalite Kontrolü (SNR & PRD)**
-    - [ ] Her 10 saniyelik segment için SNR hesaplama
-    - [ ] Eşik altı segmentleri (<12 dB) eleme veya yeniden işleme
-    - [ ] PRD (Percent Root Mean Square Difference) raporlama
-    - [ ] Kalite skoru UI'a yansıtma (sinyal kalitesi göstergesi)
+### Yeni Dosyalar (24 Şubat 2026 — BUILD SUCCESSFUL ✅)
+| Dosya | Açıklama |
+|---|---|
+| `domain/model/ArrhythmiaClass.kt` | 6 sınıf enum (NORMAL/TACHY/BRADY/AF/ST/UNKNOWN) |
+| `domain/model/AiPrediction.kt` | DCA-CNN tahmin sonucu (label, confidence, probs, inferenceMs) |
+| `domain/model/AlertLevel.kt` | Uyarı seviyesi (NONE/ELECTRODE_OFF/LOW_SIGNAL/RECHECK/YELLOW/RED) |
+| `domain/model/SignalQuality.kt` | SNR (dB), PRD (%), kalite skoru (0-100) |
+| `domain/model/AlertEvent.kt` | Acil olay geçmişi (timestamp, level, bpm, lat, lon) |
+| `domain/AlertEngine.kt` | Hibrit karar motoru (kural + AI, ≤%5 yanlış alarm hedefi) |
+| `processing/AdvancedEcgProcessor.kt` | 6. derece Butterworth SOS + L=256 bazal düzeltme + SNR + db4 wavelet + 12-lead fusion |
+| `processing/ArrhythmiaClassifier.kt` | TFLite INT8 çıkarım [1,12,2500] + otomatik mock mod (model yoksa) |
+| `presentation/viewmodel/EmergencyViewModel.kt` | SMS (SmsManager), 112 arama (Intent.ACTION_CALL) |
 
-### 3.2 — Gürültü Modellemesi & Simülasyon
-- [ ] **Kontrollü Gürültü Enjeksiyonu**
-    - [ ] Kas gürültüsü (20-200 Hz geniş bant): `s_kas[n]`
-    - [ ] Elektrot artefaktı (düşük frekans + ani sıçramalar): `s_elektrot[n]`
-    - [ ] Hedef SNR (6-18 dB) için α katsayısı kapalı formda ayarlama
-- [ ] **Çok Kanallı Korelasyon Matrisi** (Gelecek: 3 kanal desteği)
-    - [ ] Kanal kovaryans matrisi `R_xx` kestirimi
-    - [ ] PCA ile ortak-mod gürültü bastırma
-    - [ ] Tutarlılık denetimi: İskemi vs. artefakt ayrımı
+### 3.1 — İleri Sinyal İşleme (Araştırma Önerisi §3) ✅
+> **Dosya:** `mobile/.../processing/AdvancedEcgProcessor.kt`
+- [x] **Bazal Düzeltme — Kayan Ortalama (L=256)**
+    - [x] Pencere uzunluğu L=256 (~1 saniye @ 250Hz) — solunum kaynaklı düşük frekans sürüklenme
+    - [x] O(1) kümülatif toplam farkıyla online hesaplama: `x̄[n] = x̄[n-1] + (x[n] - x[n-L]) / L`
+    - [x] Düzeltilmiş sinyal: `x̂[n] = x[n] - x̄[n]`
+    - [x] Dairesel tampon ile sınır etkisi yönetimi
+- [x] **6. Derece Butterworth Bant Geçiren (0.5–40 Hz)**
+    - [x] Mevcut `EcgFilter.kt` (1. derece IIR) yerine gerçek 6. derece Butterworth
+    - [x] Bilinear dönüşüm + SOS (Second-Order Section) form — 3 ikinci dereceli bölüm
+    - [x] Direct Form II transposed — sayısal kararlılık için
+    - [x] Tek geçişli (düşük faz kaymalı) — gerçek zamanlı uygulama için
+- [x] **Dalgacık Tabanlı Gürültü Azaltma (Daubechies-4)**
+    - [x] Daubechies-4 (db4) wavelet — 4 seviye DWT ayrıştırma
+    - [x] Gürültü tahmini: `σ ≈ MAD / 0.6745`, Donoho eşiği: `τ = σ√(2lnN)`
+    - [x] Yumuşak eşikleme (soft thresholding) — yaklaşıklık katsayıları eşiklenmez
+    - [x] `waveletDenoise()` — blok mod (test/kalibrasyon); online mod Butterworth
+- [x] **Sinyal Kalite Kontrolü (SNR & PRD)**
+    - [x] `SignalQuality` veri sınıfı: snrDb, prd, score (0-100), isAcceptable (SNR≥12)
+    - [x] `computeSignalQuality()` — 10 saniyelik pencere RMS/RMSSD oranı proxy SNR
+    - [x] `computePrd()` — PRD hesaplama metodu
+    - [x] `EcgViewModel` her saniyede `_signalQuality` StateFlow'u günceller
 
-### 3.3 — DCA-CNN Yapay Zeka Modeli
+### 3.2 — Gürültü Modellemesi & Simülasyon (MockBleManager Güncellemesi)
+> **Dosya:** `mobile/.../data/bluetooth/MockBleManager.kt` — FAZ 3.2 ileriki aşamada
+- [ ] **Gerçekçi Artefakt Enjeksiyonu**
+    - [ ] Kas gürültüsü (20–200 Hz geniş bant): `α = √(P_x / (P_s × 10^(-SNR/10)))`
+    - [ ] Elektrot artefaktı: düşük frekans (<1Hz) dalgalanma + ani sıçramalar
+    - [ ] Kontrollü SNR hedefleme: 6–18 dB aralığında segment bazında farklı tohumlarla
+- [ ] **Çok Kanallı Simülasyon (3 Kanal)**
+    - [ ] Lead I, II, III: Einthoven (Lead III = Lead II - Lead I)
+    - [ ] Her kanala bağımsız gürültü modeli
+
+### 3.3 — DCA-CNN Yapay Zeka Modeli (Python Eğitim Altyapısı)
+> **Platform:** Python 3.11 + PyTorch 2.x | **Hedef:** `dataset/ecg-arrhythmia/` WFDBRecords üzerinden eğitim
+> **Plan:** `docs/plans/2026-02-24-phase3-dsp-ai-emergency-plan.md` Görev 9
+- [ ] **Veri Hazırlığı**
+    - [ ] `dataset/ecg-arrhythmia/` WFDB kayıtlarını okuma (`wfdb` + `numpy`)
+    - [ ] PTB-XL ve MIT-BIH verilerini birleştirme — hasta bağımsız 70-15-15 bölme
+    - [ ] 10 saniyelik kayar pencereler, 5 saniye örtüşmeli (2500 sample/pencere @ 250Hz)
+    - [ ] Pencere başlıkları: ritim sınıfı, sinyal kalitesi etiketi, elektrot durumu (SNOMED-CT kodları)
+    - [ ] Sınıf dengesizliği: Normal (~70%) vs Anormal (~30%) → ağırlıklı örnekleme veya SMOTE
+    - [ ] Veri artırma: Gaussian gürültü (SNR 6-18 dB), bazal sürüklenme, kanal dropout, zaman ölçekleme ±10%
 - [ ] **Model Mimarisi (Dynamic Channel-Aware CNN)**
-    - [ ] Adaptive Channel Convolution (ACC) katmanı: `W_c = W_base + ΔW_c`
-    - [ ] Öğrenilebilir gate katsayıları: `g_c = σ(α_c)` — kullanılmayan kanallar otomatik sıfırlanır
-    - [ ] Squeeze-and-Excitation kanal dikkat mekanizması (reduction ratio r=4)
-    - [ ] Faz regülarizasyonu: Konvolüsyon çekirdeğinin frekans cevabı kontrolü (λ_φ=0.01)
-- [ ] **Eğitim Stratejisi**
-    - [ ] Veri kümeleri: MIT-BIH Arrhythmia + PTB-XL + saha verileri
-    - [ ] Hasta bağımsız 70-15-15 bölme (eğitim/doğrulama/test)
-    - [ ] Veri artırma: Gaussian gürültü, bazal sürüklenme, kanal dropout, zaman ölçekleme
-    - [ ] 10 saniyelik kayar pencereler, 5 saniye örtüşmeli
-    - [ ] AdamW optimizer, lr=1e-3, cosine annealing (her 5 epoch)
-    - [ ] Kayıp: `L = L_CE + λ_g * L_gate + λ_φ * L_phase`
-    - [ ] Erken durdurma: 5 epoch gelişme yoksa
+    - [ ] `AdaptiveChannelConv` katmanı: paylaşılan temel çekirdek `W_base ∈ ℝ(F×1×K)` + kanal-özel offset `ΔW_c`
+    - [ ] Öğrenilebilir gate: `g_c = σ(α_c)` — aktif olmayan kanallar L2-reg ile otomatik sıfırlanır `(λ_g * Σ g_c²)`
+    - [ ] Squeeze-and-Excitation dikkat: global avg pooling → FC(F, F/4) → ReLU → FC(F/4, C) → sigmoid
+    - [ ] Faz regülarizasyonu: `L_phase = λ_φ * Σ_l ‖ℱ(W_l) - H*_l(ω)‖²₂` (λ_φ=0.01), ideal Butterworth ref.
+    - [ ] Toplam kayıp: `L = L_CE + λ_g * L_gate + λ_φ * L_phase`
+    - [ ] Blok dizini: AccLayer(F=64,K=7) → BN → ReLU → MaxPool → AccLayer(F=128,K=5) → GAP → FC(5 sınıf)
+    - [ ] Çıkış sınıfları: Normal / Taşikardi / Bradikardi / Atriyal Fibrilasyon / ST Anomali
+- [ ] **Eğitim**
+    - [ ] AdamW optimizer: lr=1e-3, weight_decay=1e-4
+    - [ ] Cosine annealing LR scheduler: T_max=50 epoch, η_min=1e-5
+    - [ ] Erken durdurma: validation F1 5 epoch iyileşmezse dur
+    - [ ] Checkpoint: her epoch validation F1 arttığında `best_model.pth` kaydet
+    - [ ] Hedef doğruluk: validation F1 ≥ 0.90 (araştırma önerisi hedefi)
 - [ ] **Model Dönüşümü & Gömme**
-    - [ ] PyTorch → ONNX → TensorFlow Lite dönüşümü
-    - [ ] QAT (Quantization-Aware Training) ile INT8 nicemleme (PTQ yerine, medikal hassasiyet için)
-    - [ ] Hedef: <2.1 MB model boyutu, <38ms çıkarım (3 kanal), <22ms (tek kanal)
-    - [ ] TFLite Interpreter ile Android'de gömülü çıkarım
-    - [ ] Model `assets/` klasöründe, `ByteBuffer` tensor girişi
+    - [ ] PyTorch FP32 → ONNX (dynamic axes: batch + channel)
+    - [ ] ONNX → TFLite (QAT, INT8 — PTQ yerine medikal hassasiyet için QAT zorunlu)
+    - [ ] Hedef: <2.1 MB model boyutu, <38ms çıkarım (3 kanal), <22ms (tek kanal) @ Android
+    - [ ] `mobile/app/src/main/assets/dca_cnn_int8.tflite` olarak gömme
+    - [ ] `domain/model/AiPrediction.kt` — label, confidence, rrIrregularityScore
 
-### 3.4 — Acil Durum Algoritması & Uyarı Sistemi
-- [ ] **Aritmi Tespiti**
-    - [ ] Anormal R-R interval paterni tespiti (irregüler aralıklar)
-    - [ ] Taşikardi uyarısı (BPM > 120, sürekli 30 saniye)
-    - [ ] Bradikardi uyarısı (BPM < 50, sürekli 30 saniye)
-    - [ ] DCA-CNN model çıkışı ile doğrulama
-- [ ] **ST Segment Analizi**
-    - [ ] ST segment elevasyonu/çökmesi tespiti (miyokard enfarktüsü şüphesi)
-    - [ ] Referans izoelektrik hattan sapma ölçümü (≥0.1 mV threshold)
-    - [ ] "Emin değilim → tekrar ölçüm" kuralı (gereksiz alarm oranı ≤%5)
-- [ ] **Lead-Off Detection**
-    - [ ] Elektrot teması kaybı tespiti (empedans izleme)
-    - [ ] "Elektrot teması kesildi" uyarısı
-    - [ ] Kullanıcıya yeniden konumlandırma yönergesi
-- [ ] **Renk Kodlu Uyarı UI**
-    - [ ] Yeşil (u < δ₁): Normal — "Güvendesiniz"
-    - [ ] Sarı (δ₁ ≤ u < δ₂): Dikkat — "Dikkat, kontrol önerilir"
-    - [ ] Kırmızı (u ≥ δ₂): Kritik — Acil durum paneli otomatik açılır
-    - [ ] Renk geçişleri: `τ_c * dy_c/dt + y_c = c_c(u)` (yumuşak animasyon)
+### 3.4 — Android TFLite Inference Modülü ✅
+> **Dosya:** `mobile/app/src/main/java/.../processing/ArrhythmiaClassifier.kt`
+- [x] **TFLite Interpreter Kurulumu**
+    - [x] Reflection tabanlı yükleme — TFLite bağımlılığı eklenince otomatik aktive olur
+    - [x] Model mevcut değilse → otomatik mock mod (kural tabanlı tahmin)
+    - [x] Giriş tensor: `[1, 1, 2500]`, çıkış: `[1, 5]` (softmax)
+- [x] **10 Saniyelik Pencere Yönetimi**
+    - [x] Her 2500 örnekte `RingBuffer.getAll()` → `ArrhythmiaClassifier.classify()`
+    - [x] `Dispatchers.Default` coroutine'de arka plan çıkarımı (UI thread'i bloklamaz)
+    - [x] `EcgViewModel._aiPrediction: MutableStateFlow<AiPrediction>` eklendi
+    - [x] Mock mod: RMSSD/RMS oranı → AF / Normal kural tahmini
 
-### 3.5 — Yakını Arama / SMS & Konum
-- [ ] **SMS Gönderme**
-    - [ ] `SEND_SMS` izni ve `SmsManager.sendTextMessage()`
-    - [ ] GPS/Network konum alma (`ACCESS_FINE_LOCATION`)
-    - [ ] SMS içeriği: "ACIL DURUM — [Kullanıcı Adı] kalp ritmi anomalisi tespit edildi. Konum: [lat, lon]"
-- [ ] **Otomatik Arama**
-    - [ ] 112 acil çağrı intent'i (kullanıcı onayı ile)
-    - [ ] Kayıtlı yakın kişilere sıralı arama
-- [ ] **Konum Tabanlı Topluluk Uyarısı** (Faydalı Model/Patent hedefi)
-    - [ ] Mesafeye göre uyarı gönderme sistemi konsepti
+### 3.5 — Aritmia Tespit Motoru (Kural Tabanlı + AI Hybrid) ✅
+> **Dosya:** `mobile/app/src/main/java/.../domain/AlertEngine.kt`
+- [x] **Kural Tabanlı Birincil Kontroller**
+    - [x] Elektrot teması kaybı → `AlertLevel.ELECTRODE_OFF`
+    - [x] SNR < 12 dB → `AlertLevel.LOW_SIGNAL`
+    - [x] Taşikardi: BPM > 120 ve 30 saniye sürekli → `AlertLevel.YELLOW`
+    - [x] Bradikardi: BPM < 50 ve 30 saniye sürekli → `AlertLevel.YELLOW`
+    - [x] R-R CV > 0.20 ve 30 saniye → `AlertLevel.YELLOW`
+- [x] **AI Hybrid Karar**
+    - [x] DCA-CNN güven ≥ 0.80 ve kritik sınıf → `AlertLevel.RED`
+    - [x] DCA-CNN güven ≥ 0.80, non-normal → `AlertLevel.YELLOW`
+    - [x] DCA-CNN güven < 0.55 → `AlertLevel.RECHECK`
+- [x] **Uyarı Seviyesi StateFlow**
+    - [x] `AlertLevel` enum: NONE/ELECTRODE_OFF/LOW_SIGNAL/RECHECK/YELLOW/RED
+    - [x] `EcgViewModel._alertLevel: MutableStateFlow<AlertLevel>` — her 1 saniyede güncelleme
+- [ ] **Renk Kodlu UI Güncellemesi** (sonraki aşama)
+    - [ ] `DashboardScreen` breathing circle rengi: Emerald(NONE)/Amber(YELLOW)/AlarmRed(RED)
+    - [ ] `ProModeScreen` AI tahmin + sinyal kalite kartı
+    - [ ] `AlertLevel.RED` → otomatik `EmergencyScreen` navigasyonu
 
-### 3.6 — Doktor Raporlama
-- [ ] **EKG Kayıt Geçmişi**
-    - [ ] Geçmiş EKG oturumlarının listelenmesi (tarih/saat/süre/ort BPM)
-    - [ ] CSV veri dışa aktarma
-- [ ] **PDF Rapor Oluşturma**
-    - [ ] EKG grafiği (25 mm/s standart format) + metrikler
-    - [ ] Hasta bilgileri, kan grubu, acil kişi
-    - [ ] DCA-CNN analiz sonuçları ve güven skoru
-- [ ] **E-posta ile Gönderme**
-    - [ ] Kayıtlı doktor e-posta adresine PDF ek olarak gönderme
+### 3.6 — Acil Durum Sistemi (SMS + Arama + Konum) — Kısmen ✅
+> PR #2 ile izinler zaten eklendi: `SEND_SMS`, `CALL_PHONE`, `ACCESS_FINE_LOCATION`
+- [x] **EmergencyViewModel.kt oluşturuldu**
+    - [x] `SmsManager.sendMultipartTextMessage()` — kayıtlı acil kişiye SMS
+    - [x] SMS şablonu: BPM, AI etiketi, konum URL'si (lat/lon mevcut değilse "Konum alınamadı")
+    - [x] `PendingIntent` ile SMS gönderim onay takibi
+    - [x] `callEmergencyServices()` — `Intent.ACTION_CALL tel:112`
+    - [x] `StateFlow<Boolean> smsSent`, `StateFlow<String?> smsError`
+- [ ] **GPS Konum Alma** (play-services-location bağımlılığı eklenince)
+    - [ ] `FusedLocationProviderClient.getCurrentLocation(HIGH_ACCURACY)`
+    - [ ] Network + GPS hibrit, 10s timeout
+- [ ] **EmergencyScreen Güçlendirmesi** (sonraki aşama)
+    - [ ] EmergencyViewModel bağlantısı + "SMS Gönderildi" / hata durumu UI
+    - [ ] Otomatik 10s geri sayım sonrası SMS + 112 arama
+
+### 3.7 — Doktor Raporlama & CSV Export
+- [ ] **EKG Oturum Kaydı**
+    - [ ] `EcgForegroundService` kayıt modunda `List<EcgSample>` → `ecg_[timestamp].bin` dosyaya yaz
+    - [ ] Kayıt başlat/durdur: `ProModeScreen`'deki kayıt butonu → `EcgForegroundService`
+- [ ] **CSV Export**
+    - [ ] `timestamp_ms, channel, rawAdc, voltageUv, bpm, alert_level` sütunları
+    - [ ] `ContentValues` + `MediaStore` ile Downloads klasörüne yaz (Android 10+ scoped storage)
+    - [ ] `Intent.ACTION_SEND` ile paylaşım menüsü
+- [ ] **PDF Rapor (iTextPDF veya PdfDocument API)**
+    - [ ] EKG grafiği: Canvas çizim → Bitmap → PDF sayfası (25 mm/s, 1 mV/cm standart)
+    - [ ] Başlık bölümü: Hasta adı, kan grubu, tarih/saat, kayıt süresi
+    - [ ] Metrikler bölümü: Ort/Min/Max BPM, SDNN, RMSSD, sinyal kalitesi skoru
+    - [ ] AI bölümü: DCA-CNN tahmin etiketi, güven skoru, R-R irregülarite skoru
+    - [ ] Uyarı geçmişi: PDF içine tablo formatında acil durum geçmişi
+- [ ] **E-posta Gönderme**
+    - [ ] `Intent.ACTION_SEND` + `ClipData` ile PDF ek → doktor e-posta adresine
 
 ---
 
@@ -329,6 +401,10 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Donanım (Prototip/Mock):** ESP32-C3/S3 + ADS1293 (tek kanal EKG), BLE 5.0 — Mevcut Geliştirme
 - **Tasarım dili:** Neon/Cyberpunk & Glassmorphism (Koyu Tema)
 - **Min SDK:** 24 (Android 7.0)
+- **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
+- **Son Build:** ✅ BUILD SUCCESSFUL 33s — Gradle 8.13, Kotlin 2.0.21, AGP 8.7.3 (24 Şub 2026)
+- **Kalan Uyarılar:** `BluetoothSearching` deprecated (DeviceScanScreen.kt:111,130) — işlevselliği etkilemez
+- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier, EmergencyViewModel tamamlandı. UI entegrasyonu (DashboardScreen alert renkleri, ProModeScreen AI kartı) ve GPS entegrasyonu sonraki aşamada.
 - **Hedef SDK:** 35 (Android 15)
 - **AGP:** 8.7.3, **Kotlin:** 2.0.21, **Gradle:** 8.9, **Compose BOM:** 2024.11.00
 - **Java:** Eclipse Temurin JDK 25.0.2 (gradle.properties ile yapılandırılmış)
