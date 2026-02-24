@@ -53,17 +53,21 @@ com.hayatinritmi.app/
 
 ## 3. Data Models
 
-### BLE Protocol (ESP32 → Android)
+### BLE Protocol (4× ADS1293 → Android) — 12-Lead Multi-Channel Frame
 ```
-[Header:1B=0xAA] [Channel:1B] [Timestamp:4B uint32_ms] [ECG:3B int24] [Checksum:1B XOR]
-Total: 10 bytes per sample, 250 samples/second
+[Header:1B=0xAA] [FrameSeq:1B] [Timestamp:4B uint32_ms]
+[Lead_I:3B int24] [Lead_II:3B] [Lead_III:3B] [aVR:3B] [aVL:3B] [aVF:3B]
+[V1:3B] [V2:3B] [V3:3B] [V4:3B] [V5:3B] [V6:3B]
+[Checksum:1B XOR]
+Total: 43 bytes per frame | Throughput: 250 Hz × 43 B = 10.750 B/s = 86 kbps
+BLE 5.0 MTU=247 B → up to 5 complete frames per notification
 ```
 
 ### Kotlin Models
 ```kotlin
 data class EcgSample(
     val timestamp: Long,      // ms
-    val channel: Int,         // 0 = Lead I
+    val channel: Int,         // 0=Lead I, 1=Lead II, 2=Lead III, 3=aVR, 4=aVL, 5=aVF, 6=V1–7=V2, 8=V3, 9=V4, 10=V5, 11=V6
     val rawAdc: Int,          // 24-bit signed ADC
     val voltageUv: Float      // (rawAdc * 2.4) / (2^23 * 6) → ±400µV
 )
@@ -106,7 +110,7 @@ interface BleManager {
 ### MockBleManager
 - `startScan()` → emits 2-3 fake "HayatinRitmi" devices after random delay
 - `connect()` → transitions to CONNECTED after 1.5s simulated delay
-- `observeEcgData()` → generates realistic PQRST packets at 250Hz
+- `observeEcgData()` → generates realistic PQRST packets at 250Hz (43-byte 12-lead frames)
 
 ### RealBleManager
 - Uses `BluetoothLeScanner.startScan()` with `ScanFilter` for "HayatinRitmi"
