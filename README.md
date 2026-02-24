@@ -13,7 +13,7 @@
 
 Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DCA-CNN) ile aritmi tespit eden ve acil durumlarda otomatik uyarı gönderen uçtan uca bir sağlık izleme sistemi.
 
-**Donanım:** ADS1293 (3 kanallı, 24-bit, 250 Hz ADC) + STM32F103C8T6 (MCU) + nRF52832 (BLE 5.0)
+**Donanım:** 4× ADS1293 (12 derivasyonlu, 24-bit, 250 Hz ADC) + STM32F103C8T6 (MCU) + nRF52832 (BLE 5.0)
 **Yazılım:** Kotlin + Jetpack Compose + TensorFlow Lite
 **Mimari:** Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
 
@@ -28,7 +28,7 @@ Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DCA
 | Tasarım Dili | Glassmorphism + Neon/Cyberpunk Dark Theme |
 | Reaktif Veri | Kotlin Coroutines + StateFlow |
 | BLE | Android BluetoothLeScanner + GATT Client |
-| Sinyal İşleme | IIR Filters (HPF/Notch/LPF), Pan-Tompkins R-Peak |
+| Sinyal İşleme | IIR Filters (HPF/Notch/LPF), Pan-Tompkins R-Peak, 12-Lead Fusion |
 | Yapay Zeka | DCA-CNN → TFLite INT8 (QAT) |
 | Veritabanı | Room + SQLCipher (KVKK uyumlu) |
 | Build | AGP 8.7.3, Gradle 8.9, Compose BOM 2024.11.00 |
