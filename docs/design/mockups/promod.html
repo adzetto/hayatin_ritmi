@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayatın Ritmi - Pro Mod (AI Entegreli)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background-color: #000000; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #ffffff; overflow: hidden; }
+
+        .ambient-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.2; }
+        .orb-1 { top: 10%; left: -10%; width: 400px; height: 400px; background: #3b82f6; }
+        .orb-2 { bottom: 10%; right: -10%; width: 400px; height: 400px; background: #8b5cf6; }
+
+        .app-frame { width: 393px; height: 852px; background: rgba(10, 10, 10, 0.4); backdrop-filter: blur(40px); border-radius: 50px; position: relative; z-index: 10; border: 8px solid #0a0a0a; display: flex; flex-direction: column; overflow: hidden; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border-radius: 20px; }
+        
+        /* EKG GRID */
+        .ekg-monitor { position: relative; width: 100%; height: 200px; overflow: hidden; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent); }
+        .ekg-line { fill: none; stroke: #e11d48; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(225, 29, 72, 0.6)); }
+        .scroll-chart { animation: scrollLeft 6s linear infinite; }
+        @keyframes scrollLeft { from { transform: translateX(0); } to { transform: translateX(-400px); } }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; box-shadow: 0 0 10px #ef4444; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* AI Tarama Animasyonu (Scanline) */
+        .ai-scan { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #3b82f6; box-shadow: 0 0 15px 2px #3b82f6; animation: scan 3s infinite linear; z-index: 20; opacity: 0.5; }
+        @keyframes scan { 0% { left: 0; opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { left: 100%; opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="app-frame">
+
+        <div class="w-full flex justify-between items-center px-8 pt-6 pb-2 text-xs font-semibold text-white/70">
+            <span>9:41</span><div class="flex gap-2"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-full"></i></div>
+        </div>
+
+        <div class="px-8 pt-2 pb-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-extrabold flex items-center gap-2">Canlı Monitör <span class="live-dot ml-1"></span></h2>
+                <p class="text-white/40 text-xs font-bold tracking-widest mt-1">SENSÖR AKTİF</p>
+            </div>
+            <div class="bg-white/10 p-1 rounded-full flex items-center cursor-pointer border border-white/5 relative">
+                <span class="text-[10px] font-bold px-3 py-1.5 rounded-full text-white/50 transition-all z-10">Sakin</span>
+                <span class="bg-rose-500 text-white shadow-[0_0_10px_rgba(225,29,72,0.4)] text-[10px] font-extrabold px-3 py-1.5 rounded-full transition-all z-10">PRO</span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+            
+            <div class="px-8 flex items-baseline gap-2 mb-2">
+                <span class="text-7xl font-extrabold tracking-tighter" id="bpm-display">74</span>
+                <span class="text-white/40 font-bold text-lg mb-2">BPM</span>
+            </div>
+
+            <div class="ekg-monitor mt-4 relative">
+                <div class="ai-scan"></div>
+                <svg viewBox="0 0 800 100" class="w-[400%] h-full scroll-chart">
+                    <path class="ekg-line" d="M 0 50 L 30 50 L 40 40 L 50 50 L 60 50 L 70 20 L 80 80 L 90 50 L 100 50 L 110 40 L 120 50 L 150 50 
+                    L 180 50 L 190 40 L 200 50 L 210 50 L 220 20 L 230 80 L 240 50 L 250 50 L 260 40 L 270 50 L 300 50
+                    L 330 50 L 340 40 L 350 50 L 360 50 L 370 20 L 380 80 L 390 50 L 400 50 L 410 40 L 420 50 L 450 50"></path>
+                </svg>
+            </div>
+
+            <div class="px-8 mt-4">
+                <div class="glass-card p-5 border-l-2 border-l-blue-500 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-10">
+                        <i class="fa-solid fa-microchip text-8xl"></i>
+                    </div>
+
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i>
+                            <h3 class="font-bold text-sm text-white tracking-wide">KLİNİK AI ANALİZİ</h3>
+                        </div>
+                        <span class="text-[9px] font-bold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">CANLI TARAMA</span>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        <p class="text-xs text-white/70 flex justify-between">
+                            <span class="font-medium">Sinüs Ritmi:</span> 
+                            <span class="text-emerald-400 font-bold">Düzenli (NSR)</span>
+                        </p>
+                        <p class="text-xs text-white/70 flex justify-between">
+                            <span class="font-medium">R-R İnterval Analizi:</span> 
+                            <span class="text-white font-bold">Stabil (0.8s)</span>
+                        </p>
+                        <p class="text-xs text-white/70 flex justify-between">
+                            <span class="font-medium">Ektopik Atım Tespiti:</span> 
+                            <span class="text-emerald-400 font-bold">Negatif (%0.02)</span>
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-white/50 leading-relaxed font-medium mb-4">
+                        <span class="text-white/80 font-bold">Özet:</span> Son 20 dakikalık verilerde ST segment çökmesi izlenmedi. Kardiyovasküler yüklenme seviyesi "Zone 2" antrenmanı için ideal.
+                    </p>
+
+                    <button class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 py-2.5 rounded-xl text-xs font-bold transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-file-waveform"></i> Detaylı Raporu Çıkar (PDF)
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-8 mt-4 grid grid-cols-2 gap-4">
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-wave-square text-blue-400"></i><span class="text-white/50 text-xs font-bold uppercase tracking-wider">HRV (Ms)</span></div>
+                    <div class="flex items-end gap-1"><span class="text-3xl font-extrabold text-white" id="hrv-display">42</span><span class="text-xs text-white/40 mb-1">ms</span></div>
+                </div>
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-droplet text-cyan-400"></i><span class="text-white/50 text-xs font-bold uppercase tracking-wider">SpO2</span></div>
+                    <div class="flex items-end gap-1"><span class="text-3xl font-extrabold text-white">98</span><span class="text-xs text-white/40 mb-1">%</span></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

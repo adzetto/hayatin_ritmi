@@ -29,7 +29,7 @@ Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DCA
 | Reaktif Veri | Kotlin Coroutines + StateFlow |
 | BLE | Android BluetoothLeScanner + GATT Client |
 | Sinyal İşleme | IIR Filters (HPF/Notch/LPF), Pan-Tompkins R-Peak, 12-Lead Fusion |
-| Yapay Zeka | DCA-CNN → TFLite INT8 (QAT) |
+| Yapay Zeka | DS-1D-CNN → TFLite INT8 (176K param, AUC=0.9517, 232 KB) |
 | Veritabanı | Room + SQLCipher (KVKK uyumlu) |
 | Build | AGP 8.7.3, Gradle 8.9, Compose BOM 2024.11.00 |
 | Min/Hedef SDK | 24 (Android 7.0) / 35 (Android 15) |
@@ -42,11 +42,38 @@ Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DCA
 |---|---|---|
 | FAZ 1 | ✅ Tamamlandı | UI Arayüzü & Navigasyon (10 ekran) |
 | FAZ 2 | ✅ Tamamlandı | Bluetooth & Cihaz Bağlantısı (28 Kotlin dosyası) |
-| FAZ 3 | 🔄 Devam Ediyor | Sinyal Kalitesi, DCA-CNN AI & Acil Durum |
+| FAZ 3 | 🔄 Devam Ediyor | Sinyal Kalitesi, DS-1D-CNN AI (✅ Eğitildi) & Acil Durum |
 | FAZ 4 | ⏳ Planlandı | Room DB, Kullanıcı Yönetimi & KVKK |
 | FAZ 5 | ⏳ Planlandı | Doğrulama, Test & Yaygınlaştırma |
 
 Detaylı görev takibi: [`ILERLEME_DURUMU.md`](ILERLEME_DURUMU.md)
+
+---
+
+## AI Model — DS-1D-CNN ECG Arrhythmia Classifier
+
+> Detaylı dokümantasyon ve Mermaid diyagramları: [`docs/model/MODEL_DOCUMENTATION.md`](docs/model/MODEL_DOCUMENTATION.md)
+
+```mermaid
+flowchart LR
+    ECG["12-Lead ECG<br/>(12×2500)<br/>10s @ 250Hz"] --> STEM["Stem<br/>Conv1d 12→32"]
+    STEM --> DS1["DSConv<br/>32→64"] --> DS2["DSConv<br/>64→128"]
+    DS2 --> DS3["DSConv<br/>128→128"] --> DS4["DSConv<br/>128→256"]
+    DS4 --> DS5["DSConv<br/>256→256"] --> GAP["GAP"]
+    GAP --> FC1["FC 256→128"] --> FC2["FC 128→55"]
+    FC2 --> SIG["Sigmoid<br/>55-class probs"]
+```
+
+| Metrik | Değer |
+|---|---|
+| Parametre | 176,599 |
+| FLOPs | 38.7 M |
+| Dataset | PhysioNet SPH 12-Lead (26,395 kayıt, 55 SNOMED-CT sınıfı) |
+| Split | Train 18,476 / Val 3,959 / Test 3,960 |
+| **Test Macro AUC** | **0.9517** (PyTorch) / **0.9334** (TFLite INT8) |
+| **Test Micro AUC** | **0.9924** / **0.9916** |
+| TFLite INT8 Boyut | **231.6 KB** |
+| TFLite INT8 Hız | **0.84 ms** / 1,185 ECG/s (CPU) |
 
 ---
 

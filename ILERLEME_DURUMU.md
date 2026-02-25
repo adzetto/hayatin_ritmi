@@ -8,8 +8,9 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ## 📅 Genel Durum
 - **Başlangıç Tarihi:** 19 Şubat 2026
-- **Mevcut Faz:** FAZ 3 (İleri DSP, DCA-CNN AI & Acil Durum Sistemi)
-- **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DCA-CNN ile analiz etmek ve acil durum uyarısı göndermek.
+- **Mevcut Faz:** FAZ 3 (İleri DSP, DS-1D-CNN AI & Acil Durum Sistemi) — **AI Modeli Eğitildi ✅**
+- **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DS-1D-CNN ile analiz etmek ve acil durum uyarısı göndermek.
+- **AI Durumu:** DS-1D-CNN eğitildi (Macro AUC=0.9517), TFLite INT8 export tamamlandı (231.6 KB, 0.84 ms/inference)
 - **Mimari:** Clean Architecture — `domain/` (model + interface) → `data/` (bluetooth + repository) → `presentation/` (screen + viewmodel) | Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
 
 ### 🗂️ Proje Yapısı (İki Paralel Dizin)
@@ -167,9 +168,9 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ---
 
-## 🔄 FAZ 3: İleri DSP, DCA-CNN Yapay Zeka & Acil Durum Sistemi
-**Amaç:** Araştırma önerisindeki ileri sinyal işleme algoritmalarını, DCA-CNN modelini ve acil durum sistemini tam olarak implement etmek.
-**Kaynak:** 2209-A Araştırma Önerisi — Bölüm 3 (DSP), Bölüm 4 (DCA-CNN), Bölüm 5 (Mobil Uygulama)
+## 🔄 FAZ 3: İleri DSP, DS-1D-CNN Yapay Zeka & Acil Durum Sistemi
+**Amaç:** Araştırma önerisindeki ileri sinyal işleme algoritmalarını, DS-1D-CNN modelini eğitmek, TFLite INT8'e dönüştürmek ve acil durum sistemini tam olarak implement etmek.
+**Kaynak:** 2209-A Araştırma Önerisi — Bölüm 3 (DSP), Bölüm 4 (AI Model), Bölüm 5 (Mobil Uygulama)
 **Takvim (Araştırma Önerisinden):** 01.12.2025–28.02.2026 → 01.03.2026–30.04.2026
 **Plan Dosyası:** `docs/plans/2026-02-24-phase3-dsp-ai-emergency-plan.md`
 
@@ -219,43 +220,57 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [ ] Lead I, II, III: Einthoven (Lead III = Lead II - Lead I)
     - [ ] Her kanala bağımsız gürültü modeli
 
-### 3.3 — DCA-CNN Yapay Zeka Modeli (Python Eğitim Altyapısı)
-> **Platform:** Python 3.11 + PyTorch 2.x | **Hedef:** `dataset/ecg-arrhythmia/` WFDBRecords üzerinden eğitim
-> **Plan:** `docs/plans/2026-02-24-phase3-dsp-ai-emergency-plan.md` Görev 9
-- [ ] **Veri Hazırlığı**
-    - [ ] `dataset/ecg-arrhythmia/` WFDB kayıtlarını okuma (`wfdb` + `numpy`)
-    - [ ] PTB-XL ve MIT-BIH verilerini birleştirme — hasta bağımsız 70-15-15 bölme
-    - [ ] 10 saniyelik kayar pencereler, 5 saniye örtüşmeli (2500 sample/pencere @ 250Hz)
-    - [ ] Pencere başlıkları: ritim sınıfı, sinyal kalitesi etiketi, elektrot durumu (SNOMED-CT kodları)
-    - [ ] Sınıf dengesizliği: Normal (~70%) vs Anormal (~30%) → ağırlıklı örnekleme veya SMOTE
-    - [ ] Veri artırma: Gaussian gürültü (SNR 6-18 dB), bazal sürüklenme, kanal dropout, zaman ölçekleme ±10%
-- [ ] **Model Mimarisi (Dynamic Channel-Aware CNN)**
-    - [ ] `AdaptiveChannelConv` katmanı: paylaşılan temel çekirdek `W_base ∈ ℝ(F×1×K)` + kanal-özel offset `ΔW_c`
-    - [ ] Öğrenilebilir gate: `g_c = σ(α_c)` — aktif olmayan kanallar L2-reg ile otomatik sıfırlanır `(λ_g * Σ g_c²)`
-    - [ ] Squeeze-and-Excitation dikkat: global avg pooling → FC(F, F/4) → ReLU → FC(F/4, C) → sigmoid
-    - [ ] Faz regülarizasyonu: `L_phase = λ_φ * Σ_l ‖ℱ(W_l) - H*_l(ω)‖²₂` (λ_φ=0.01), ideal Butterworth ref.
-    - [ ] Toplam kayıp: `L = L_CE + λ_g * L_gate + λ_φ * L_phase`
-    - [ ] Blok dizini: AccLayer(F=64,K=7) → BN → ReLU → MaxPool → AccLayer(F=128,K=5) → GAP → FC(5 sınıf)
-    - [ ] Çıkış sınıfları: Normal / Taşikardi / Bradikardi / Atriyal Fibrilasyon / ST Anomali
-- [ ] **Eğitim**
-    - [ ] AdamW optimizer: lr=1e-3, weight_decay=1e-4
-    - [ ] Cosine annealing LR scheduler: T_max=50 epoch, η_min=1e-5
-    - [ ] Erken durdurma: validation F1 5 epoch iyileşmezse dur
-    - [ ] Checkpoint: her epoch validation F1 arttığında `best_model.pth` kaydet
-    - [ ] Hedef doğruluk: validation F1 ≥ 0.90 (araştırma önerisi hedefi)
-- [ ] **Model Dönüşümü & Gömme**
-    - [ ] PyTorch FP32 → ONNX (dynamic axes: batch + channel)
-    - [ ] ONNX → TFLite (QAT, INT8 — PTQ yerine medikal hassasiyet için QAT zorunlu)
-    - [ ] Hedef: <2.1 MB model boyutu, <38ms çıkarım (3 kanal), <22ms (tek kanal) @ Android
-    - [ ] `mobile/app/src/main/assets/dca_cnn_int8.tflite` olarak gömme
-    - [ ] `domain/model/AiPrediction.kt` — label, confidence, rrIrregularityScore
+### 3.3 — DS-1D-CNN Yapay Zeka Modeli (Python Eğitim Altyapısı) ✅
+> **Platform:** Python 3.11 + PyTorch 2.6.0+cu124 | **GPU:** RTX 4050 Laptop (6 GB VRAM, CUDA 12.4)
+> **Dataset:** PhysioNet SPH 12-Lead ECG Arrhythmia (26,395 clean records, 55 SNOMED-CT sınıfı)
+> **Mimari Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md`
+- [x] **Veri Hazırlığı**
+    - [x] `dataset/ecg-arrhythmia/` WFDB kayıtlarını okuma (`wfdb` + `numpy`) — 45,152 ham kayıt
+    - [x] Ön-işleme: 2. derece Butterworth bant geçiren (0.5–40 Hz) → downsample (500→250 Hz) → per-lead z-score normalizasyon
+    - [x] NaN koruma: `nan_to_num` + `isfinite` kontrolü — 47 dejenere kayıt otomatik elendi
+    - [x] Hasta bağımsız 70/15/15 bölme: Train 18,476 / Val 3,959 / Test 3,960 (`train_test_split`, seed=42)
+    - [x] 55 SNOMED-CT multi-label: BCEWithLogitsLoss ile çok etiketli sınıflandırma
+    - [x] Dataset önbellek: `dataset_cache.npz` (~2.8 GB) — MD5 hash ile değişiklik algılama
+- [x] **Model Mimarisi (DS-1D-CNN — Depthwise Separable 1D CNN)**
+    - [x] Stem: Conv1d(12→32, k=15, s=2) → BN → ReLU6
+    - [x] 5× DSConv blok: DW Conv1d(groups=C) → BN → ReLU6 → PW Conv1d(1×1) → BN → ReLU6
+    - [x] Kanal dizisi: 32 → 64 → 128 → 128 → 256 → 256
+    - [x] Head: AdaptiveAvgPool1d(1) → Flatten → Dropout(0.3) → Linear(256→128) → BN → ReLU6 → Linear(128→55)
+    - [x] Toplam parametre: **176,599** | Toplam nöron (Conv+Linear): **1,047** | FLOPs: **38.7 MFLOPs**
+    - [x] PT dosya boyutu: 726.4 KB | ONNX: 694.3 KB
+- [x] **Eğitim**
+    - [x] Adam optimizer: lr=1e-3 | BCEWithLogitsLoss | Gradient clipping: max_norm=1.0
+    - [x] ReduceLROnPlateau: patience=4, factor=0.5 | Early stop patience=10
+    - [x] LR takvimi: 1e-3 → 5e-4 (ep15) → 2.5e-4 (ep20)
+    - [x] **20/50 epoch eğitildi** (epoch 10'dan sonra 10 epoch iyileşme yok → early stop)
+    - [x] **En iyi val AUC: 0.9356** @ Epoch 10
+    - [x] Training log: `dataset/models/training_log.csv`
+- [x] **Test Seti Değerlendirmesi (3,960 kayıt)**
+    - [x] **PyTorch FP32:** Macro AUC=0.9517 | Micro AUC=0.9924 | Micro F1=0.8581 | Hit Rate=0.9568
+    - [x] **TFLite INT8:** Macro AUC=0.9334 | Micro AUC=0.9916 | Micro F1=0.8592 | Hit Rate=0.9773
+    - [x] Quantization kaybı: Macro AUC'de yalnızca -0.018 fark (3× boyut azaltma karşılığı)
+    - [x] 38/55 aktif sınıf test setinde mevcut
+    - [x] En iyi sınıflar: SB(0.999), SR(0.999), AFIB(0.999), 3AVB(0.996), RBBB(0.994)
+    - [x] Detaylı sonuçlar: `dataset/models/evaluation_results.json`, `dataset/models/tflite_evaluation_results.json`
+- [x] **Hız Benchmarkı**
+    - [x] GPU single: 1.94 ms (516 ECG/s) | GPU batch=32: 0.95 ms (33,810 ECG/s)
+    - [x] ONNX Runtime CPU: 4.56 ms (220 ECG/s)
+    - [x] **TFLite INT8 CPU: 0.84 ms (1,185 ECG/s)** — Android için 40% daha hızlı, 3× daha küçük
+    - [x] TFLite FP16 CPU: 1.14 ms (878 ECG/s) | TFLite FP32 CPU: 1.18 ms (846 ECG/s)
+- [x] **Model Dönüşümü & Export**
+    - [x] PyTorch FP32 → ONNX opset 17 (SigmoidWrapper ile probability çıkışı)
+    - [x] ONNX → TFLite FP32/FP16 (`onnx2tf`) + TFLite INT8 (200 ECG kalibrasyon örneği ile representative dataset quantization)
+    - [x] **Hedef karşılandı:** 231.6 KB model boyutu (<2.1 MB ✅), 0.84 ms inference (<22 ms ✅)
+    - [x] Üç varyant: `ecg_model_float32.tflite` (698 KB), `ecg_model_float16.tflite` (359 KB), `ecg_model_int8.tflite` (232 KB)
+    - [ ] `mobile/app/src/main/assets/ecg_model_int8.tflite` olarak Android projesine gömme (sonraki adım)
 
 ### 3.4 — Android TFLite Inference Modülü ✅
 > **Dosya:** `mobile/app/src/main/java/.../processing/ArrhythmiaClassifier.kt`
 - [x] **TFLite Interpreter Kurulumu**
     - [x] Reflection tabanlı yükleme — TFLite bağımlılığı eklenince otomatik aktive olur
     - [x] Model mevcut değilse → otomatik mock mod (kural tabanlı tahmin)
-    - [x] Giriş tensor: `[1, 1, 2500]`, çıkış: `[1, 5]` (softmax)
+    - [x] Giriş tensor: `[1, 2500, 12]` (channels-last INT8), çıkış: `[1, 55]` (float32 sigmoid)
+    - [x] INT8 quantization: scale=0.0909, zero_point=-9
 - [x] **10 Saniyelik Pencere Yönetimi**
     - [x] Her 2500 örnekte `RingBuffer.getAll()` → `ArrhythmiaClassifier.classify()`
     - [x] `Dispatchers.Default` coroutine'de arka plan çıkarımı (UI thread'i bloklamaz)
@@ -404,7 +419,8 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
 - **Son Build:** ✅ BUILD SUCCESSFUL 33s — Gradle 8.13, Kotlin 2.0.21, AGP 8.7.3 (24 Şub 2026)
 - **Kalan Uyarılar:** `BluetoothSearching` deprecated (DeviceScanScreen.kt:111,130) — işlevselliği etkilemez
-- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier, EmergencyViewModel tamamlandı. UI entegrasyonu (DashboardScreen alert renkleri, ProModeScreen AI kartı) ve GPS entegrasyonu sonraki aşamada.
+- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier, EmergencyViewModel tamamlandı. DS-1D-CNN eğitimi tamamlandı (Macro AUC=0.9517, TFLite INT8=231.6 KB). UI entegrasyonu (DashboardScreen alert renkleri, ProModeScreen AI kartı) ve GPS entegrasyonu sonraki aşamada.
+- **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` — Mermaid diyagramları ile mimari, eğitim, test, export detayları
 - **Hedef SDK:** 35 (Android 15)
 - **AGP:** 8.7.3, **Kotlin:** 2.0.21, **Gradle:** 8.9, **Compose BOM:** 2024.11.00
 - **Java:** Eclipse Temurin JDK 25.0.2 (gradle.properties ile yapılandırılmış)

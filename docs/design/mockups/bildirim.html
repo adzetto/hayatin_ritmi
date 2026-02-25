@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayatın Ritmi - Akıllı Bildirim Ayarları</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background-color: #000000; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #ffffff; overflow: hidden; }
+
+        /* Ortam Işıkları */
+        .ambient-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.3; animation: float 15s infinite ease-in-out alternate; }
+        .orb-1 { top: -10%; left: -20%; width: 400px; height: 400px; background: #3b82f6; } /* Mavi */
+        .orb-2 { bottom: -10%; right: -20%; width: 400px; height: 400px; background: #e11d48; animation-delay: -5s; } /* Kırmızı */
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 30px); } }
+
+        /* Cihaz Çerçevesi */
+        .app-frame { width: 393px; height: 852px; background: rgba(10, 10, 10, 0.4); backdrop-filter: blur(40px); border-radius: 50px; position: relative; z-index: 10; border: 8px solid #0a0a0a; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Scrollbar Gizleme */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overflow-y: auto; }
+
+        /* Cam Kartlar */
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border-radius: 20px; }
+
+        /* iOS Tarzı Toggle Switch (Aç/Kapa Butonu) */
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .toggle-checkbox { right: 0; z-index: 1; border-color: #10b981; transition: all 0.3s; }
+
+        /* Kilitli Toggle (Kapatılamaz Butonlar İçin) */
+        .toggle-locked { background-color: #10b981; opacity: 0.5; cursor: not-allowed; }
+        .dot-locked { transform: translateX(100%); background-color: #fff; }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="app-frame">
+
+        <div class="w-full flex justify-between items-center px-8 pt-6 pb-2 text-xs font-semibold text-white/70">
+            <span>9:41</span><div class="flex gap-2"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-full"></i></div>
+        </div>
+
+        <div class="px-8 pt-4 pb-6 flex items-center">
+            <button class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all mr-4">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-extrabold tracking-tight">Bildirim Ayarları</h1>
+        </div>
+
+        <div class="flex-1 px-8 pb-10 overflow-y-auto no-scrollbar space-y-6">
+
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                    <h2 class="text-xs font-bold text-white/50 tracking-widest uppercase">Kritik Güvenlik (Kapatılamaz)</h2>
+                </div>
+                
+                <div class="glass-card divide-y divide-white/5">
+                    
+                    <div class="p-4 flex justify-between items-center">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                                Acil Durum ve Kriz Uyarıları
+                                <i class="fa-solid fa-lock text-white/30 text-xs"></i>
+                            </h3>
+                            <p class="text-xs text-white/40 mt-1 font-medium leading-relaxed w-11/12">Ritim bozukluğu veya kalp krizi şüphesinde anında alarm verir.</p>
+                        </div>
+                        <div class="w-11 h-6 bg-emerald-500/50 rounded-full p-1 cursor-not-allowed">
+                            <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-5 transition-transform"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex justify-between items-center">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                                Cihaz Bağlantı Durumu
+                                <i class="fa-solid fa-lock text-white/30 text-xs"></i>
+                            </h3>
+                            <p class="text-xs text-white/40 mt-1 font-medium leading-relaxed w-11/12">Tişört şarjı biterse veya Bluetooth koparsa uyarır.</p>
+                        </div>
+                        <div class="w-11 h-6 bg-emerald-500/50 rounded-full p-1 cursor-not-allowed">
+                            <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-5 transition-transform"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <p class="text-[11px] text-white/30 mt-2 ml-1 font-medium"><i class="fa-solid fa-circle-info mr-1"></i> Hayati güvenliğiniz ve sistemin çalışması için bu bildirimler zorunludur.</p>
+            </div>
+
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i>
+                    <h2 class="text-xs font-bold text-white/50 tracking-widest uppercase">Akıllı Asistan (Opsiyonel)</h2>
+                </div>
+
+                <div class="glass-card divide-y divide-white/5">
+                    
+                    <div class="p-4 flex justify-between items-center">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-white">İlaç ve Su Hatırlatıcıları</h3>
+                            <p class="text-xs text-white/40 mt-1 font-medium">Günlük ilaç saatlerinizi ve su tüketiminizi hatırlatır.</p>
+                        </div>
+                        <div class="w-11 h-6 bg-blue-500 rounded-full p-1 cursor-pointer transition-colors" onclick="toggleSwitch(this)">
+                            <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-5 transition-transform"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex justify-between items-center">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-white">Günlük AI Sağlık Özeti</h3>
+                            <p class="text-xs text-white/40 mt-1 font-medium">Her sabah dünün analizi ve bugünün tavsiyelerini gönderir.</p>
+                        </div>
+                        <div class="w-11 h-6 bg-white/20 rounded-full p-1 cursor-pointer transition-colors" onclick="toggleSwitch(this)">
+                            <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-0 transition-transform"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleSwitch(element) {
+            const ball = element.children[0];
+            if (ball.classList.contains('translate-x-5')) {
+                // Kapat
+                ball.classList.remove('translate-x-5');
+                ball.classList.add('translate-x-0');
+                element.classList.remove('bg-blue-500');
+                element.classList.add('bg-white/20');
+            } else {
+                // Aç
+                ball.classList.remove('translate-x-0');
+                ball.classList.add('translate-x-5');
+                element.classList.remove('bg-white/20');
+                element.classList.add('bg-blue-500');
+            }
+        }
+    </script>
+
+</body>
+</html>

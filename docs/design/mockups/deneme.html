@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayatın Ritmi - World Class Design & Midas Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Premium Reset */
+        body { background-color: #000000; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #ffffff; overflow: hidden; }
+
+        /* Ortam Işıkları */
+        .ambient-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 15s infinite ease-in-out alternate; }
+        .orb-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: #e11d48; }
+        .orb-2 { bottom: -10%; right: -10%; width: 350px; height: 350px; background: #be123c; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.2); } }
+
+        /* Cihaz Çerçevesi */
+        .app-frame { width: 393px; height: 852px; background: rgba(10, 10, 10, 0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-radius: 50px; position: relative; z-index: 10; border: 8px solid #0a0a0a; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* EKG Animasyonu */
+        .ekg-line { fill: none; stroke: #e11d48; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 3s infinite linear; filter: drop-shadow(0 0 8px rgba(225, 29, 72, 0.8)); }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+
+        /* Inputlar */
+        .premium-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 12px 12px 40px; color: white; font-size: 17px; font-weight: 500; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .premium-input:focus { outline: none; border-bottom-color: #e11d48; box-shadow: 0 1px 0 0 #e11d48; }
+        .input-icon { position: absolute; left: 8px; top: 14px; color: rgba(255,255,255,0.4); font-size: 18px; transition: color 0.3s; }
+        .input-wrapper:focus-within .input-icon { color: #e11d48; }
+
+        /* Cam Buton */
+        .glass-btn { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3); border-radius: 16px; font-weight: 700; transition: all 0.2s; }
+        .glass-btn:active { transform: scale(0.96); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
+        .glass-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* -- YENİ EKLENEN KISIMLAR (MİDAS AKIŞI) -- */
+        .backdrop { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 40; opacity: 0; transition: opacity 0.3s; }
+        .bottom-sheet { position: absolute; bottom: -100%; left: 0; right: 0; background: #121212; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 32px 32px 0 0; z-index: 50; padding: 32px 24px 40px 24px; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
+        .bottom-sheet.open { bottom: 0; }
+        .backdrop.open { display: block; opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="app-frame">
+
+        <div class="w-full flex justify-between items-center px-8 pt-6 pb-2 text-xs font-semibold tracking-wider text-white/70">
+            <span>9:41</span>
+            <div class="flex gap-2"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-full"></i></div>
+        </div>
+
+        <div class="flex-1 flex flex-col justify-center px-8 pb-12">
+            
+            <div class="w-full flex justify-center mb-6 h-20">
+                <svg viewBox="0 0 100 30" class="w-48 h-full">
+                    <path class="ekg-line" d="M 0 15 L 20 15 L 25 5 L 30 25 L 35 15 L 50 15 L 55 10 L 60 15 L 80 15 L 85 0 L 90 28 L 95 15 L 100 15"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-4xl font-extrabold text-center tracking-tight mb-2">Hayatın Ritmi</h1>
+            <p class="text-center text-sm font-medium tracking-[0.2em] text-white/50 mb-12">YAPAY ZEKA DESTEKLİ TAKİP</p>
+
+            <div class="space-y-6">
+                <div class="input-wrapper relative">
+                    <i class="fa-solid fa-phone input-icon"></i>
+                    <input type="tel" value="0532 123 45 67" class="premium-input">
+                </div>
+                <div class="input-wrapper relative">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" value="*********" class="premium-input">
+                </div>
+            </div>
+
+            <button id="login-btn" onclick="startLogin()" class="glass-btn w-full mt-10 py-4 text-lg text-white flex items-center justify-center gap-3">
+                <span id="btn-text">Giriş Yap</span>
+                <i id="btn-icon" class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div id="backdrop" class="backdrop"></div>
+        <div id="biometric-sheet" class="bottom-sheet">
+            <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mb-8"></div>
+            
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+                    <i class="fa-solid fa-fingerprint text-4xl text-rose-500 drop-shadow-[0_0_8px_rgba(225,29,72,0.6)]"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold mb-3">Daha Hızlı Giriş Yapın</h3>
+                <p class="text-white/50 text-sm leading-relaxed font-medium">Bundan sonraki girişlerinizde şifre girmeden, sadece <b>parmak izi</b> veya <b>yüz tanıma</b> ile giriş yapmak ister misiniz?</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="acceptBiometric()" class="glass-btn w-full py-4 text-lg text-white font-bold flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-check"></i> Evet, Aktifleştir
+                </button>
+                <button onclick="declineBiometric()" class="w-full py-4 text-lg text-white/50 hover:text-white font-semibold transition-colors bg-transparent">
+                    Şimdi Değil
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function startLogin() {
+            const btn = document.getElementById('login-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+
+            // 1. Yükleniyor Durumu
+            btnText.innerText = "Doğrulanıyor...";
+            btnIcon.className = "fa-solid fa-circle-notch fa-spin";
+            btn.disabled = true;
+
+            // 2. 1.5 Saniye sonra giriş tamamlanır ve Bottom Sheet açılır
+            setTimeout(() => {
+                btnText.innerText = "Giriş Yapıldı";
+                btnIcon.className = "fa-solid fa-check";
+                btnIcon.classList.remove("fa-spin");
+                openBottomSheet();
+            }, 1500);
+        }
+
+        // Bottom Sheet Animasyonları
+        function openBottomSheet() {
+            document.getElementById('backdrop').classList.add('open');
+            document.getElementById('biometric-sheet').classList.add('open');
+        }
+
+        function closeBottomSheet() {
+            document.getElementById('backdrop').classList.remove('open');
+            document.getElementById('biometric-sheet').classList.remove('open');
+            
+            // Butonu eski haline getir
+            setTimeout(() => {
+                const btn = document.getElementById('login-btn');
+                document.getElementById('btn-text').innerText = "Giriş Yap";
+                document.getElementById('btn-icon').className = "fa-solid fa-arrow-right";
+                btn.disabled = false;
+            }, 500);
+        }
+
+        function acceptBiometric() {
+            alert("Biyometrik giriş başarıyla kaydedildi! Şimdi Dashboard'a yönlendiriliyorsunuz.");
+            closeBottomSheet();
+        }
+
+        function declineBiometric() {
+            alert("Sadece bu seferlik şifre ile girildi. Dashboard'a yönlendiriliyorsunuz.");
+            closeBottomSheet();
+        }
+    </script>
+
+</body>
+</html>
