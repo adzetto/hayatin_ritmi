@@ -11,7 +11,7 @@
 
 ## Proje Özeti
 
-Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DCA-CNN) ile aritmi tespit eden ve acil durumlarda otomatik uyarı gönderen uçtan uca bir sağlık izleme sistemi.
+Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DS-1D-CNN) ile aritmi tespit eden ve acil durumlarda otomatik uyarı gönderen uçtan uca bir sağlık izleme sistemi.
 
 **Donanım:** 4× ADS1293 (12 derivasyonlu, 24-bit, 250 Hz ADC) + STM32F103C8T6 (MCU) + nRF52832 (BLE 5.0)
 **Yazılım:** Kotlin + Jetpack Compose + TensorFlow Lite

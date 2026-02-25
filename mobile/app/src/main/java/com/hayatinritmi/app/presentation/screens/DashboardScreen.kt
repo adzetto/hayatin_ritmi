@@ -30,7 +30,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.hayatinritmi.app.Screen
+import com.hayatinritmi.app.domain.model.AiPrediction
 import com.hayatinritmi.app.domain.model.AlertLevel
+import com.hayatinritmi.app.domain.model.ArrhythmiaClass
 import com.hayatinritmi.app.domain.model.ConnectionState
 import com.hayatinritmi.app.presentation.components.InfoCard
 import com.hayatinritmi.app.presentation.components.StatusBadge
@@ -43,6 +45,7 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
         ?: ConnectionState.DISCONNECTED
     val bpm = ecgViewModel?.bpm?.collectAsState()?.value ?: 0
     val alertLevel = ecgViewModel?.alertLevel?.collectAsState()?.value ?: AlertLevel.NONE
+    val aiPrediction = ecgViewModel?.aiPrediction?.collectAsState()?.value ?: AiPrediction()
     val alertCircleColor = when (alertLevel) {
         AlertLevel.RED -> AlarmRed
         AlertLevel.YELLOW -> AmberWarning
@@ -135,11 +138,31 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
             Spacer(modifier = Modifier.height(40.dp))
 
             // ── BİLGİ KARTLARI (InfoCard from CommonComponents) ─
+            val aiNote = when {
+                aiPrediction.label == ArrhythmiaClass.UNKNOWN ->
+                    "Henüz bir analiz yapılmadı. Sensör bağlandığında AI taraması başlayacak."
+                aiPrediction.label == ArrhythmiaClass.NORMAL ->
+                    "Kalp ritminiz normal görünüyor (%${(aiPrediction.confidence * 100).toInt()} güven). " +
+                        "İlacınızı aldıysanız günün tadını çıkarabilirsiniz."
+                aiPrediction.label.isCritical ->
+                    "⚠️ ${aiPrediction.label.displayName} tespit edildi (%${(aiPrediction.confidence * 100).toInt()} güven). " +
+                        "Lütfen doktorunuza danışın."
+                else ->
+                    "${aiPrediction.label.displayName} tespit edildi (%${(aiPrediction.confidence * 100).toInt()} güven). Detaylar için Pro moda geçin."
+            }
+
+            val aiIconColor = when {
+                aiPrediction.label.isCritical -> AlarmRed
+                aiPrediction.label == ArrhythmiaClass.NORMAL -> Emerald500
+                aiPrediction.label == ArrhythmiaClass.UNKNOWN -> NeonBlue
+                else -> AmberWarning
+            }
+
             InfoCard(
                 icon = Icons.Default.AutoAwesome,
-                iconColor = NeonBlue,
+                iconColor = aiIconColor,
                 title = "Yapay Zeka Notu",
-                description = "Bugün gayet iyi görünüyorsunuz. Düne göre stresiniz azaldı. İlacınızı aldıysanız günün tadını çıkarabilirsiniz."
+                description = aiNote
             )
 
             Spacer(modifier = Modifier.height(16.dp))

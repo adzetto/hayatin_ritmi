@@ -178,7 +178,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 | Dosya | Açıklama |
 |---|---|
 | `domain/model/ArrhythmiaClass.kt` | 6 sınıf enum (NORMAL/TACHY/BRADY/AF/ST/UNKNOWN) |
-| `domain/model/AiPrediction.kt` | DCA-CNN tahmin sonucu (label, confidence, probs, inferenceMs) |
+| `domain/model/AiPrediction.kt` | DS-1D-CNN tahmin sonucu (label, confidence, probs, topPredictions, inferenceMs) |
 | `domain/model/AlertLevel.kt` | Uyarı seviyesi (NONE/ELECTRODE_OFF/LOW_SIGNAL/RECHECK/YELLOW/RED) |
 | `domain/model/SignalQuality.kt` | SNR (dB), PRD (%), kalite skoru (0-100) |
 | `domain/model/AlertEvent.kt` | Acil olay geçmişi (timestamp, level, bpm, lat, lon) |
@@ -262,7 +262,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] ONNX → TFLite FP32/FP16 (`onnx2tf`) + TFLite INT8 (200 ECG kalibrasyon örneği ile representative dataset quantization)
     - [x] **Hedef karşılandı:** 231.6 KB model boyutu (<2.1 MB ✅), 0.84 ms inference (<22 ms ✅)
     - [x] Üç varyant: `ecg_model_float32.tflite` (698 KB), `ecg_model_float16.tflite` (359 KB), `ecg_model_int8.tflite` (232 KB)
-    - [ ] `mobile/app/src/main/assets/ecg_model_int8.tflite` olarak Android projesine gömme (sonraki adım)
+    - [x] `mobile/app/src/main/assets/ecg_model_int8.tflite` olarak Android projesine gömüldü (237 KB)
 
 ### 3.4 — Android TFLite Inference Modülü ✅
 > **Dosya:** `mobile/app/src/main/java/.../processing/ArrhythmiaClassifier.kt`
@@ -272,7 +272,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] Giriş tensor: `[1, 2500, 12]` (channels-last INT8), çıkış: `[1, 55]` (float32 sigmoid)
     - [x] INT8 quantization: scale=0.0909, zero_point=-9
 - [x] **10 Saniyelik Pencere Yönetimi**
-    - [x] Her 2500 örnekte `RingBuffer.getAll()` → `ArrhythmiaClassifier.classify()`
+    - [x] Her 2500 örnekte 12-kanal `multiChannelBuffer` → `ArrhythmiaClassifier.classify(window)`
     - [x] `Dispatchers.Default` coroutine'de arka plan çıkarımı (UI thread'i bloklamaz)
     - [x] `EcgViewModel._aiPrediction: MutableStateFlow<AiPrediction>` eklendi
     - [x] Mock mod: RMSSD/RMS oranı → AF / Normal kural tahmini
@@ -286,18 +286,19 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] Bradikardi: BPM < 50 ve 30 saniye sürekli → `AlertLevel.YELLOW`
     - [x] R-R CV > 0.20 ve 30 saniye → `AlertLevel.YELLOW`
 - [x] **AI Hybrid Karar**
-    - [x] DCA-CNN güven ≥ 0.80 ve kritik sınıf → `AlertLevel.RED`
-    - [x] DCA-CNN güven ≥ 0.80, non-normal → `AlertLevel.YELLOW`
-    - [x] DCA-CNN güven < 0.55 → `AlertLevel.RECHECK`
+    - [x] DS-1D-CNN güven ≥ 0.80 ve kritik sınıf → `AlertLevel.RED`
+    - [x] DS-1D-CNN güven ≥ 0.80, non-normal → `AlertLevel.YELLOW`
+    - [x] DS-1D-CNN güven < 0.55 → `AlertLevel.RECHECK`
 - [x] **Uyarı Seviyesi StateFlow**
     - [x] `AlertLevel` enum: NONE/ELECTRODE_OFF/LOW_SIGNAL/RECHECK/YELLOW/RED
     - [x] `EcgViewModel._alertLevel: MutableStateFlow<AlertLevel>` — her 1 saniyede güncelleme
-- [ ] **Renk Kodlu UI Güncellemesi** (sonraki aşama)
-    - [ ] `DashboardScreen` breathing circle rengi: Emerald(NONE)/Amber(YELLOW)/AlarmRed(RED)
-    - [ ] `ProModeScreen` AI tahmin + sinyal kalite kartı
-    - [ ] `AlertLevel.RED` → otomatik `EmergencyScreen` navigasyonu
+- [x] **Renk Kodlu UI Güncellemesi** ✅
+    - [x] `DashboardScreen` breathing circle rengi: Emerald(NONE)/Amber(YELLOW)/AlarmRed(RED)
+    - [x] `DashboardScreen` AI Notu kartı dinamik (aiPrediction'dan label + confidence)
+    - [x] `ProModeScreen` AI tahmin + sinyal kalite kartı
+    - [x] `AlertLevel.RED` → otomatik `EmergencyScreen` navigasyonu (`LaunchedEffect`)
 
-### 3.6 — Acil Durum Sistemi (SMS + Arama + Konum) — Kısmen ✅
+### 3.6 — Acil Durum Sistemi (SMS + Arama + Konum) ✅
 > PR #2 ile izinler zaten eklendi: `SEND_SMS`, `CALL_PHONE`, `ACCESS_FINE_LOCATION`
 - [x] **EmergencyViewModel.kt oluşturuldu**
     - [x] `SmsManager.sendMultipartTextMessage()` — kayıtlı acil kişiye SMS
@@ -305,12 +306,12 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] `PendingIntent` ile SMS gönderim onay takibi
     - [x] `callEmergencyServices()` — `Intent.ACTION_CALL tel:112`
     - [x] `StateFlow<Boolean> smsSent`, `StateFlow<String?> smsError`
-- [ ] **GPS Konum Alma** (play-services-location bağımlılığı eklenince)
-    - [ ] `FusedLocationProviderClient.getCurrentLocation(HIGH_ACCURACY)`
-    - [ ] Network + GPS hibrit, 10s timeout
-- [ ] **EmergencyScreen Güçlendirmesi** (sonraki aşama)
-    - [ ] EmergencyViewModel bağlantısı + "SMS Gönderildi" / hata durumu UI
-    - [ ] Otomatik 10s geri sayım sonrası SMS + 112 arama
+- [x] **GPS Konum Alma** ✅
+    - [x] `FusedLocationProviderClient.getCurrentLocation(HIGH_ACCURACY)`
+    - [x] 10s timeout (`withTimeoutOrNull`), permission check
+- [x] **EmergencyScreen Güçlendirmesi** ✅
+    - [x] EmergencyViewModel bağlantısı + smsSent/smsError StateFlow UI
+    - [x] Otomatik 10s geri sayım sonrası SMS + 112 arama (`LaunchedEffect`)
 
 ### 3.7 — Doktor Raporlama & CSV Export
 - [ ] **EKG Oturum Kaydı**
@@ -324,7 +325,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [ ] EKG grafiği: Canvas çizim → Bitmap → PDF sayfası (25 mm/s, 1 mV/cm standart)
     - [ ] Başlık bölümü: Hasta adı, kan grubu, tarih/saat, kayıt süresi
     - [ ] Metrikler bölümü: Ort/Min/Max BPM, SDNN, RMSSD, sinyal kalitesi skoru
-    - [ ] AI bölümü: DCA-CNN tahmin etiketi, güven skoru, R-R irregülarite skoru
+    - [ ] AI bölümü: DS-1D-CNN tahmin etiketi, güven skoru, R-R irregülarite skoru
     - [ ] Uyarı geçmişi: PDF içine tablo formatında acil durum geçmişi
 - [ ] **E-posta Gönderme**
     - [ ] `Intent.ACTION_SEND` + `ClipData` ile PDF ek → doktor e-posta adresine
@@ -419,7 +420,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
 - **Son Build:** ✅ BUILD SUCCESSFUL 33s — Gradle 8.13, Kotlin 2.0.21, AGP 8.7.3 (24 Şub 2026)
 - **Kalan Uyarılar:** `BluetoothSearching` deprecated (DeviceScanScreen.kt:111,130) — işlevselliği etkilemez
-- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier, EmergencyViewModel tamamlandı. DS-1D-CNN eğitimi tamamlandı (Macro AUC=0.9517, TFLite INT8=231.6 KB). UI entegrasyonu (DashboardScreen alert renkleri, ProModeScreen AI kartı) ve GPS entegrasyonu sonraki aşamada.
+- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier (55-sınıf DS-1D-CNN TFLite INT8), EmergencyViewModel (GPS + SMS) tamamlandı. UI entegrasyonu tamamlandı (DashboardScreen alert renkleri + dinamik AI notu, ProModeScreen AI kartı, EmergencyScreen geri sayım + SMS). TFLite bağımlılığı ve play-services-location eklendi.
 - **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` — Mermaid diyagramları ile mimari, eğitim, test, export detayları
 - **Hedef SDK:** 35 (Android 15)
 - **AGP:** 8.7.3, **Kotlin:** 2.0.21, **Gradle:** 8.9, **Compose BOM:** 2024.11.00

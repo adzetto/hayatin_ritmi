@@ -8,7 +8,7 @@ import com.hayatinritmi.app.domain.model.*
  * Tahmin sırası:
  *  1. Elektrot kaybı kontrolü
  *  2. SNR sinyal kalitesi kontrolü
- *  3. DCA-CNN yüksek güven (≥0.80) → direkt karar
+ *  3. DS-1D-CNN yüksek güven (≥0.80) → direkt karar
  *  4. Süre bazlı kural tabanlı kontroller (taşikardi/bradikardi 30s)
  *  5. R-R irregülarite + AI orta güven (0.55–0.80) → sarı
  *

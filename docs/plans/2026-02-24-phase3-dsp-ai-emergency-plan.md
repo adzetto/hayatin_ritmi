@@ -1,8 +1,8 @@
-# FAZ 3: İleri DSP, DCA-CNN AI & Acil Durum Sistemi — Implementation Plan
+# FAZ 3: İleri DSP, DS-1D-CNN AI & Acil Durum Sistemi — Implementation Plan
 
 > **Tarih:** 24 Şubat 2026  
 > **Durum:** Aktif — FAZ 2 tamamlandı, FAZ 3 başlıyor  
-> **Araştırma Önerisi Referansı:** TÜBİTAK 2209-A, Bölüm 3 (DSP) + Bölüm 4 (DCA-CNN) + Bölüm 5 (Mobil)  
+> **Araştırma Önerisi Referansı:** TÜBİTAK 2209-A, Bölüm 3 (DSP) + Bölüm 4 (DS-1D-CNN) + Bölüm 5 (Mobil)  
 > **Proje:** `mobile/` (Clean Architecture — domain/data/presentation)  
 > **Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Java 21 (Android Studio JBR)
 > **Kanal:** 12 derivasyonlu standart EKG (I, II, III, aVR, aVL, aVF, V1–V6)
@@ -326,7 +326,7 @@ class AdvancedEcgProcessor(private val sampleRateHz: Int = 250) {
 
 ## Görev 4: ArrhythmiaClassifier (TFLite Inference)
 
-> **Not:** Model dosyası `dca_cnn_int8.tflite` önce PyTorch eğitim pipeline ile üretilecek.  
+> **Not:** Model dosyası `ecg_model_int8.tflite` DS-1D-CNN PyTorch eğitim pipeline ile üretildi.  
 > Eğitim tamamlanana kadar bu sınıf mock tahmin üretecek.
 
 **Yeni Bağımlılık — `libs.versions.toml`:**
@@ -360,7 +360,7 @@ import java.nio.channels.FileChannel
 class ArrhythmiaClassifier(private val context: Context) {
 
     private var interpreter: Interpreter? = null
-    private val modelFileName = "dca_cnn_int8.tflite"
+    private val modelFileName = "ecg_model_int8.tflite"
     private val windowSize = 2500      // 10 saniye @ 250 Hz
     private val numClasses = 5
 
@@ -454,7 +454,7 @@ import com.hayatinritmi.app.domain.model.*
 
 /**
  * Araştırma Önerisi §3 + §4 → Hibrit karar motoru:
- * Kural tabanlı (BPM, R-R, ST) + DCA-CNN AI (güven eşiği)
+ * Kural tabanlı (BPM, R-R, ST) + DS-1D-CNN AI (güven eşiği)
  * Gereksiz alarm oranı hedefi: ≤ %5
  */
 object AlertEngine {

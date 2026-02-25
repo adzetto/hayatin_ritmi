@@ -25,9 +25,13 @@ class EcgViewModel(
     private val classifier: ArrhythmiaClassifier
 ) : ViewModel() {
 
-    private val ringBuffer = RingBuffer(2500)   // 10 saniye @ 250 Hz
+    private val ringBuffer = RingBuffer(2500)   // Lead II grafik için
     private val processor = AdvancedEcgProcessor()
     private val rPeakDetector = RPeakDetector()
+
+    // ─── 12-Kanal AI Tampon (her derivasyon için 2500 örnek) ────────────────
+    private val multiChannelBuffer = Array(12) { FloatArray(2500) }
+    private val channelWriteIdx = IntArray(12)
 
     // ─── Temel EKG StateFlow'ları ────────────────────────────────────────────
     private val _graphPoints = MutableStateFlow<List<Float>>(emptyList())
@@ -59,39 +63,49 @@ class EcgViewModel(
     init {
         viewModelScope.launch {
             repository.observeEcgSamples().collect { sample ->
-                val filtered = processor.processSample(sample.voltageUv)
-                ringBuffer.add(filtered)
-                rPeakDetector.processSample(filtered)
+                val ch = sample.channel.coerceIn(0, 11)
 
-                sampleCounter++
+                // Tüm kanalları 12-kanal AI tamponuna yaz
+                val idx = channelWriteIdx[ch] % 2500
+                multiChannelBuffer[ch][idx] = sample.voltageUv
+                channelWriteIdx[ch]++
 
-                // 30 FPS UI güncellemesi (her 8 örnekte)
-                if (sampleCounter % 8 == 0) {
-                    _graphPoints.value = ringBuffer.getLastN(1000).toList()
-                    _bpm.value = rPeakDetector.currentBpm
-                    _hrv.value = rPeakDetector.currentHrv
-                }
+                // Lead II (channel 1) → grafik + BPM + alert
+                if (ch == 1) {
+                    val filtered = processor.processSample(sample.voltageUv)
+                    ringBuffer.add(filtered)
+                    rPeakDetector.processSample(filtered)
 
-                // Her 1 saniyede AlertEngine değerlendirmesi (250 örnekte)
-                if (sampleCounter % 250 == 0) {
-                    val quality = processor.computeSignalQuality()
-                    _signalQuality.value = quality
-                    val currentAlert = AlertEngine.evaluate(
-                        bpm = rPeakDetector.currentBpm,
-                        hrv = rPeakDetector.currentHrv,
-                        deviceStatus = _deviceStatus.value,
-                        signalQuality = quality,
-                        ai = _aiPrediction.value
-                    )
-                    _alertLevel.value = currentAlert
-                }
+                    sampleCounter++
 
-                // Her 10 saniyede DCA-CNN çıkarımı (2500 örnekte)
-                if (sampleCounter % 2500 == 0) {
-                    val window = ringBuffer.getAll()
-                    viewModelScope.launch(Dispatchers.Default) {
-                        val prediction = classifier.classify(window)
-                        _aiPrediction.value = prediction
+                    // 30 FPS UI güncellemesi (her 8 örnekte)
+                    if (sampleCounter % 8 == 0) {
+                        _graphPoints.value = ringBuffer.getLastN(1000).toList()
+                        _bpm.value = rPeakDetector.currentBpm
+                        _hrv.value = rPeakDetector.currentHrv
+                    }
+
+                    // Her 1 saniyede AlertEngine değerlendirmesi (250 örnekte)
+                    if (sampleCounter % 250 == 0) {
+                        val quality = processor.computeSignalQuality()
+                        _signalQuality.value = quality
+                        val currentAlert = AlertEngine.evaluate(
+                            bpm = rPeakDetector.currentBpm,
+                            hrv = rPeakDetector.currentHrv,
+                            deviceStatus = _deviceStatus.value,
+                            signalQuality = quality,
+                            ai = _aiPrediction.value
+                        )
+                        _alertLevel.value = currentAlert
+                    }
+
+                    // Her 10 saniyede DS-1D-CNN 12-lead çıkarımı (2500 örnekte)
+                    if (sampleCounter % 2500 == 0) {
+                        val window = Array(12) { c -> multiChannelBuffer[c].copyOf() }
+                        viewModelScope.launch(Dispatchers.Default) {
+                            val prediction = classifier.classify(window)
+                            _aiPrediction.value = prediction
+                        }
                     }
                 }
             }
@@ -110,6 +124,10 @@ class EcgViewModel(
         rPeakDetector.reset()
         AlertEngine.reset()
         sampleCounter = 0
+        for (ch in 0 until 12) {
+            multiChannelBuffer[ch].fill(0f)
+            channelWriteIdx[ch] = 0
+        }
         _graphPoints.value = emptyList()
         _bpm.value = 0
         _hrv.value = HrvMetrics()

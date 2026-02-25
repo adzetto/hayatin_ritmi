@@ -1,28 +1,34 @@
 package com.hayatinritmi.app.presentation.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.telephony.SmsManager
 import android.app.PendingIntent
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hayatinritmi.app.domain.model.AlertEvent
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Acil durum sistemi ViewModel.
  *
  * Sorumluluklar:
- *  - GPS konum alma (FusedLocationProviderClient — FAZ 3.6)
+ *  - GPS konum alma (FusedLocationProviderClient)
  *  - Kayıtlı acil kişilere SMS gönderme (SmsManager)
- *  - EmergencyScreen'e durum bildirimi (StateFlow)
- *
- * Not: GPS entegrasyonu play-services-location bağımlılığı eklenince aktive olur.
- * Şimdilik konumsuz SMS gönderimi çalışır.
+ *  - 112 arama (ACTION_CALL)
  */
 class EmergencyViewModel(private val context: Context) : ViewModel() {
 
@@ -35,30 +41,67 @@ class EmergencyViewModel(private val context: Context) : ViewModel() {
     private val _currentLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     val currentLocation: StateFlow<Pair<Double, Double>?> = _currentLocation.asStateFlow()
 
-    // Room entegrasyonu (FAZ 4) tamamlanana kadar bu değerler dışarıdan set edilir
+    private val _locationLoading = MutableStateFlow(false)
+    val locationLoading: StateFlow<Boolean> = _locationLoading.asStateFlow()
+
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
     var emergencyContactPhone: String = ""
     var emergencyContactName: String = "Acil Kişi"
     var userName: String = "Kullanıcı"
 
+    /** GPS konum al — 10s timeout, HIGH_ACCURACY */
+    @SuppressLint("MissingPermission")
+    fun fetchLocation() {
+        if (!hasLocationPermission()) return
+        _locationLoading.value = true
+        viewModelScope.launch {
+            try {
+                val cancellationToken = CancellationTokenSource()
+                val location: Location? = withTimeoutOrNull(10_000L) {
+                    fusedLocationClient.getCurrentLocation(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        cancellationToken.token
+                    ).await()
+                }
+                if (location != null) {
+                    _currentLocation.value = Pair(location.latitude, location.longitude)
+                }
+            } catch (_: Exception) {
+                // Konum alınamadı — devam et
+            } finally {
+                _locationLoading.value = false
+            }
+        }
+    }
+
+    private fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     /**
-     * Acil durum SMS'i gönder (konumsuz).
-     * GPS entegrasyonu FAZ 4'te play-services-location ile eklenecek.
+     * Acil durum SMS'i gönder — önce konumu al, sonra SMS at.
      */
     fun sendEmergencyAlert(event: AlertEvent) {
         viewModelScope.launch {
+            // Konum mevcut değilse bir kez dene
+            if (_currentLocation.value == null) {
+                fetchLocation()
+                // Kısa bekleme — konum gelebilir veya gelmez
+                kotlinx.coroutines.delay(3000)
+            }
+            val loc = _currentLocation.value
             sendSms(
-                lat = event.lat,
-                lon = event.lon,
+                lat = loc?.first ?: event.lat,
+                lon = loc?.second ?: event.lon,
                 bpm = event.bpm,
                 aiLabel = event.aiPrediction?.label?.displayName ?: "Belirsiz"
             )
         }
     }
 
-    /**
-     * 112'yi ara.
-     * Caller, CALL_PHONE izninin mevcut olduğunu doğrulamalı.
-     */
     fun callEmergencyServices() {
         try {
             val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:112")).apply {
@@ -97,7 +140,6 @@ class EmergencyViewModel(private val context: Context) : ViewModel() {
                 Intent("com.hayatinritmi.app.SMS_SENT"),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-            // SMS >160 karakter olabilir — parçala
             val parts = smsManager.divideMessage(smsBody)
             val sentIntents = ArrayList<PendingIntent>(parts.size).apply {
                 repeat(parts.size) { add(sentIntent) }
@@ -124,5 +166,6 @@ class EmergencyViewModel(private val context: Context) : ViewModel() {
         _smsSent.value = false
         _smsError.value = null
         _currentLocation.value = null
+        _locationLoading.value = false
     }
 }

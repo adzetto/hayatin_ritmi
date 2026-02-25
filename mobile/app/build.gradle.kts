@@ -62,6 +62,13 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // TensorFlow Lite
+    implementation(libs.tflite.runtime)
+
+    // Google Play Services — Location (GPS)
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
