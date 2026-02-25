@@ -35,6 +35,7 @@ build_debug.bat
 # OS
 Thumbs.db
 desktop.ini
+dxdiag_out.txt
 
 # Kotlin
 *.class
