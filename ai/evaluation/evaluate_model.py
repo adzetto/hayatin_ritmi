@@ -27,11 +27,14 @@ from rich import box
 console = Console()
 
 # ── Paths ──
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(SCRIPT_DIR, "ecg-arrhythmia")
-MODEL_DIR    = os.path.join(SCRIPT_DIR, "models")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AI_DIR       = os.path.join(PROJECT_ROOT, "ai")
+DATASET_PATH = os.path.join(PROJECT_ROOT, "dataset", "ecg-arrhythmia")
+MODEL_DIR    = os.path.join(AI_DIR, "models", "checkpoints")
+RESULTS_DIR  = os.path.join(AI_DIR, "models", "results")
+CACHE_DIR    = os.path.join(AI_DIR, "cache")
 SNOMED_CSV   = os.path.join(DATASET_PATH, "ConditionNames_SNOMED-CT.csv")
-CACHE_FILE   = os.path.join(MODEL_DIR, "dataset_cache.npz")
+CACHE_FILE   = os.path.join(CACHE_DIR, "dataset_cache.npz")
 BEST_PT      = os.path.join(MODEL_DIR, "ecg_best.pt")
 ONNX_PATH    = os.path.join(MODEL_DIR, "ecg_model.onnx")
 
@@ -577,7 +580,7 @@ if __name__ == "__main__":
         metrics = evaluate_on_test(model, X, Y)
 
         # Save evaluation results
-        eval_path = os.path.join(MODEL_DIR, "evaluation_results.json")
+        eval_path = os.path.join(RESULTS_DIR, "evaluation_results.json")
         save_metrics = {k: v for k, v in metrics.items() if k != "per_class_auc"}
         save_metrics["per_class_auc"] = [
             {"condition": n, "auc": round(a, 4), "support": s}

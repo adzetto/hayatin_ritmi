@@ -25,7 +25,7 @@ from huggingface_hub import HfApi, upload_file as hf_upload
 
 # ── .env'den token oku ──────────────────────
 def _load_env():
-    env_path = Path(__file__).resolve().parent.parent / ".env"
+    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -39,9 +39,11 @@ _load_env()
 # ═══════════════════════════════════════════════════════
 #  YAPILANDIRMA
 # ═══════════════════════════════════════════════════════
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(SCRIPT_DIR, "ecg-arrhythmia")
-MODEL_DIR    = os.path.join(SCRIPT_DIR, "models")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AI_DIR       = os.path.join(PROJECT_ROOT, "ai")
+DATASET_PATH = os.path.join(PROJECT_ROOT, "dataset", "ecg-arrhythmia")
+MODEL_DIR    = os.path.join(AI_DIR, "models", "checkpoints")
+RESULTS_DIR  = os.path.join(AI_DIR, "models", "results")
 SNOMED_CSV   = os.path.join(DATASET_PATH, "ConditionNames_SNOMED-CT.csv")
 RECORDS_FILE = os.path.join(DATASET_PATH, "RECORDS")
 
@@ -57,6 +59,7 @@ BATCH_SIZE   = 64
 EPOCHS       = 50
 
 os.makedirs(MODEL_DIR, exist_ok=True)
+os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════
 #  1. SNOMED-CT LABEL MAP
@@ -259,8 +262,8 @@ def train(X, Y):
             filepath=os.path.join(MODEL_DIR, "ecg_best.keras"),
             monitor="val_auc", mode="max", save_best_only=True, verbose=1
         ),
-        callbacks.CSVLogger(os.path.join(MODEL_DIR, "training_log.csv")),
-        callbacks.TensorBoard(log_dir=os.path.join(MODEL_DIR, "tensorboard"), histogram_freq=0),
+        callbacks.CSVLogger(os.path.join(RESULTS_DIR, "training_log.csv")),
+        callbacks.TensorBoard(log_dir=os.path.join(RESULTS_DIR, "tensorboard"), histogram_freq=0),
     ]
 
     print(f"\n🚂 Eğitim başlıyor... (epoch={EPOCHS}, batch={BATCH_SIZE})")
@@ -358,7 +361,7 @@ if __name__ == "__main__":
     model, X_val, Y_val = train(X, Y)
 
     # ── TFLite export ───────────────────────
-    tflite_path = os.path.join(MODEL_DIR, "ecg_model_int8.tflite")
+    tflite_path = os.path.join(AI_DIR, "models", "tflite", "ecg_model_int8.tflite")
     model_path  = os.path.join(MODEL_DIR, "ecg_best.keras")
     export_tflite(model, X_val, tflite_path)
 

@@ -22,15 +22,17 @@ from rich import box
 console = Console()
 
 # ── Paths ──
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(SCRIPT_DIR, "ecg-arrhythmia")
-MODEL_DIR    = os.path.join(SCRIPT_DIR, "models")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AI_DIR       = os.path.join(PROJECT_ROOT, "ai")
+DATASET_PATH = os.path.join(PROJECT_ROOT, "dataset", "ecg-arrhythmia")
+MODEL_DIR    = os.path.join(AI_DIR, "models")
+CACHE_DIR    = os.path.join(AI_DIR, "cache")
 SNOMED_CSV   = os.path.join(DATASET_PATH, "ConditionNames_SNOMED-CT.csv")
-CACHE_FILE   = os.path.join(MODEL_DIR, "dataset_cache.npz")
+CACHE_FILE   = os.path.join(CACHE_DIR, "dataset_cache.npz")
 INT8_PATH    = os.path.join(MODEL_DIR, "tflite", "ecg_model_int8.tflite")
 FLOAT32_PATH = os.path.join(MODEL_DIR, "tflite", "ecg_model_float32.tflite")
 FLOAT16_PATH = os.path.join(MODEL_DIR, "tflite", "ecg_model_float16.tflite")
-EVAL_JSON    = os.path.join(MODEL_DIR, "tflite_evaluation_results.json")
+EVAL_JSON    = os.path.join(MODEL_DIR, "results", "tflite_evaluation_results.json")
 
 
 # ═══════════════════════════════════════════════════════════

@@ -9,12 +9,14 @@ import os, sys
 import numpy as np
 import tensorflow as tf
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR  = os.path.join(SCRIPT_DIR, "models")
-TFLITE_DIR = os.path.join(MODEL_DIR, "tflite")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
+AI_DIR       = os.path.join(PROJECT_ROOT, "ai")
+MODEL_DIR    = os.path.join(AI_DIR, "models")
+TFLITE_DIR   = os.path.join(MODEL_DIR, "tflite")
 SAVED_MODEL_DIR = TFLITE_DIR  # onnx2tf saves SavedModel here
-CACHE_FILE = os.path.join(MODEL_DIR, "dataset_cache.npz")
-INT8_PATH = os.path.join(TFLITE_DIR, "ecg_model_int8.tflite")
+CACHE_DIR    = os.path.join(AI_DIR, "cache")
+CACHE_FILE   = os.path.join(CACHE_DIR, "dataset_cache.npz")
+INT8_PATH    = os.path.join(TFLITE_DIR, "ecg_model_int8.tflite")
 
 N_CALIB = 200  # number of calibration samples
 

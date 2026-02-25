@@ -16,7 +16,7 @@ from huggingface_hub import HfApi, create_repo, upload_file
 
 # ── .env'den token oku ──────────────────────
 def _load_env():
-    env_path = Path(__file__).resolve().parent.parent / ".env"
+    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -199,8 +199,8 @@ api.upload_file(
 )
 
 # SNOMED CSV'yi de yükle
-_script_dir = os.path.dirname(os.path.abspath(__file__))
-snomed_csv_path = os.path.join(_script_dir, "ecg-arrhythmia", "ConditionNames_SNOMED-CT.csv")
+_project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+snomed_csv_path = os.path.join(_project_root, "dataset", "ecg-arrhythmia", "ConditionNames_SNOMED-CT.csv")
 if os.path.exists(snomed_csv_path):
     api.upload_file(
         path_or_fileobj=snomed_csv_path,

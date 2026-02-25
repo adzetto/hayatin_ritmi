@@ -31,7 +31,7 @@ console = Console()
 
 # ── .env'den token oku ──────────────────────────────────────
 def _load_env():
-    env_path = Path(__file__).resolve().parent.parent / ".env"
+    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -44,9 +44,13 @@ _load_env()
 # ═══════════════════════════════════════════════════════════
 #  YAPILANDIRMA
 # ═══════════════════════════════════════════════════════════
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(SCRIPT_DIR, "ecg-arrhythmia")
-MODEL_DIR    = os.path.join(SCRIPT_DIR, "models")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AI_DIR       = os.path.join(PROJECT_ROOT, "ai")
+DATASET_PATH = os.path.join(PROJECT_ROOT, "dataset", "ecg-arrhythmia")
+MODEL_DIR    = os.path.join(AI_DIR, "models", "checkpoints")
+RESULTS_DIR  = os.path.join(AI_DIR, "models", "results")
+TFLITE_DIR   = os.path.join(AI_DIR, "models", "tflite")
+CACHE_DIR    = os.path.join(AI_DIR, "cache")
 SNOMED_CSV   = os.path.join(DATASET_PATH, "ConditionNames_SNOMED-CT.csv")
 RECORDS_FILE = os.path.join(DATASET_PATH, "RECORDS")
 
@@ -61,10 +65,13 @@ BATCH_SIZE  = 128               # RTX 4050 6GB → 128 rahat
 EPOCHS      = 50
 LR          = 1e-3
 VAL_RATIO   = 0.15
-CACHE_FILE  = os.path.join(MODEL_DIR, "dataset_cache.npz")
+CACHE_FILE  = os.path.join(CACHE_DIR, "dataset_cache.npz")
 DEVICE      = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 os.makedirs(MODEL_DIR, exist_ok=True)
+os.makedirs(RESULTS_DIR, exist_ok=True)
+os.makedirs(TFLITE_DIR, exist_ok=True)
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════
 #  1. SNOMED-CT LABEL MAP
@@ -400,7 +407,7 @@ def train_model(X, Y):
 
     # Log kaydet
     import csv as csv_mod
-    log_path = os.path.join(MODEL_DIR, "training_log.csv")
+    log_path = os.path.join(RESULTS_DIR, "training_log.csv")
     with open(log_path, "w", newline="") as f:
         writer = csv_mod.DictWriter(f, fieldnames=log_rows[0].keys())
         writer.writeheader()
@@ -578,9 +585,8 @@ if __name__ == "__main__":
     export_onnx(model, onnx_path)
 
     # 4. TFLite dönüşümü (onnx2tf varsa)
-    tflite_dir  = os.path.join(MODEL_DIR, "tflite")
-    os.makedirs(tflite_dir, exist_ok=True)
-    tflite_path = export_tflite(onnx_path, tflite_dir)
+    os.makedirs(TFLITE_DIR, exist_ok=True)
+    tflite_path = export_tflite(onnx_path, TFLITE_DIR)
 
     # 5. HuggingFace'e yükle
     push_to_hub(model, onnx_path, tflite_path, best_auc)

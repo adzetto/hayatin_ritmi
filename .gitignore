@@ -47,15 +47,17 @@ desktop.ini
 # Word docs (keep in separate storage)
 *.docx
 
-# Dataset — large data files only (scripts & small models are tracked)
+# Dataset — raw ECG data (large)
 dataset/ecg-arrhythmia/WFDBRecords/
 dataset/ecg-arrhythmia/download_debug.log
-dataset/models/dataset_cache.npz
-dataset/models/tflite/saved_model.pb
-dataset/models/tflite/fingerprint.pb
-dataset/models/tflite/variables/
-dataset/models/tflite/assets/
-dataset/models/tensorboard/
+
+# AI — large/generated artifacts
+ai/cache/
+ai/models/tflite/saved_model.pb
+ai/models/tflite/fingerprint.pb
+ai/models/tflite/variables/
+ai/models/tflite/assets/
+ai/models/results/tensorboard/
 
 # Backup copies
 app/_yedek_HayatinRitmi/
