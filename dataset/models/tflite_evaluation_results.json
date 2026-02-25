@@ -1,0 +1,19 @@
+{
+  "speed_benchmark": {
+    "INT8": {
+      "avg_ms": 0.84,
+      "size_kb": 231.6,
+      "throughput": 1185
+    },
+    "Float16": {
+      "avg_ms": 1.14,
+      "size_kb": 359.1,
+      "throughput": 878
+    },
+    "Float32": {
+      "avg_ms": 1.18,
+      "size_kb": 697.6,
+      "throughput": 846
+    }
+  }
+}

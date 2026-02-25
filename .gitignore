@@ -47,8 +47,15 @@ desktop.ini
 # Word docs (keep in separate storage)
 *.docx
 
-# Dataset (too large for git)
-dataset/
+# Dataset — large data files only (scripts & small models are tracked)
+dataset/ecg-arrhythmia/WFDBRecords/
+dataset/ecg-arrhythmia/download_debug.log
+dataset/models/dataset_cache.npz
+dataset/models/tflite/saved_model.pb
+dataset/models/tflite/fingerprint.pb
+dataset/models/tflite/variables/
+dataset/models/tflite/assets/
+dataset/models/tensorboard/
 
 # Backup copies
 app/_yedek_HayatinRitmi/

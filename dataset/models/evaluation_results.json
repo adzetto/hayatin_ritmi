@@ -1,0 +1,202 @@
+{
+  "macro_auc": 0.9516780493903269,
+  "micro_auc": 0.992402949270861,
+  "macro_f1": 0.15076000792341665,
+  "micro_f1": 0.8580645161290322,
+  "weighted_f1": 0.8108164289948582,
+  "macro_precision": 0.20743575129326672,
+  "macro_recall": 0.13737545621000766,
+  "n_test": 3960,
+  "per_class_auc": [
+    {
+      "condition": "SB",
+      "auc": 0.9991,
+      "support": 2399
+    },
+    {
+      "condition": "SR",
+      "auc": 0.999,
+      "support": 1147
+    },
+    {
+      "condition": "AFIB",
+      "auc": 0.9986,
+      "support": 284
+    },
+    {
+      "condition": "VEB",
+      "auc": 0.9979,
+      "support": 4
+    },
+    {
+      "condition": "3AVB",
+      "auc": 0.9963,
+      "support": 4
+    },
+    {
+      "condition": "RBBB",
+      "auc": 0.9944,
+      "support": 64
+    },
+    {
+      "condition": "JEB",
+      "auc": 0.9923,
+      "support": 6
+    },
+    {
+      "condition": "CR",
+      "auc": 0.9919,
+      "support": 1
+    },
+    {
+      "condition": "MISW",
+      "auc": 0.9914,
+      "support": 10
+    },
+    {
+      "condition": "VFW",
+      "auc": 0.9901,
+      "support": 5
+    },
+    {
+      "condition": "1AVB",
+      "auc": 0.9893,
+      "support": 141
+    },
+    {
+      "condition": "ALS",
+      "auc": 0.9893,
+      "support": 126
+    },
+    {
+      "condition": "LFBBB",
+      "auc": 0.9864,
+      "support": 18
+    },
+    {
+      "condition": "RVH",
+      "auc": 0.9864,
+      "support": 2
+    },
+    {
+      "condition": "RAH",
+      "auc": 0.9843,
+      "support": 2
+    },
+    {
+      "condition": "2AVB",
+      "auc": 0.9822,
+      "support": 2
+    },
+    {
+      "condition": "ARS",
+      "auc": 0.9805,
+      "support": 45
+    },
+    {
+      "condition": "2AVB1",
+      "auc": 0.9773,
+      "support": 1
+    },
+    {
+      "condition": "TWO",
+      "auc": 0.977,
+      "support": 168
+    },
+    {
+      "condition": "ERV",
+      "auc": 0.9711,
+      "support": 53
+    },
+    {
+      "condition": "VPB",
+      "auc": 0.9707,
+      "support": 31
+    },
+    {
+      "condition": "STDD",
+      "auc": 0.9686,
+      "support": 80
+    },
+    {
+      "condition": "STTC",
+      "auc": 0.9648,
+      "support": 99
+    },
+    {
+      "condition": "TWC",
+      "auc": 0.9584,
+      "support": 505
+    },
+    {
+      "condition": "AQW",
+      "auc": 0.9578,
+      "support": 94
+    },
+    {
+      "condition": "STE",
+      "auc": 0.9569,
+      "support": 86
+    },
+    {
+      "condition": "LVH",
+      "auc": 0.954,
+      "support": 34
+    },
+    {
+      "condition": "JPT",
+      "auc": 0.9535,
+      "support": 1
+    },
+    {
+      "condition": "QTIE",
+      "auc": 0.9528,
+      "support": 42
+    },
+    {
+      "condition": "PRIE",
+      "auc": 0.9218,
+      "support": 2
+    },
+    {
+      "condition": "UW",
+      "auc": 0.9189,
+      "support": 12
+    },
+    {
+      "condition": "IVB",
+      "auc": 0.9082,
+      "support": 27
+    },
+    {
+      "condition": "STTU",
+      "auc": 0.8986,
+      "support": 18
+    },
+    {
+      "condition": "LVQRSAL",
+      "auc": 0.8966,
+      "support": 68
+    },
+    {
+      "condition": "CCR",
+      "auc": 0.869,
+      "support": 17
+    },
+    {
+      "condition": "APB",
+      "auc": 0.8532,
+      "support": 89
+    },
+    {
+      "condition": "PWC",
+      "auc": 0.82,
+      "support": 7
+    },
+    {
+      "condition": "WPW",
+      "auc": 0.6651,
+      "support": 4
+    }
+  ]
+}
