@@ -48,9 +48,19 @@ dxdiag_out.txt
 # Word docs (keep in separate storage)
 *.docx
 
-# Dataset — raw ECG data (large)
+# Dataset — raw ECG data (large binary/waveform files)
 dataset/ecg-arrhythmia/WFDBRecords/
-dataset/ecg-arrhythmia/download_debug.log
+dataset/ptb-xl/
+dataset/cpsc2018/
+dataset/cpsc2018-extra/
+dataset/georgia/
+dataset/chapman-shaoxing/
+dataset/ningbo/
+dataset/ptb-diagnostic/
+dataset/incart/
+dataset/ludb/
+dataset/*/download_debug.log
+dataset/download_debug.log
 
 # AI — large/generated artifacts
 ai/cache/
