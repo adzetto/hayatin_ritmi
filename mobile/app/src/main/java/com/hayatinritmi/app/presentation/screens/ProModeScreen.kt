@@ -34,6 +34,8 @@ import com.hayatinritmi.app.presentation.components.MetricCard
 import com.hayatinritmi.app.presentation.components.StatusBadge
 import com.hayatinritmi.app.presentation.theme.*
 import com.hayatinritmi.app.presentation.viewmodel.EcgViewModel
+import com.hayatinritmi.app.presentation.accessibility.accessibleBpm
+import com.hayatinritmi.app.presentation.accessibility.accessibleAlert
 
 @Composable
 fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
@@ -139,7 +141,10 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
             Spacer(modifier = Modifier.height(30.dp))
 
             // 3. BUYUK BPM GOSTERGESI
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.accessibleBpm(bpm)
+            ) {
                 Text(
                     text = if (bpm > 0) bpm.toString() else "--",
                     style = MaterialTheme.typography.displayLarge.copy(
@@ -172,7 +177,9 @@ fun ProModeScreen(navController: NavHostController, viewModel: EcgViewModel) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // 5. AI ANALIZ KARTI
-            GlassCard {
+            GlassCard(
+                modifier = Modifier.accessibleAlert(alertLevel.name)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
