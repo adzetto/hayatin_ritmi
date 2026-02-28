@@ -8,7 +8,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ## 📅 Genel Durum
 - **Başlangıç Tarihi:** 19 Şubat 2026
-- **Mevcut Faz:** FAZ 4 (Veri Saklama, Kayıt, Raporlama) — **AI + DSP + Room DB + Auth + Export tamamlandı ✅**
+- **Mevcut Faz:** FAZ 5 (Doğrulama & Test) — **AI + DSP + Room DB + Auth + Export + Backpressure + Parser + Accessibility tamamlandı ✅**
 - **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DCA-CNN ile analiz etmek ve acil durum uyarısı göndermek.
 - **AI Durumu:** DCA-CNN eğitildi (261K param, AUC=0.968 12-lead, adaptif 1/3/12 kanal), QAT fine-tuned (AUC=0.9535, drop -0.001), TFLite INT8 (312 KB, 0.90ms/inference). Gürültü dayanıklılık: AUC 0.958 @ SNR 6dB. Python 22/22 test geçti.
 - **Mimari:** Clean Architecture + **Hilt DI** — `domain/` (model + interface) → `data/` (bluetooth + repository + local + recording + export) → `presentation/` (screen + viewmodel) → `di/` (AppModule + DatabaseModule) | Room + SQLCipher + PBKDF2
@@ -446,7 +446,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - [ ] **TFLite Performans:** tek kanal <22ms, üç kanal <38ms, bellek <2.1MB
 
 ### 5.2 — Test Stratejisi
-- [x] **Birim Testleri (49/49 geçti)** ✅
+- [x] **Birim Testleri (78/78 geçti)** ✅
     - [x] `EcgFilter` — 5 test (HPF/LPF/Notch frekans cevabı)
     - [x] `RPeakDetector` — 6 test (sentetik PQRST BPM doğruluğu)
     - [x] `RingBuffer` — 7 test (thread safety, overflow, getLastN)
@@ -454,6 +454,9 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] `AlertEngine` — 7 test (kural tabanlı + AI hibrit karar)
     - [x] `UserRepositoryImpl` — 10 test (kayıt, giriş, PBKDF2, duplicate, biometric)
     - [x] `SessionRepositoryImpl` — 5 test (session CRUD, alert, markAsRead)
+    - [x] `BackpressureManager` — 10 test (pressure levels, energy modes, battery, drop rate)
+    - [x] `SlidingCorrelationParser` — 9 test (frame parsing, fragmentation, checksum, alignment)
+    - [x] `AccessibilityUtils` — 10 test (TalkBack descriptions, contrast ratio, WCAG)
     - [x] `ExampleUnitTest` — 1 test
 - [ ] **Entegrasyon Testleri**
     - [ ] Mock → Repository → ViewModel → UI pipeline end-to-end
@@ -484,10 +487,11 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Tasarım dili:** Neon/Cyberpunk & Glassmorphism (Koyu Tema)
 - **Min SDK:** 24 (Android 7.0)
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
-- **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3), Hilt 2.51.1, Room 2.6.1, SQLCipher 4.6.1 (28 Şub 2026)
-- **Test Durumu:** Python AI: 22/22 geçti | Android: 49/49 geçti (RingBuffer, EcgFilter, RPeakDetector, AlertEngine, AdvancedEcgProcessor PCA, UserRepository, SessionRepository) | **Toplam: 71/71** ✅
+- **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3, Hilt 2.51.1, Room 2.6.1, SQLCipher 4.6.1 (28 Şub 2026)
+- **Test Durumu:** Python AI: 22/22 geçti | Android: 78/78 geçti (11 test suite) | **Toplam: 100/100** ✅
 - **FAZ 3 AI Durumu:** ✅ Tüm bileşenler tamamlandı. DCA-CNN (261K param), QAT INT8 (312KB), augmentation, PCA, gürültü modeli, 6 dataset cross-eval.
 - **FAZ 4 Durumu:** ✅ Room DB (4 entity, 4 DAO, SQLCipher), PBKDF2 auth, session recording, CSV/PDF export, Hilt DI.
+- **FAZ 5 Kısmi:** ✅ BackpressureManager, SlidingCorrelationParser, WCAG AccessibilityUtils. 78/78 Android test. Kalan: saha testleri (donanım bağımlı).
 - **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` + `docs/plans/2026-03-master-implementation-status.md`
 - **Aktif AI Modeli:** DCA-CNN INT8 (ecg_dca_cnn_int8.tflite, 312 KB) — DS-1D-CNN fallback (ecg_model_int8.tflite, 232 KB)
 - **Hedef SDK:** 35 (Android 15)
