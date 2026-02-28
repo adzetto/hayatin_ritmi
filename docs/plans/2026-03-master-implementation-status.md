@@ -169,7 +169,90 @@
 
 ---
 
-## 5. ARAŞTIRMA ÖNERİSİ HEDEFLERİ vs GERÇEKLEŞEN
+## 5. KAPSAMLI MODEL ANALİZİ (28 Şubat 2026)
+
+### 5.1 — Kanal Kapısı (Gate) Değerleri
+
+Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigma(\alpha_c)$:
+
+| Lead | $\alpha_c$ | $g_c$ | Yorum |
+|------|-----------|-------|-------|
+| **I** | 1.231 | **0.774** | En yüksek — ritim analizi için kritik |
+| **II** | -0.904 | 0.288 | Orta — tek lead olarak en iyi performans |
+| **III** | -1.058 | 0.258 | Orta |
+| aVR-aVF | -1.8 ~ -1.9 | 0.13-0.14 | Düşük — augmented leads |
+| V1-V6 | -1.8 ~ -1.9 | 0.13-0.14 | Düşük — precordial leads |
+
+> **Gözlem:** Model Lead I'e en yüksek gate değerini atamış. Channel dropout eğitimi sırasında Lead I, 3-lead konfigürasyonunda (I, II, III) her zaman aktif olduğu için model bu kanala daha fazla ağırlık veriyor.
+
+### 5.2 — Tek Lead Ablasyon (Her Lead Tek Başına)
+
+| Lead | SPH | CPSC2018 | Georgia | Chapman | Ningbo | Ortalama |
+|------|-----|---------|---------|---------|--------|----------|
+| **II** | **0.921** | **0.902** | **0.833** | **0.894** | **0.925** | **0.895** |
+| **I** | 0.910 | 0.886 | 0.825 | 0.852 | 0.905 | 0.876 |
+| V5 | 0.798 | 0.714 | 0.720 | 0.795 | 0.779 | 0.761 |
+| III | 0.788 | 0.728 | 0.674 | 0.749 | 0.739 | 0.736 |
+| aVR | 0.786 | 0.789 | 0.691 | 0.783 | 0.781 | 0.766 |
+| aVF | 0.779 | 0.698 | 0.653 | 0.744 | 0.758 | 0.726 |
+| V6 | 0.745 | 0.719 | 0.658 | 0.710 | 0.668 | 0.700 |
+| V4 | 0.734 | 0.641 | 0.640 | 0.739 | 0.688 | 0.688 |
+| V1 | 0.685 | 0.697 | 0.645 | 0.709 | 0.660 | 0.679 |
+| V3 | 0.677 | 0.602 | 0.600 | 0.713 | 0.653 | 0.649 |
+| V2 | 0.599 | 0.597 | 0.597 | 0.634 | 0.593 | 0.604 |
+| aVL | 0.440 | 0.553 | 0.543 | 0.493 | 0.500 | 0.506 |
+
+> **En iyi tek lead: Lead II** — tüm veri setlerinde tutarlı şekilde en yüksek AUC. Einthoven II, ritim analizi için altın standart.
+
+### 5.3 — Lead Kombinasyonları (DCA-CNN vs DS-1D-CNN)
+
+| Konfigürasyon | Leads | DCA-CNN | DS-1D-CNN | Δ |
+|---------------|-------|---------|-----------|---|
+| Lead II only | II | **0.921** | 0.601 | **+0.320** |
+| Lead I only | I | **0.910** | 0.577 | **+0.333** |
+| I + II | I+II | **0.964** | 0.720 | **+0.244** |
+| II + V5 | II+V5 | **0.938** | 0.715 | +0.223 |
+| Einthoven (I,II,III) | I+II+III | **0.972** | 0.733 | **+0.239** |
+| Limb (6 lead) | I-aVF | **0.969** | 0.858 | +0.111 |
+| Precordial (V1-V6) | V1-V6 | **0.915** | 0.823 | +0.092 |
+| II + V1-V6 (7 lead) | II+V1-V6 | **0.964** | 0.907 | +0.057 |
+| **Clinical 12-lead** | All | **0.984** | **0.985** | -0.001 |
+
+> **Kritik bulgu:** DCA-CNN, eksik lead senaryolarında DS-1D-CNN'den **dramatik şekilde üstün**. Tek lead'de +32%, 3 lead'de +24%, 6 lead'de +11% fark. 12-lead'de neredeyse eşit. Bu, DCA-CNN'in araştırma önerisindeki temel vaadini kanıtlıyor: **tek model, tüm konfigürasyonlar**.
+
+### 5.4 — Bozulma (Corruption) Dayanıklılık
+
+| Senaryo | Macro AUC | Δ |
+|---------|-----------|---|
+| Clean (baseline) | 0.984 | — |
+| Lead I+III flat (elektrot kopuk) | 0.978 | -0.006 |
+| V1-V3 flat (precordial kısmi kayıp) | 0.978 | -0.006 |
+| Random 4 lead dropped | 0.971 | -0.013 |
+| Lead V1 random noise | 0.863 | -0.121 |
+| Lead II random noise | 0.541 | -0.443 |
+| All limb leads noisy | 0.508 | -0.476 |
+
+> **Model, kayıp leadlere karşı dayanıklı** (4 lead düşse bile AUC 0.971). Ancak **aktif leadlere gürültü enjekte edilirse** ciddi performans kaybı yaşanıyor — özellikle Lead II bozulursa model çöküyor çünkü en çok ona güveniyor.
+
+### 5.5 — Kademeli Bozulma Eğrisi (Graceful Degradation)
+
+| # Lead | AUC | Eklenen Lead |
+|--------|-----|-------------|
+| 1 | 0.921 | II |
+| 2 | 0.964 | + I |
+| 3 | 0.972 | + III |
+| 4 | 0.972 | + aVF |
+| 5 | 0.976 | + V5 |
+| 6 | 0.979 | + V1 |
+| 7 | 0.982 | + V2 |
+| 9 | 0.983 | + V3 |
+| 12 | 0.984 | + aVR, aVL |
+
+> **İlk 3 lead (Einthoven) AUC'nin %98.8'ini yakalar.** 3→12 arası marjinal kazanım (~1.2%).
+
+---
+
+## 6. ARAŞTIRMA ÖNERİSİ HEDEFLERİ vs GERÇEKLEŞEN
 
 | Hedef | Beklenen | Gerçekleşen | Durum |
 |-------|----------|-------------|-------|
