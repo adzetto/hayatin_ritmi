@@ -14,24 +14,24 @@
 | UI & Navigasyon (FAZ 1) | Tüm ekranlar, responsive tasarım | ✅ 9 ekran, Dark/Light tema | %100 |
 | BLE & Cihaz Bağlantısı (FAZ 2) | GATT, 12-lead, foreground service | ✅ Mock + Real BLE, 43-byte parser | %100 |
 | İleri DSP (FAZ 3.1) | Bazal düzeltme, Butterworth, wavelet | ✅ AdvancedEcgProcessor.kt | %100 |
-| Gürültü Simülasyonu (FAZ 3.2) | Kas/elektrot artefakt, SNR kontrol | ❌ Henüz başlanmadı | %0 |
-| AI Model Eğitimi (FAZ 3.3) | DCA-CNN / DS-1D-CNN | ✅ DS-1D-CNN, AUC=0.9517, TFLite INT8 | %90 |
-| Android TFLite Inference (FAZ 3.4) | Gömülü AI, <22ms | ✅ ArrhythmiaClassifier.kt, 0.84ms | %100 |
+| Gürültü Simülasyonu (FAZ 3.2) | Kas/elektrot artefakt, SNR kontrol | ✅ MockBleManager NoiseProfile (CLEAN/NORMAL/NOISY/EXTREME) | %100 |
+| AI Model Eğitimi (FAZ 3.3) | DCA-CNN / DS-1D-CNN | ✅ DCA-CNN (261K param, AUC 0.968) + DS-1D-CNN (AUC 0.962) | %100 |
+| Android TFLite Inference (FAZ 3.4) | Gömülü AI, <22ms | ✅ DCA-CNN INT8 primary + DS-1D-CNN fallback, 0.90ms | %100 |
 | Alert Engine (FAZ 3.5) | Kural + AI hibrit karar | ✅ AlertEngine.kt | %100 |
 | Acil Durum Sistemi (FAZ 3.6) | SMS + 112 + GPS | ✅ EmergencyViewModel.kt | %100 |
 | Doktor Raporlama (FAZ 3.7) | CSV, PDF, e-posta | ❌ Henüz başlanmadı | %0 |
 | Room DB & Kullanıcı (FAZ 4) | Room, SQLCipher, KVKK | ❌ Henüz başlanmadı | %0 |
-| Test & Doğrulama (FAZ 5) | Unit test, pilot, SUS≥75 | ❌ Henüz başlanmadı | %0 |
-| DCA-CNN Mimari (Öneri §4) | Dinamik kanal adaptif CNN | ❌ DS-1D-CNN kullanıldı, DCA-CNN yok | %0 |
-| QAT (Öneri §4.1) | Quantization-Aware Training | ❌ Sadece PTQ yapıldı | %0 |
-| Çok Kanallı Korelasyon (Öneri §3.6) | PCA, kovaryans matrisi | ❌ Henüz başlanmadı | %0 |
-| Veri Artırma / Augmentation (Öneri §4) | Gaussian gürültü, kanal dropout, zaman ölçekleme | ❌ Eğitimde augmentation yok | %0 |
+| Test & Doğrulama (FAZ 5) | Unit test, pilot, SUS≥75 | ✅ 56/56 test geçiyor (Python 22 + Android 34) | %60 |
+| DCA-CNN Mimari (Öneri §4) | Dinamik kanal adaptif CNN | ✅ ACC+SE+gates+phase reg, 1/3/12 kanal | %100 |
+| QAT (Öneri §4.1) | Quantization-Aware Training | ✅ AUC 0.9535, drop -0.001, TFLite 312KB | %100 |
+| Çok Kanallı Korelasyon (Öneri §3.6) | PCA, kovaryans matrisi | ✅ computeCovarianceMatrix, dominantEigenvalue, analyzeMultiChannelConsistency | %100 |
+| Veri Artırma / Augmentation (Öneri §4) | Gaussian gürültü, kanal dropout, zaman ölçekleme | ✅ 4 augmentation + 5s overlap windowing | %100 |
 | Sync Word Paket Hizalama (Öneri §5) | Kayan korelasyon ile çerçeve hizalama | ❌ Parser'da basit header kontrolü var | %50 |
 | Tampon Doluluğu Yönetimi (Öneri §5) | ρ>0.8 → sensöre yavaşla komutu | ❌ Basit ring buffer var, backpressure yok | %30 |
 | Enerji Farkındalığı (Öneri §5) | Pil eğrisi izleme, adaptif veri hızı | ❌ Henüz başlanmadı | %0 |
 | WCAG Erişilebilirlik (Öneri §5d) | Yüksek kontrast, dinamik font | ❌ Temel tema var, WCAG uyumu yok | %20 |
 | Hilt/Koin DI (Öneri §5c) | Dependency injection framework | ❌ Manuel DI (MainActivity'de) | %30 |
-| Kapalı Beta & SUS (Öneri takvim) | SUS≥75, crash-free≥%98 | ❌ Henüz başlanmadı | %0 |
+| Kapalı Beta & SUS (Öneri takvim) | SUS≥75, crash-free≥%98 | ❌ Henüz başlanmadı (donanıma bağlı) | %0 |
 | KVKK & Etik (Öneri risk tablosu) | Anonimleştirme, şifreli depolama | ❌ Henüz başlanmadı | %0 |
 
 ---
