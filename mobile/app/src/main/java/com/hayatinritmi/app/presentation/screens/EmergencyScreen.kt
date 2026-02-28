@@ -17,8 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.hayatinritmi.app.domain.model.AlertEvent
-import com.hayatinritmi.app.domain.model.AlertLevel
 import com.hayatinritmi.app.presentation.components.GlassOutlinedButton
 import com.hayatinritmi.app.presentation.components.GradientButton
 import com.hayatinritmi.app.presentation.theme.*
@@ -44,14 +42,12 @@ fun EmergencyScreen(
             delay(1000L)
             countdown--
         } else if (countdown == 0 && !isCancelled) {
-            val event = AlertEvent(
-                timestampMs = System.currentTimeMillis(),
-                level = AlertLevel.RED,
-                alertSource = "EMERGENCY_SCREEN",
+            emergencyViewModel.fetchLocation()
+            emergencyViewModel.sendEmergencySms(
+                phoneNumber = "112",
                 bpm = ecgViewModel.bpm.value,
-                aiPrediction = ecgViewModel.aiPrediction.value
+                aiLabel = ecgViewModel.aiPrediction.value.label.name
             )
-            emergencyViewModel.sendEmergencyAlert(event)
             emergencyViewModel.callEmergencyServices()
         }
     }

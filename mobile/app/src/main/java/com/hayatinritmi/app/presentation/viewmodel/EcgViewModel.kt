@@ -2,6 +2,10 @@ package com.hayatinritmi.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hayatinritmi.app.data.export.CsvExporter
+import com.hayatinritmi.app.data.export.PdfReportGenerator
+import com.hayatinritmi.app.data.local.entity.EcgSessionEntity
+import com.hayatinritmi.app.data.recording.EcgSessionRecorder
 import com.hayatinritmi.app.domain.AlertEngine
 import com.hayatinritmi.app.domain.repository.EcgRepository
 import com.hayatinritmi.app.domain.model.AiPrediction
@@ -15,14 +19,20 @@ import com.hayatinritmi.app.processing.AdvancedEcgProcessor
 import com.hayatinritmi.app.processing.ArrhythmiaClassifier
 import com.hayatinritmi.app.processing.RPeakDetector
 import com.hayatinritmi.app.processing.RingBuffer
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EcgViewModel(
+@HiltViewModel
+class EcgViewModel @Inject constructor(
     private val repository: EcgRepository,
     private val bleManager: BleManager,
-    private val classifier: ArrhythmiaClassifier
+    private val classifier: ArrhythmiaClassifier,
+    val sessionRecorder: EcgSessionRecorder,
+    val csvExporter: CsvExporter,
+    val pdfReportGenerator: PdfReportGenerator
 ) : ViewModel() {
 
     private val ringBuffer = RingBuffer(2500)   // Lead II grafik için
@@ -58,6 +68,16 @@ class EcgViewModel(
     private val _signalQuality = MutableStateFlow(SignalQuality.UNKNOWN)
     val signalQuality: StateFlow<SignalQuality> = _signalQuality.asStateFlow()
 
+    // ─── FAZ 4 StateFlow'ları — Recording ───────────────────────────────────
+    private val _isRecording = MutableStateFlow(false)
+    val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
+
+    private val _recordingDurationMs = MutableStateFlow(0L)
+    val recordingDurationMs: StateFlow<Long> = _recordingDurationMs.asStateFlow()
+
+    private val _lastSession = MutableStateFlow<EcgSessionEntity?>(null)
+    val lastSession: StateFlow<EcgSessionEntity?> = _lastSession.asStateFlow()
+
     private var sampleCounter = 0
 
     init {
@@ -69,6 +89,11 @@ class EcgViewModel(
                 val idx = channelWriteIdx[ch] % 2500
                 multiChannelBuffer[ch][idx] = sample.voltageUv
                 channelWriteIdx[ch]++
+
+                // Session recording — her sample'ı diske yaz
+                if (sessionRecorder.isRecording) {
+                    sessionRecorder.addSample(sample)
+                }
 
                 // Lead II (channel 1) → grafik + BPM + alert
                 if (ch == 1) {
@@ -83,6 +108,12 @@ class EcgViewModel(
                         _graphPoints.value = ringBuffer.getLastN(1000).toList()
                         _bpm.value = rPeakDetector.currentBpm
                         _hrv.value = rPeakDetector.currentHrv
+
+                        // Update recording BPM
+                        if (sessionRecorder.isRecording) {
+                            sessionRecorder.updateBpm(rPeakDetector.currentBpm)
+                            _recordingDurationMs.value = sessionRecorder.getRecordingDurationMs()
+                        }
                     }
 
                     // Her 1 saniyede AlertEngine değerlendirmesi (250 örnekte)
@@ -118,6 +149,25 @@ class EcgViewModel(
         }
     }
 
+    // ─── Recording Controls ─────────────────────────────────────────────────
+
+    fun startRecording(userId: Long) {
+        viewModelScope.launch {
+            val sessionId = sessionRecorder.startRecording(userId)
+            _isRecording.value = true
+            _recordingDurationMs.value = 0L
+        }
+    }
+
+    fun stopRecording() {
+        viewModelScope.launch {
+            val session = sessionRecorder.stopRecording()
+            _isRecording.value = false
+            _recordingDurationMs.value = 0L
+            _lastSession.value = session
+        }
+    }
+
     fun resetProcessing() {
         ringBuffer.clear()
         processor.reset()
@@ -139,5 +189,9 @@ class EcgViewModel(
     override fun onCleared() {
         super.onCleared()
         classifier.close()
+        if (sessionRecorder.isRecording) {
+            // Fire-and-forget stop in case ViewModel is cleared while recording
+            viewModelScope.launch { sessionRecorder.stopRecording() }
+        }
     }
 }

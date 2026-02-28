@@ -8,19 +8,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hayatinritmi.app.presentation.screens.*
 import com.hayatinritmi.app.presentation.theme.HayatinRitmiTheme
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import com.hayatinritmi.app.data.bluetooth.MockBleManager
-import com.hayatinritmi.app.data.repository.MockEcgRepository
+import com.hayatinritmi.app.presentation.viewmodel.AuthViewModel
 import com.hayatinritmi.app.presentation.viewmodel.DeviceScanViewModel
 import com.hayatinritmi.app.presentation.viewmodel.EcgViewModel
 import com.hayatinritmi.app.presentation.viewmodel.EmergencyViewModel
-import com.hayatinritmi.app.processing.ArrhythmiaClassifier
+import com.hayatinritmi.app.presentation.viewmodel.SessionViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 // Navigasyon Rotaları
 sealed class Screen(val route: String) {
@@ -35,6 +34,7 @@ sealed class Screen(val route: String) {
     data object DeviceScan : Screen("device_scan")
 }
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,15 +54,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
 
-    // Create instances (mock-first approach)
-    val bleManager = remember { MockBleManager() }
-    val repository = remember { MockEcgRepository(bleManager) }
-    val classifier = remember { ArrhythmiaClassifier(context) }
-    val ecgViewModel = remember { EcgViewModel(repository, bleManager, classifier) }
-    val deviceScanViewModel = remember { DeviceScanViewModel(bleManager, context) }
-    val emergencyViewModel = remember { EmergencyViewModel(context) }
+    // Hilt-injected ViewModels (scoped to Activity/navigation graph)
+    val ecgViewModel: EcgViewModel = hiltViewModel()
+    val deviceScanViewModel: DeviceScanViewModel = hiltViewModel()
+    val emergencyViewModel: EmergencyViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val sessionViewModel: SessionViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = Screen.Login.route) {
         composable(Screen.Login.route) {

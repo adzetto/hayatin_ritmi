@@ -1,8 +1,6 @@
 package com.hayatinritmi.app.presentation.viewmodel
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -11,51 +9,55 @@ import androidx.lifecycle.viewModelScope
 import com.hayatinritmi.app.data.bluetooth.BleManager
 import com.hayatinritmi.app.domain.model.ConnectionState
 import com.hayatinritmi.app.domain.model.ScannedDevice
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ble_settings")
+private val Context.dataStore by preferencesDataStore(name = "device_prefs")
 
-class DeviceScanViewModel(
+@HiltViewModel
+class DeviceScanViewModel @Inject constructor(
     private val bleManager: BleManager,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    val scannedDevices: StateFlow<List<ScannedDevice>> = bleManager.scannedDevices
+    private val _scannedDevices = MutableStateFlow<List<ScannedDevice>>(emptyList())
+    val scannedDevices: StateFlow<List<ScannedDevice>> = _scannedDevices.asStateFlow()
+
     val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
 
-    private val _savedDeviceMac = MutableStateFlow<String?>(null)
-    val savedDeviceMac: StateFlow<String?> = _savedDeviceMac.asStateFlow()
+    private val _isScanning = MutableStateFlow(false)
+    val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
     companion object {
-        private val SAVED_DEVICE_MAC_KEY = stringPreferencesKey("saved_device_mac")
-        private val SAVED_DEVICE_NAME_KEY = stringPreferencesKey("saved_device_name")
+        private val SAVED_DEVICE_MAC = stringPreferencesKey("saved_device_mac")
+        private val SAVED_DEVICE_NAME = stringPreferencesKey("saved_device_name")
     }
 
-    init {
+    fun startScan() {
         viewModelScope.launch {
-            context.dataStore.data.map { prefs ->
-                prefs[SAVED_DEVICE_MAC_KEY]
-            }.collect { mac ->
-                _savedDeviceMac.value = mac
+            _isScanning.value = true
+            bleManager.startScan()
+            bleManager.scannedDevices.collect { devices ->
+                _scannedDevices.value = devices
             }
         }
     }
 
-    fun startScan() {
-        bleManager.startScan()
-    }
-
     fun stopScan() {
         bleManager.stopScan()
+        _isScanning.value = false
     }
 
     fun connectToDevice(device: ScannedDevice) {
-        bleManager.connect(device)
         viewModelScope.launch {
+            bleManager.connect(device)
+            // Save device info
             context.dataStore.edit { prefs ->
-                prefs[SAVED_DEVICE_MAC_KEY] = device.macAddress
-                prefs[SAVED_DEVICE_NAME_KEY] = device.name
+                prefs[SAVED_DEVICE_MAC] = device.macAddress
+                prefs[SAVED_DEVICE_NAME] = device.name
             }
         }
     }
@@ -66,11 +68,11 @@ class DeviceScanViewModel(
 
     fun autoReconnect() {
         viewModelScope.launch {
-            val mac = _savedDeviceMac.value ?: return@launch
-            context.dataStore.data.map { prefs ->
-                prefs[SAVED_DEVICE_NAME_KEY] ?: "HayatinRitmi"
-            }.first().let { name ->
-                bleManager.connect(ScannedDevice(name, mac, 0))
+            val prefs = context.dataStore.data.first()
+            val savedMac = prefs[SAVED_DEVICE_MAC]
+            val savedName = prefs[SAVED_DEVICE_NAME]
+            if (savedMac != null && savedName != null) {
+                bleManager.connect(ScannedDevice(savedName, savedMac, 0))
             }
         }
     }
