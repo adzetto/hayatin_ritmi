@@ -171,6 +171,10 @@
 
 ## 5. KAPSAMLI MODEL ANALİZİ (28 Şubat 2026)
 
+> 6 modül, 6 veri seti, 15 lead konfigürasyonu, 7 bozulma senaryosu, 12 kademeli test.
+> Kaynak: `ai/evaluation/comprehensive_model_analysis.py`
+> Sonuçlar: `ai/models/results/comprehensive_model_analysis.json`
+
 ### 5.1 — Kanal Kapısı (Gate) Değerleri
 
 Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigma(\alpha_c)$:
@@ -204,6 +208,26 @@ Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigm
 
 > **En iyi tek lead: Lead II** — tüm veri setlerinde tutarlı şekilde en yüksek AUC. Einthoven II, ritim analizi için altın standart.
 
+#### Tek Lead Ablasyon — Bar Grafik (SPH)
+
+```mermaid
+xychart-beta
+    title "Single-Lead AUC — SPH Dataset"
+    x-axis ["I","II","III","aVR","aVL","aVF","V1","V2","V3","V4","V5","V6"]
+    y-axis "Macro AUC" 0.3 --> 1.0
+    bar [0.910, 0.921, 0.788, 0.786, 0.440, 0.779, 0.685, 0.599, 0.677, 0.734, 0.798, 0.745]
+```
+
+#### Tek Lead Ablasyon — Bar Grafik (Ortalama 6 Dataset)
+
+```mermaid
+xychart-beta
+    title "Single-Lead AUC — Average Across 6 Datasets"
+    x-axis ["I","II","III","aVR","aVL","aVF","V1","V2","V3","V4","V5","V6"]
+    y-axis "Macro AUC" 0.4 --> 1.0
+    bar [0.877, 0.895, 0.730, 0.753, 0.503, 0.718, 0.672, 0.606, 0.647, 0.689, 0.748, 0.694]
+```
+
 ### 5.3 — Lead Kombinasyonları (DCA-CNN vs DS-1D-CNN)
 
 | Konfigürasyon | Leads | DCA-CNN | DS-1D-CNN | Δ |
@@ -220,6 +244,17 @@ Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigm
 
 > **Kritik bulgu:** DCA-CNN, eksik lead senaryolarında DS-1D-CNN'den **dramatik şekilde üstün**. Tek lead'de +32%, 3 lead'de +24%, 6 lead'de +11% fark. 12-lead'de neredeyse eşit. Bu, DCA-CNN'in araştırma önerisindeki temel vaadini kanıtlıyor: **tek model, tüm konfigürasyonlar**.
 
+#### DCA-CNN vs DS-1D-CNN Karşılaştırma Grafiği
+
+```mermaid
+xychart-beta
+    title "DCA-CNN vs DS-1D-CNN: AUC by Lead Configuration"
+    x-axis ["1-lead","2-lead","3-lead","6-lead","V1-V6","7-lead","12-lead"]
+    y-axis "Macro AUC" 0.4 --> 1.0
+    bar [0.921, 0.964, 0.972, 0.969, 0.915, 0.964, 0.984]
+    bar [0.602, 0.726, 0.739, 0.865, 0.822, 0.911, 0.999]
+```
+
 ### 5.4 — Bozulma (Corruption) Dayanıklılık
 
 | Senaryo | Macro AUC | Δ |
@@ -233,6 +268,16 @@ Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigm
 | All limb leads noisy | 0.508 | -0.476 |
 
 > **Model, kayıp leadlere karşı dayanıklı** (4 lead düşse bile AUC 0.971). Ancak **aktif leadlere gürültü enjekte edilirse** ciddi performans kaybı yaşanıyor — özellikle Lead II bozulursa model çöküyor çünkü en çok ona güveniyor.
+
+#### Bozulma Dayanıklılık — Bar Grafik
+
+```mermaid
+xychart-beta
+    title "Corruption Robustness — AUC by Scenario"
+    x-axis ["Clean","I+III off","V1-V3 off","4 drop","V1 noise","II noise","Limb noise"]
+    y-axis "Macro AUC" 0.4 --> 1.0
+    bar [0.984, 0.978, 0.978, 0.971, 0.863, 0.541, 0.508]
+```
 
 ### 5.5 — Kademeli Bozulma Eğrisi (Graceful Degradation)
 
@@ -249,6 +294,97 @@ Model eğitim sonrası her kanal için öğrendiği gate değerleri $g_c = \sigm
 | 12 | 0.984 | + aVR, aVL |
 
 > **İlk 3 lead (Einthoven) AUC'nin %98.8'ini yakalar.** 3→12 arası marjinal kazanım (~1.2%).
+
+#### Graceful Degradation — Line Grafik
+
+```mermaid
+xychart-beta
+    title "AUC vs Number of Active Leads"
+    x-axis ["1","2","3","4","5","6","7","8","9","10","11","12"]
+    y-axis "Macro AUC" 0.90 --> 1.00
+    line [0.921, 0.964, 0.972, 0.972, 0.976, 0.979, 0.982, 0.982, 0.983, 0.983, 0.984, 0.984]
+```
+
+### 5.6 — Gürültü Dayanıklılık (SNR Eğrisi)
+
+| SNR (dB) | Macro AUC | Bar |
+|----------|-----------|-----|
+| 6 | 0.9582 | `██████████████████████████████████████████████████████████████████████████████░░░░` |
+| 9 | 0.9713 | `████████████████████████████████████████████████████████████████████████████████░░` |
+| 12 | 0.9784 | `█████████████████████████████████████████████████████████████████████████████████░` |
+| 15 | 0.9807 | `██████████████████████████████████████████████████████████████████████████████████` |
+| 18 | 0.9829 | `██████████████████████████████████████████████████████████████████████████████████` |
+| 25 | 0.9842 | `██████████████████████████████████████████████████████████████████████████████████` |
+| 40 | 0.9843 | `██████████████████████████████████████████████████████████████████████████████████` |
+| Clean | 0.9843 | `██████████████████████████████████████████████████████████████████████████████████` |
+
+```mermaid
+xychart-beta
+    title "Noise Robustness: AUC vs SNR"
+    x-axis ["6dB","9dB","12dB","15dB","18dB","25dB","40dB","Clean"]
+    y-axis "Macro AUC" 0.94 --> 1.00
+    line [0.958, 0.971, 0.978, 0.981, 0.983, 0.984, 0.984, 0.984]
+```
+
+### 5.7 — TFLite Hız Karşılaştırma
+
+| Model | Boyut (KB) | Latency (ms) | Throughput (ECG/s) | Bar (hız) |
+|-------|-----------|-------------|-------------------|-----------|
+| DS-1D-CNN INT8 | 232 | 0.55 | 1,811 | `████████████████████████████████████████` |
+| Combined INT8 | 232 | 0.69 | 1,457 | `████████████████████████████████` |
+| **DCA-CNN INT8** | **312** | **0.90** | **1,105** | `████████████████████████` |
+| DCA-CNN FP32 | 1,033 | 1.22 | 820 | `██████████████████` |
+
+```mermaid
+xychart-beta
+    title "TFLite Inference Speed (lower is better)"
+    x-axis ["DS-1D-CNN INT8","Combined INT8","DCA-CNN INT8","DCA-CNN FP32"]
+    y-axis "Latency (ms)" 0 --> 1.5
+    bar [0.55, 0.69, 0.90, 1.22]
+```
+
+### 5.8 — Per-Class Confusion Matrix (SPH, Top 20)
+
+| Class | AUC | Precision | Recall | F1 | Support | Bar (AUC) |
+|-------|-----|-----------|--------|----|---------| ----------|
+| AFIB | 1.000 | 0.980 | 1.000 | 0.990 | 290 | `████████████████████` |
+| AVB | 1.000 | — | — | — | 1 | `████████████████████` |
+| SB | 0.999 | 0.995 | 0.995 | 0.995 | 2,306 | `████████████████████` |
+| 2AVB1 | 0.999 | — | — | — | 2 | `████████████████████` |
+| SR | 0.998 | 0.989 | 0.926 | 0.956 | 1,226 | `████████████████████` |
+| MISW | 0.999 | 0.250 | 0.125 | 0.167 | 8 | `████████████████████` |
+| RVH | 0.999 | — | — | — | 2 | `████████████████████` |
+| 3AVB | 0.998 | — | — | — | 5 | `████████████████████` |
+| 2AVB | 0.998 | — | — | — | 2 | `████████████████████` |
+| LFBBB | 0.998 | 0.588 | 0.588 | 0.588 | 17 | `████████████████████` |
+| ... | ... | ... | ... | ... | ... | ... |
+| CCR | 0.887 | — | — | — | 13 | `██████████████████░░` |
+
+> **40/40 aktif sınıfın 39'u AUC > 0.90.** Sadece CCR (0.887) zayıf — düşük örneklem sayısı (n=13).
+
+### 5.9 — Cross-Dataset 12/3/1-Lead AUC Karşılaştırma
+
+```mermaid
+xychart-beta
+    title "DCA-CNN: 12-lead vs 3-lead vs 1-lead Across Datasets"
+    x-axis ["SPH","CPSC2018","CPSC-Ext","Georgia","Chapman","Ningbo"]
+    y-axis "Macro AUC" 0.7 --> 1.0
+    bar [0.984, 0.964, 0.858, 0.908, 0.955, 0.987]
+    bar [0.972, 0.943, 0.844, 0.879, 0.932, 0.979]
+    bar [0.921, 0.894, 0.767, 0.818, 0.879, 0.925]
+```
+
+| Dataset | 12-lead | 3-lead | 1-lead | Δ (12→1) |
+|---------|---------|--------|--------|----------|
+| SPH | 0.984 | 0.972 | 0.921 | -0.063 |
+| CPSC2018 | 0.964 | 0.943 | 0.894 | -0.070 |
+| CPSC2018-Extra | 0.858 | 0.844 | 0.767 | -0.091 |
+| Georgia | 0.908 | 0.879 | 0.818 | -0.090 |
+| Chapman-Shaoxing | 0.955 | 0.932 | 0.879 | -0.076 |
+| Ningbo | 0.987 | 0.979 | 0.925 | -0.062 |
+| **Ortalama** | **0.943** | **0.925** | **0.867** | **-0.075** |
+
+> 12-lead → 1-lead geçişte ortalama AUC düşüşü sadece **7.5%**. DCA-CNN kademeli bozulmayı kontrol altında tutuyor.
 
 ---
 
