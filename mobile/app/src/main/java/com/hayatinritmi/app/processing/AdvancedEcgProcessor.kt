@@ -196,6 +196,124 @@ class AdvancedEcgProcessor(private val sampleRateHz: Int = 250) {
         return if (den > 0.0) (100f * sqrt(num / den)).toFloat() else 0f
     }
 
+    // ────────────────────────────────────────────────────────────────────────
+    // §3.6 Çok Kanallı Korelasyon Matrisi ve PCA Tutarlılık Analizi
+    //
+    // R_xx = (1/(N-1)) Σ (x_n - x̄)(x_n - x̄)^T
+    // Özayrışım: R_xx = Q Λ Q^T
+    // Tutarlılık: iskemik paternler çoğu derivasyonda uyumlu → yüksek ilk özdeğer
+    //             tekil kanal artefaktı → tek büyük özdeğer, diğerleri küçük
+    // ────────────────────────────────────────────────────────────────────────
+
+    data class PcaResult(
+        val eigenvalues: FloatArray,
+        val dominantRatio: Float,
+        val channelConsistencyScore: Float,
+        val artifactChannels: List<Int>
+    )
+
+    /**
+     * Compute covariance matrix R_xx from multi-channel ECG window.
+     * @param channels array of C lead signals, each of length T
+     * @return C×C covariance matrix
+     */
+    fun computeCovarianceMatrix(channels: Array<FloatArray>): Array<FloatArray> {
+        val c = channels.size
+        val t = channels[0].size
+
+        val means = FloatArray(c) { ch -> channels[ch].average().toFloat() }
+
+        val cov = Array(c) { FloatArray(c) }
+        for (i in 0 until c) {
+            for (j in i until c) {
+                var sum = 0.0
+                for (n in 0 until t) {
+                    sum += (channels[i][n] - means[i]) * (channels[j][n] - means[j])
+                }
+                val value = (sum / (t - 1)).toFloat()
+                cov[i][j] = value
+                cov[j][i] = value
+            }
+        }
+        return cov
+    }
+
+    /**
+     * Power iteration for dominant eigenvalue/eigenvector of symmetric matrix.
+     * Sufficient for consistency check — full eigendecomposition not needed on mobile.
+     */
+    fun dominantEigenvalue(matrix: Array<FloatArray>, iterations: Int = 30): Float {
+        val n = matrix.size
+        var v = FloatArray(n) { 1f / sqrt(n.toFloat()) }
+
+        repeat(iterations) {
+            val mv = FloatArray(n)
+            for (i in 0 until n) {
+                for (j in 0 until n) {
+                    mv[i] += matrix[i][j] * v[j]
+                }
+            }
+            val norm = sqrt(mv.sumOf { (it * it).toDouble() }).toFloat()
+            if (norm > 1e-10f) {
+                v = FloatArray(n) { mv[it] / norm }
+            }
+        }
+
+        var eigenvalue = 0f
+        val mv = FloatArray(n)
+        for (i in 0 until n) {
+            for (j in 0 until n) {
+                mv[i] += matrix[i][j] * v[j]
+            }
+        }
+        for (i in 0 until n) eigenvalue += v[i] * mv[i]
+        return eigenvalue
+    }
+
+    /**
+     * §3.6 Consistency analysis: detect artifact vs ischemic patterns.
+     *
+     * High dominantRatio (>0.8): signals are highly correlated → normal or ischemic
+     * Low dominantRatio (<0.5): one channel diverges → likely artifact/electrode issue
+     *
+     * @param channels 12 lead signals, each 2500 samples
+     * @return PcaResult with consistency score and artifact channel indices
+     */
+    fun analyzeMultiChannelConsistency(channels: Array<FloatArray>): PcaResult {
+        val c = channels.size
+        val cov = computeCovarianceMatrix(channels)
+        val totalVariance = (0 until c).sumOf { cov[it][it].toDouble() }.toFloat()
+        val lambda1 = dominantEigenvalue(cov)
+
+        val dominantRatio = if (totalVariance > 1e-10f) lambda1 / totalVariance else 0f
+
+        val channelVariances = FloatArray(c) { cov[it][it] }
+        val medianVar = channelVariances.sorted()[c / 2]
+
+        val artifactChannels = mutableListOf<Int>()
+        for (ch in 0 until c) {
+            if (medianVar > 1e-10f) {
+                val ratio = channelVariances[ch] / medianVar
+                if (ratio > 5.0f || ratio < 0.1f) {
+                    artifactChannels.add(ch)
+                }
+            }
+        }
+
+        val consistencyScore = when {
+            artifactChannels.isNotEmpty() -> (50f * dominantRatio).coerceIn(0f, 50f)
+            dominantRatio > 0.7f -> (80f + 20f * dominantRatio).coerceIn(80f, 100f)
+            else -> (100f * dominantRatio).coerceIn(0f, 80f)
+        }
+
+        return PcaResult(
+            eigenvalues = floatArrayOf(lambda1),
+            dominantRatio = dominantRatio,
+            channelConsistencyScore = consistencyScore,
+            artifactChannels = artifactChannels
+        )
+    }
+
     fun reset() {
         baselineBuf.fill(0f)
         baselineSum = 0.0

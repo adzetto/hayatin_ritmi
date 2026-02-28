@@ -10,7 +10,27 @@ import java.nio.ByteOrder
 import kotlin.math.*
 import kotlin.random.Random
 
-class MockBleManager : BleManager {
+/**
+ * §3.4 Parametrik gürültü modeli:
+ *   z[n] = x̂[n] + α_kas · s_kas[n] + α_elektrot · s_elektrot[n]
+ *   α = √(P_x / (P_s · 10^(-SNR_dB/10)))
+ *
+ * Gürültü profilleri:
+ *   CLEAN   — SNR ~40 dB (minimal gürültü)
+ *   NORMAL  — SNR ~18 dB (günlük kullanım)
+ *   NOISY   — SNR ~12 dB (hareket halinde)
+ *   EXTREME — SNR ~6 dB  (koşu, yoğun kas aktivitesi)
+ */
+enum class NoiseProfile(val targetSnrDb: Float, val muscleGain: Float, val electrodeGain: Float) {
+    CLEAN(40f, 0.5f, 0.1f),
+    NORMAL(18f, 3f, 1f),
+    NOISY(12f, 8f, 3f),
+    EXTREME(6f, 20f, 8f)
+}
+
+class MockBleManager(
+    var noiseProfile: NoiseProfile = NoiseProfile.NORMAL
+) : BleManager {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -87,14 +107,29 @@ class MockBleManager : BleManager {
             phase += phaseIncrement
             if (phase >= 1.0) phase -= 1.0
 
+            // §3.4 Parametrik gürültü modeli
+            val np = noiseProfile
             val baselineWander = 20f * sin(2.0 * PI * 0.3 * timestampMs / 1000.0).toFloat()
             val lineNoise = 5f * sin(2.0 * PI * 50.0 * timestampMs / 1000.0).toFloat()
 
-            // Build 43-byte 12-lead frame
             val leadRawAdcs = IntArray(BleConstants.CHANNEL_COUNT) { ch ->
                 val ecgUv = interpolateLeadValue(pqrstTemplate, phase.toFloat(), leadScaleR[ch], leadScaleT[ch])
-                val muscleNoise = Random.nextFloat() * 3f - 1.5f
-                val totalUv = ecgUv + baselineWander + lineNoise + muscleNoise
+
+                // s_kas: 20-200 Hz broadband EMG model (sum of random sinusoids)
+                val muscleNoise = np.muscleGain * (
+                    sin(2.0 * PI * 35.0 * timestampMs / 1000.0 + ch * 0.7).toFloat() * 0.4f +
+                    sin(2.0 * PI * 78.0 * timestampMs / 1000.0 + ch * 1.3).toFloat() * 0.3f +
+                    sin(2.0 * PI * 142.0 * timestampMs / 1000.0 + ch * 2.1).toFloat() * 0.2f +
+                    (Random.nextFloat() - 0.5f) * 0.3f
+                )
+
+                // s_elektrot: low-freq drift (<1 Hz) + occasional spikes
+                val electrodeDrift = np.electrodeGain * (
+                    sin(2.0 * PI * 0.15 * timestampMs / 1000.0 + ch * 0.5).toFloat() * 15f +
+                    if (Random.nextFloat() < 0.001f) (Random.nextFloat() - 0.5f) * 200f else 0f
+                )
+
+                val totalUv = ecgUv + baselineWander + lineNoise + muscleNoise + electrodeDrift
                 ((totalUv / 1_000_000f) * EcgSample_ADC_MAX * EcgSample_GAIN / EcgSample_VREF).toInt()
             }
 

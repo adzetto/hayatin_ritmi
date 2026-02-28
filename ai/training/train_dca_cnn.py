@@ -153,6 +153,40 @@ def preprocess(sig_12xN, original_fs=500):
     return out
 
 
+def preprocess_with_overlap(sig_12xN, original_fs=500, window_sec=10, overlap_sec=5):
+    """(12, N) → list of (12, 2500) windows with overlap. §4: 10s windows, 5s overlap."""
+    n_leads, n_samples = sig_12xN.shape
+    if original_fs != 500:
+        target_samples = int(n_samples * 500 / original_fs)
+        sig_12xN = resample(sig_12xN, target_samples, axis=1)
+        n_samples = target_samples
+
+    sig = bandpass(sig_12xN, fs=500)
+    sig = np.nan_to_num(sig, nan=0.0, posinf=0.0, neginf=0.0)
+    sig = sig[:, ::2]  # 500→250 Hz
+    n_ds = sig.shape[1]
+
+    win_samples = FS_TARGET * window_sec   # 2500
+    step_samples = FS_TARGET * (window_sec - overlap_sec)  # 1250
+
+    if n_ds < win_samples:
+        sig = np.pad(sig, ((0, 0), (0, win_samples - n_ds)), mode="constant")
+        n_ds = win_samples
+
+    windows = []
+    start = 0
+    while start + win_samples <= n_ds:
+        w = sig[:, start:start + win_samples].copy()
+        std = w.std(axis=1, keepdims=True)
+        std = np.where(std < 1e-6, 1.0, std)
+        w = (w - w.mean(axis=1, keepdims=True)) / std
+        w = np.nan_to_num(w, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32)
+        if np.isfinite(w).all():
+            windows.append(w)
+        start += step_samples
+    return windows
+
+
 def parse_dx(hea_path: str) -> list[int]:
     """Extract SNOMED codes from .hea — handles '# Dx:' and '#Dx:'."""
     codes: list[int] = []
@@ -172,8 +206,11 @@ def parse_dx(hea_path: str) -> list[int]:
     return codes
 
 
-def load_dataset_records(dataset_path: str, max_records: int | None = None):
-    """Load ECG records from any CinC 2021 WFDB dataset."""
+def load_dataset_records(dataset_path: str, max_records: int | None = None,
+                         use_overlap: bool = False):
+    """Load ECG records from any CinC 2021 WFDB dataset.
+    §4: use_overlap=True applies 10s windows with 5s overlap for longer recordings.
+    """
     hea_files = glob.glob(os.path.join(dataset_path, "**", "*.hea"), recursive=True)
     X_list, Y_list = [], []
     skipped = 0
@@ -189,10 +226,7 @@ def load_dataset_records(dataset_path: str, max_records: int | None = None):
                 continue
             sig = sig[:, :12].T
             fs = record.fs
-            x = preprocess(sig, original_fs=fs)
-            if x is None:
-                skipped += 1
-                continue
+
             codes = parse_dx(hea)
             if not codes:
                 skipped += 1
@@ -206,8 +240,19 @@ def load_dataset_records(dataset_path: str, max_records: int | None = None):
             if not has_known:
                 skipped += 1
                 continue
-            X_list.append(x)
-            Y_list.append(label)
+
+            if use_overlap:
+                windows = preprocess_with_overlap(sig, original_fs=fs)
+                for w in windows:
+                    X_list.append(w)
+                    Y_list.append(label)
+            else:
+                x = preprocess(sig, original_fs=fs)
+                if x is None:
+                    skipped += 1
+                    continue
+                X_list.append(x)
+                Y_list.append(label)
         except Exception:
             skipped += 1
     if X_list:
@@ -216,7 +261,8 @@ def load_dataset_records(dataset_path: str, max_records: int | None = None):
     else:
         X = np.zeros((0, 12, 2500), dtype=np.float32)
         Y = np.zeros((0, NUM_CLASSES), dtype=np.float32)
-    console.print(f"    → [green]{len(X_list):,}[/] records, [yellow]{skipped:,}[/] skipped")
+    console.print(f"    → [green]{len(X_list):,}[/] windows, [yellow]{skipped:,}[/] skipped"
+                  + (f" [dim](overlap={use_overlap})[/]" if use_overlap else ""))
     return X, Y
 
 
