@@ -6,24 +6,24 @@ import com.hayatinritmi.app.domain.model.ArrhythmiaClass
 import kotlin.math.sqrt
 
 /**
- * DS-1D-CNN TFLite INT8 çıkarım sınıfı — 55 SNOMED-CT multi-label aritmi sınıflandırması.
+ * DCA-CNN / DS-1D-CNN TFLite INT8 çıkarım sınıfı — 55 SNOMED-CT multi-label aritmi.
  *
- * Model: ecg_model_int8.tflite (231.6 KB, 176K param)
- * Giriş tensor:  [1, 2500, 12] INT8 (channels-last, scale=0.0909, zero_point=-9)
- * Çıkış tensor:  [1, 55] float32 sigmoid olasılıkları
+ * DCA-CNN modeli:  ecg_dca_cnn_int8.tflite (312 KB, 261K param, adaptif 1/3/12 kanal)
+ * Fallback model:  ecg_model_int8.tflite   (232 KB, 176K param, sabit 12 kanal)
  *
- * Model mevcut değilse otomatik mock mod — uygulama çalışmaya devam eder.
+ * Giriş tensor:  [1, 2500, 12] INT8 channels-last  |  Çıkış: [1, 55] float32 sigmoid
+ * Model mevcut değilse otomatik mock mod.
  */
 class ArrhythmiaClassifier(private val context: Context) {
 
     companion object {
-        private const val MODEL_FILE = "ecg_model_int8.tflite"
-        private const val WINDOW_SIZE = 2500    // 10 saniye @ 250 Hz
+        private const val DCA_MODEL_FILE = "ecg_dca_cnn_int8.tflite"
+        private const val FALLBACK_MODEL_FILE = "ecg_model_int8.tflite"
+        private const val WINDOW_SIZE = 2500
         private const val NUM_LEADS = 12
         private const val NUM_CLASSES = 55
         private const val MOCK_INFERENCE_MS = 8L
 
-        // INT8 quantization parametreleri (export_tflite_int8.py ile uyumlu)
         private const val INPUT_SCALE = 0.0909f
         private const val INPUT_ZERO_POINT = -9
 
@@ -72,29 +72,33 @@ class ArrhythmiaClassifier(private val context: Context) {
 
     private var interpreter: Any? = null
     val isMockMode: Boolean
+    val activeModelName: String
 
     init {
-        isMockMode = !tryLoadModel()
+        val (loaded, name) = tryLoadModels()
+        isMockMode = !loaded
+        activeModelName = name
     }
 
-    private fun tryLoadModel(): Boolean {
-        return try {
-            val interpreterClass = Class.forName("org.tensorflow.lite.Interpreter")
-            val assetFd = context.assets.openFd(MODEL_FILE)
-            val inputStream = java.io.FileInputStream(assetFd.fileDescriptor)
-            val channel = inputStream.channel
-            val buffer = channel.map(
-                java.nio.channels.FileChannel.MapMode.READ_ONLY,
-                assetFd.startOffset,
-                assetFd.declaredLength
-            )
-            interpreter = interpreterClass.getConstructor(java.nio.ByteBuffer::class.java)
-                .newInstance(buffer)
-            inputStream.close()
-            true
-        } catch (_: Exception) {
-            false
+    private fun tryLoadModels(): Pair<Boolean, String> {
+        for (modelFile in listOf(DCA_MODEL_FILE, FALLBACK_MODEL_FILE)) {
+            try {
+                val interpreterClass = Class.forName("org.tensorflow.lite.Interpreter")
+                val assetFd = context.assets.openFd(modelFile)
+                val inputStream = java.io.FileInputStream(assetFd.fileDescriptor)
+                val channel = inputStream.channel
+                val buffer = channel.map(
+                    java.nio.channels.FileChannel.MapMode.READ_ONLY,
+                    assetFd.startOffset,
+                    assetFd.declaredLength
+                )
+                interpreter = interpreterClass.getConstructor(java.nio.ByteBuffer::class.java)
+                    .newInstance(buffer)
+                inputStream.close()
+                return true to modelFile
+            } catch (_: Exception) { /* try next */ }
         }
+        return false to "mock"
     }
 
     /**

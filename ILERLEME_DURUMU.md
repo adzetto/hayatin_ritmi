@@ -8,9 +8,9 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ## 📅 Genel Durum
 - **Başlangıç Tarihi:** 19 Şubat 2026
-- **Mevcut Faz:** FAZ 3 (İleri DSP, DS-1D-CNN AI & Acil Durum Sistemi) — **AI Modeli Eğitildi ✅**
-- **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DS-1D-CNN ile analiz etmek ve acil durum uyarısı göndermek.
-- **AI Durumu:** DS-1D-CNN eğitildi (Macro AUC=0.9517), TFLite INT8 export tamamlandı (231.6 KB, 0.84 ms/inference)
+- **Mevcut Faz:** FAZ 3 (İleri DSP, DCA-CNN AI & Acil Durum Sistemi) — **AI Modeli Eğitildi + Test Edildi ✅**
+- **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DCA-CNN ile analiz etmek ve acil durum uyarısı göndermek.
+- **AI Durumu:** DCA-CNN eğitildi (261K param, AUC=0.968 12-lead, adaptif 1/3/12 kanal), QAT fine-tuned (AUC=0.9535, drop -0.001), TFLite INT8 (312 KB, 0.90ms/inference). Gürültü dayanıklılık: AUC 0.958 @ SNR 6dB. Python 22/22 test + Android 26/26 test geçti.
 - **Mimari:** Clean Architecture — `domain/` (model + interface) → `data/` (bluetooth + repository) → `presentation/` (screen + viewmodel) | Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
 
 ### 🗂️ Proje Yapısı (İki Paralel Dizin)
@@ -418,10 +418,11 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Tasarım dili:** Neon/Cyberpunk & Glassmorphism (Koyu Tema)
 - **Min SDK:** 24 (Android 7.0)
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
-- **Son Build:** ✅ BUILD SUCCESSFUL 33s — Gradle 8.13, Kotlin 2.0.21, AGP 8.7.3 (24 Şub 2026)
-- **Kalan Uyarılar:** `BluetoothSearching` deprecated (DeviceScanScreen.kt:111,130) — işlevselliği etkilemez
-- **FAZ 3 Durumu:** Domain model, AdvancedEcgProcessor, AlertEngine, ArrhythmiaClassifier (55-sınıf DS-1D-CNN TFLite INT8), EmergencyViewModel (GPS + SMS) tamamlandı. UI entegrasyonu tamamlandı (DashboardScreen alert renkleri + dinamik AI notu, ProModeScreen AI kartı, EmergencyScreen geri sayım + SMS). TFLite bağımlılığı ve play-services-location eklendi.
-- **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` — Mermaid diyagramları ile mimari, eğitim, test, export detayları
+- **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3 (28 Şub 2026)
+- **Test Durumu:** Python AI: 22/22 geçti | Android: 26/26 geçti (RingBuffer, EcgFilter, RPeakDetector, AlertEngine)
+- **FAZ 3 Durumu:** DCA-CNN (261K param, adaptif 1/3/12 kanal, ACC+SE+gates+phase reg) eğitildi, QAT fine-tuned, 6 dataset cross-eval yapıldı. TFLite INT8 (312KB) Android'e deploy edildi. Gürültü testi: AUC 0.958 @ SNR 6dB.
+- **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` + `docs/plans/2026-03-master-implementation-status.md`
+- **Aktif AI Modeli:** DCA-CNN INT8 (ecg_dca_cnn_int8.tflite, 312 KB) — DS-1D-CNN fallback (ecg_model_int8.tflite, 232 KB)
 - **Hedef SDK:** 35 (Android 15)
 - **AGP:** 8.7.3, **Kotlin:** 2.0.21, **Gradle:** 8.9, **Compose BOM:** 2024.11.00
 - **Java:** Eclipse Temurin JDK 25.0.2 (gradle.properties ile yapılandırılmış)
