@@ -45,6 +45,12 @@ interface EcgSessionDao {
 
     @Query("DELETE FROM ecg_sessions WHERE userId = :userId")
     suspend fun deleteAllByUser(userId: Long)
+
+    @Query("SELECT * FROM ecg_sessions WHERE isExported = 0 ORDER BY startTimeMs ASC LIMIT :limit")
+    suspend fun getPendingSyncSessions(limit: Int = 50): List<EcgSessionEntity>
+
+    @Query("UPDATE ecg_sessions SET isExported = :isExported WHERE id = :sessionId")
+    suspend fun markExported(sessionId: Long, isExported: Boolean)
 }
 
 data class SessionStats(

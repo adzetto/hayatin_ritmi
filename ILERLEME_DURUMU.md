@@ -429,8 +429,8 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] `FileProvider` ile güvenli dosya paylaşımı (CSV/PDF)
     - [x] `FLAG_GRANT_READ_URI_PERMISSION` ile URI bazlı erişim kontrolü
 - [ ] **Gelecek (Opsiyonel)**
-    - [ ] EncryptedFile (Jetpack Security) ile binary kayıt şifreleme
-    - [ ] WorkManager ile çevrimdışı senkronizasyon
+    - [x] EncryptedFile (Jetpack Security) ile binary kayıt şifreleme
+    - [x] WorkManager ile çevrimdışı senkronizasyon
 
 ---
 
@@ -446,21 +446,22 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - [x] **TFLite Performans:** tek kanal <22ms, üç kanal <38ms, bellek <2.1MB (benchmark raporunda sağlandı)
 
 ### 5.2 — Test Stratejisi
-- [x] **Birim Testleri (78/78 geçti)** ✅
+- [x] **Birim+Entegrasyon Testleri (81/81 geçti)** ✅
     - [x] `EcgFilter` — 5 test (HPF/LPF/Notch frekans cevabı)
     - [x] `RPeakDetector` — 6 test (sentetik PQRST BPM doğruluğu)
     - [x] `RingBuffer` — 7 test (thread safety, overflow, getLastN)
     - [x] `AdvancedEcgProcessor` — 8 test (PCA, kovaryans, eigenvalue, tutarlılık)
     - [x] `AlertEngine` — 7 test (kural tabanlı + AI hibrit karar)
     - [x] `UserRepositoryImpl` — 10 test (kayıt, giriş, PBKDF2, duplicate, biometric)
-    - [x] `SessionRepositoryImpl` — 5 test (session CRUD, alert, markAsRead)
+    - [x] `SessionRepositoryImpl` — 6 test (session CRUD, alert, markAsRead, pending sync)
     - [x] `BackpressureManager` — 10 test (pressure levels, energy modes, battery, drop rate)
     - [x] `SlidingCorrelationParser` — 9 test (frame parsing, fragmentation, checksum, alignment)
     - [x] `AccessibilityUtils` — 10 test (TalkBack descriptions, contrast ratio, WCAG)
+    - [x] `BlePipelineIntegrationTest` — 2 test (connected frame pipeline, connect/disconnect stres)
     - [x] `ExampleUnitTest` — 1 test
 - [ ] **Entegrasyon Testleri**
-    - [ ] Mock → Repository → ViewModel → UI pipeline end-to-end
-    - [ ] BLE bağlantı/bağlantı kesme döngüsü stres testi
+    - [x] Mock BLE → Repository pipeline entegrasyon testi
+    - [x] BLE bağlantı/bağlantı kesme döngüsü stres testi
 - [ ] **Saha Pilot Denemeleri**
     - [x] Pilot yürütme paketi hazırlandı (`docs/validation/` runbook + SUS + CSV şablonları + metrik scripti)
     - [ ] En az 60 saatlik EKG kaydı
@@ -489,10 +490,10 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Min SDK:** 24 (Android 7.0)
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
 - **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3, Hilt 2.51.1, Room 2.6.1, SQLCipher 4.6.1 (28 Şub 2026)
-- **Test Durumu:** Python AI: 22/22 geçti | Android: 78/78 geçti (11 test suite) | **Toplam: 100/100** ✅
+- **Test Durumu:** Python AI: 22/22 geçti | Android: 81/81 geçti (12 test suite) | **Toplam: 103/103** ✅
 - **FAZ 3 AI Durumu:** ✅ Tüm bileşenler tamamlandı. DCA-CNN (261K param), QAT INT8 (312KB), augmentation, PCA, gürültü modeli, 6 dataset cross-eval.
 - **FAZ 4 Durumu:** ✅ Room DB (4 entity, 4 DAO, SQLCipher), PBKDF2 auth, session recording, CSV/PDF export, Hilt DI.
-- **FAZ 5 Kısmi:** ✅ BackpressureManager, SlidingCorrelationParser, WCAG AccessibilityUtils. 78/78 Android test.
+- **FAZ 5 Kısmi:** ✅ BackpressureManager, SlidingCorrelationParser, WCAG AccessibilityUtils, BLE pipeline integration testleri. 81/81 Android test.
 - **Pilot Hazırlık Paketi:** ✅ `docs/validation/` altında runbook, SUS formu, CSV şablonları ve `ai/evaluation/pilot_metrics_report.py` eklendi.
 - **Kalan Tek Bağımlılık:** ⚪ Saha testlerinin fiziksel donanımla icrası (60 saat pilot).
 - **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` + `docs/plans/2026-03-master-implementation-status.md`

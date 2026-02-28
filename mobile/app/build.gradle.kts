@@ -91,6 +91,9 @@ dependencies {
     // Biometric Authentication
     implementation(libs.biometric)
 
+    // WorkManager (offline sync)
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Test
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

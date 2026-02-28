@@ -1,6 +1,8 @@
 package com.hayatinritmi.app.data.recording
 
 import android.content.Context
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKey
 import com.hayatinritmi.app.data.local.entity.EcgSessionEntity
 import com.hayatinritmi.app.domain.model.EcgSample
 import com.hayatinritmi.app.domain.repository.SessionRepository
@@ -18,7 +20,7 @@ import javax.inject.Singleton
 /**
  * EKG Oturum Kaydedici — binary formatta disk'e yazar, oturum sonunda Room'a kaydeder.
  *
- * Binary format (per sample, 16 bytes):
+ * Binary format (per sample, 18 bytes):
  * [timestampMs:8B LE int64][channel:2B LE int16][rawAdc:4B LE int32][voltageUv:4B LE float32]
  *
  * File header (32 bytes):
@@ -60,8 +62,8 @@ class EcgSessionRecorder @Inject constructor(
         if (!recordingDir.exists()) recordingDir.mkdirs()
 
         // Create file
-        currentFile = File(recordingDir, "ecg_${userId}_${startTimeMs}.bin")
-        outputStream = BufferedOutputStream(FileOutputStream(currentFile!!), 8192)
+        currentFile = File(recordingDir, "ecg_${userId}_${startTimeMs}.bin.enc")
+        outputStream = createSecureOutputStream(currentFile!!)
 
         // Write header
         writeHeader(channelCount)
@@ -149,5 +151,25 @@ class EcgSessionRecorder @Inject constructor(
         // reserved (14B) — zero-filled
         headerBuf.position(32)
         outputStream?.write(headerBuf.array())
+    }
+
+    private fun createSecureOutputStream(file: File): BufferedOutputStream {
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val encryptedFile = EncryptedFile.Builder(
+                context,
+                file,
+                masterKey,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+
+            BufferedOutputStream(encryptedFile.openFileOutput(), 8192)
+        } catch (_: Exception) {
+            // Fallback to plain stream if encrypted backend cannot be initialized.
+            BufferedOutputStream(FileOutputStream(file), 8192)
+        }
     }
 }

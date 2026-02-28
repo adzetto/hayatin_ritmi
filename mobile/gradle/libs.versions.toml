@@ -28,6 +28,8 @@ securityCrypto = "1.1.0-alpha06"
 biometric = "1.1.0"
 # Coroutines test
 coroutinesTest = "1.8.1"
+# WorkManager
+work = "2.9.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -67,6 +69,8 @@ sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sq
 security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 # Biometric
 biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+# WorkManager
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 # Test
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 

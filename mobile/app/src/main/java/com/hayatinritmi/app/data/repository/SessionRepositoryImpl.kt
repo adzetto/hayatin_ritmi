@@ -49,6 +49,14 @@ class SessionRepositoryImpl @Inject constructor(
         return sessionDao.getSessionStats(userId)
     }
 
+    override suspend fun getPendingSyncSessions(limit: Int): List<EcgSessionEntity> {
+        return sessionDao.getPendingSyncSessions(limit)
+    }
+
+    override suspend fun markSessionExported(sessionId: Long, exported: Boolean) {
+        sessionDao.markExported(sessionId, exported)
+    }
+
     override suspend fun deleteSession(sessionId: Long) {
         val session = sessionDao.getById(sessionId)
         if (session != null) {

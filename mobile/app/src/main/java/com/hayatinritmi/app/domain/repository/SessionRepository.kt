@@ -13,6 +13,8 @@ interface SessionRepository {
     suspend fun getRecentSessions(userId: Long, limit: Int = 10): List<EcgSessionEntity>
     suspend fun getSessionsBetween(userId: Long, startMs: Long, endMs: Long): List<EcgSessionEntity>
     suspend fun getSessionStats(userId: Long): SessionStats
+    suspend fun getPendingSyncSessions(limit: Int = 50): List<EcgSessionEntity>
+    suspend fun markSessionExported(sessionId: Long, exported: Boolean)
     suspend fun deleteSession(sessionId: Long)
     suspend fun deleteAllByUser(userId: Long)
 

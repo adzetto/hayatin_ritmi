@@ -56,6 +56,20 @@ class SessionRepositoryImplTest {
     }
 
     @Test
+    fun `pending sync sessions can be marked exported`() = runTest {
+        val id1 = repository.createSession(userId = 1)
+        val id2 = repository.createSession(userId = 1)
+
+        val pendingBefore = repository.getPendingSyncSessions(limit = 10)
+        assertTrue(pendingBefore.map { it.id }.containsAll(listOf(id1, id2)))
+
+        repository.markSessionExported(id1, true)
+        val pendingAfter = repository.getPendingSyncSessions(limit = 10)
+        assertTrue(pendingAfter.none { it.id == id1 })
+        assertTrue(pendingAfter.any { it.id == id2 })
+    }
+
+    @Test
     fun `insertAlert and retrieve`() = runTest {
         val sessionId = repository.createSession(userId = 1)
         val alertId = repository.insertAlert(
@@ -140,6 +154,14 @@ class FakeSessionDao : EcgSessionDao {
 
     override suspend fun deleteAllByUser(userId: Long) {
         sessions.removeAll { it.userId == userId }
+    }
+
+    override suspend fun getPendingSyncSessions(limit: Int): List<EcgSessionEntity> =
+        sessions.filter { !it.isExported }.sortedBy { it.startTimeMs }.take(limit)
+
+    override suspend fun markExported(sessionId: Long, isExported: Boolean) {
+        val idx = sessions.indexOfFirst { it.id == sessionId }
+        if (idx >= 0) sessions[idx] = sessions[idx].copy(isExported = isExported)
     }
 }
 
