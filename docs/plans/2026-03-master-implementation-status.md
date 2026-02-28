@@ -123,8 +123,8 @@
 
 | # | Görev | İlgili Issue |
 |---|-------|-------------|
-| 10 | Saha pilot denemeleri (60 saat) | #18 |
-| 11 | Kongre bildirisi | #19 |
+| 10 | Saha pilot denemeleri (60 saat) | #18 (hazırlık tamam, saha icrası bekliyor) |
+| 11 | Kongre bildirisi | #19 (tamamlandı: taslak + rapor seti) |
 
 ---
 

@@ -1,0 +1,5 @@
+session_id,participant_id,duration_minutes,scenario,predicted_label,ground_truth_label,warning_latency_ms,false_alarm,crash,tflite_latency_single_ms,tflite_latency_three_ms,tflite_memory_mb
+s001,p01,30,rest,normal,normal,820,0,0,11.2,21.9,1.7
+s002,p01,20,walk,normal,normal,910,0,0,11.8,23.1,1.8
+s003,p02,15,stairs,arrhythmia,arrhythmia,980,0,0,12.5,24.6,1.9
+s004,p02,10,light_run,normal,normal,995,0,0,13.0,25.2,1.9

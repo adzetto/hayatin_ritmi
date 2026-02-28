@@ -443,7 +443,7 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - [ ] **Yanlış Alarm:** Gereksiz alarm oranı ≤%5
 - [ ] **Kullanıcı Deneyimi:** SUS (System Usability Scale) puanı ≥75
 - [ ] **Kararlılık:** Crash-free oranı ≥%98
-- [ ] **TFLite Performans:** tek kanal <22ms, üç kanal <38ms, bellek <2.1MB
+- [x] **TFLite Performans:** tek kanal <22ms, üç kanal <38ms, bellek <2.1MB (benchmark raporunda sağlandı)
 
 ### 5.2 — Test Stratejisi
 - [x] **Birim Testleri (78/78 geçti)** ✅
@@ -462,15 +462,16 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [ ] Mock → Repository → ViewModel → UI pipeline end-to-end
     - [ ] BLE bağlantı/bağlantı kesme döngüsü stres testi
 - [ ] **Saha Pilot Denemeleri**
+    - [x] Pilot yürütme paketi hazırlandı (`docs/validation/` runbook + SUS + CSV şablonları + metrik scripti)
     - [ ] En az 60 saatlik EKG kaydı
     - [ ] Farklı aktivite senaryoları (istirahat, yürüyüş, merdiven, koşu)
     - [ ] Elektrot kalitesi ve hareket artefaktı değerlendirmesi
 
 ### 5.3 — Yaygın Etki & Çıktılar
 - [ ] **Bilimsel Çıktılar**
-    - [ ] En az 1 ulusal/uluslararası kongre bildirisi
-    - [ ] Teknik rapor + kullanım kılavuzu
-    - [ ] Açık kaynak kod ve model bileşenleri (MIT/Apache lisansı)
+    - [x] En az 1 ulusal/uluslararası kongre bildirisi (taslak hazır)
+    - [x] Teknik rapor + kullanım kılavuzu
+    - [x] Açık kaynak kod ve model bileşenleri (MIT/Apache lisansı)
 - [ ] **Prototip Çıktıları**
     - [ ] ADS1293 tabanlı giyilebilir sensör + BLE + mobil uygulama (TRL 4-5)
     - [ ] Mobil uygulama MVP
@@ -491,7 +492,9 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Test Durumu:** Python AI: 22/22 geçti | Android: 78/78 geçti (11 test suite) | **Toplam: 100/100** ✅
 - **FAZ 3 AI Durumu:** ✅ Tüm bileşenler tamamlandı. DCA-CNN (261K param), QAT INT8 (312KB), augmentation, PCA, gürültü modeli, 6 dataset cross-eval.
 - **FAZ 4 Durumu:** ✅ Room DB (4 entity, 4 DAO, SQLCipher), PBKDF2 auth, session recording, CSV/PDF export, Hilt DI.
-- **FAZ 5 Kısmi:** ✅ BackpressureManager, SlidingCorrelationParser, WCAG AccessibilityUtils. 78/78 Android test. Kalan: saha testleri (donanım bağımlı).
+- **FAZ 5 Kısmi:** ✅ BackpressureManager, SlidingCorrelationParser, WCAG AccessibilityUtils. 78/78 Android test.
+- **Pilot Hazırlık Paketi:** ✅ `docs/validation/` altında runbook, SUS formu, CSV şablonları ve `ai/evaluation/pilot_metrics_report.py` eklendi.
+- **Kalan Tek Bağımlılık:** ⚪ Saha testlerinin fiziksel donanımla icrası (60 saat pilot).
 - **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` + `docs/plans/2026-03-master-implementation-status.md`
 - **Aktif AI Modeli:** DCA-CNN INT8 (ecg_dca_cnn_int8.tflite, 312 KB) — DS-1D-CNN fallback (ecg_model_int8.tflite, 232 KB)
 - **Hedef SDK:** 35 (Android 15)

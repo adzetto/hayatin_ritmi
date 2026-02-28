@@ -42,11 +42,18 @@ Giyilebilir EKG tişörtü ile sürekli kalp ritmi takibi yapan, yapay zeka (DS-
 |---|---|---|
 | FAZ 1 | ✅ Tamamlandı | UI Arayüzü & Navigasyon (10 ekran) |
 | FAZ 2 | ✅ Tamamlandı | Bluetooth & Cihaz Bağlantısı (28 Kotlin dosyası) |
-| FAZ 3 | 🔄 Devam Ediyor | Sinyal Kalitesi, DS-1D-CNN AI (✅ Eğitildi) & Acil Durum |
-| FAZ 4 | ⏳ Planlandı | Room DB, Kullanıcı Yönetimi & KVKK |
-| FAZ 5 | ⏳ Planlandı | Doğrulama, Test & Yaygınlaştırma |
+| FAZ 3 | ✅ Tamamlandı | DCA-CNN/TFLite entegrasyonu, acil durum ve raporlama bileşenleri |
+| FAZ 4 | ✅ Tamamlandı | Room DB, SQLCipher, kimlik doğrulama, Hilt DI |
+| FAZ 5 | 🟡 Kısmi Tamamlandı | Testler ve dokümantasyon tamam; saha pilotu donanım bağımlı |
 
 Detaylı görev takibi: [`ILERLEME_DURUMU.md`](ILERLEME_DURUMU.md)
+
+## 2026-02-28 Güncellemesi
+
+- Teknik rapor: [`docs/reports/2026-02-28-teknik-rapor.md`](docs/reports/2026-02-28-teknik-rapor.md)
+- Kullanım kılavuzu: [`docs/reports/2026-02-28-kullanim-kilavuzu.md`](docs/reports/2026-02-28-kullanim-kilavuzu.md)
+- Kongre bildirisi özeti: [`docs/reports/2026-02-28-kongre-bildirisi-ozet.md`](docs/reports/2026-02-28-kongre-bildirisi-ozet.md)
+- Pilot doğrulama runbook'u: [`docs/validation/PILOT_VALIDATION_RUNBOOK.md`](docs/validation/PILOT_VALIDATION_RUNBOOK.md)
 
 ---
 

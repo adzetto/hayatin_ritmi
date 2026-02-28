@@ -72,3 +72,10 @@ ai/models/results/tensorboard/
 
 # Backup copies
 app/_yedek_HayatinRitmi/
+
+# Python cache / bytecode
+**/__pycache__/
+*.py[cod]
+
+# Local one-off build outputs
+mobile/build_out*.txt
