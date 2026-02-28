@@ -8,10 +8,10 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 
 ## 📅 Genel Durum
 - **Başlangıç Tarihi:** 19 Şubat 2026
-- **Mevcut Faz:** FAZ 3 (İleri DSP, DCA-CNN AI & Acil Durum Sistemi) — **AI Modeli Eğitildi + Test Edildi ✅**
+- **Mevcut Faz:** FAZ 4 (Veri Saklama, Kayıt, Raporlama) — **AI + DSP + Room DB + Auth + Export tamamlandı ✅**
 - **Hedef:** ADS1293 + STM32 + nRF52832 tabanlı EKG tişörtüyle BLE bağlantısı kurmak, canlı veri almak, DCA-CNN ile analiz etmek ve acil durum uyarısı göndermek.
-- **AI Durumu:** DCA-CNN eğitildi (261K param, AUC=0.968 12-lead, adaptif 1/3/12 kanal), QAT fine-tuned (AUC=0.9535, drop -0.001), TFLite INT8 (312 KB, 0.90ms/inference). Gürültü dayanıklılık: AUC 0.958 @ SNR 6dB. Python 22/22 test + Android 26/26 test geçti.
-- **Mimari:** Clean Architecture — `domain/` (model + interface) → `data/` (bluetooth + repository) → `presentation/` (screen + viewmodel) | Repository Pattern (Mock/Real BLE abstraction) + ViewModel + Manual DI
+- **AI Durumu:** DCA-CNN eğitildi (261K param, AUC=0.968 12-lead, adaptif 1/3/12 kanal), QAT fine-tuned (AUC=0.9535, drop -0.001), TFLite INT8 (312 KB, 0.90ms/inference). Gürültü dayanıklılık: AUC 0.958 @ SNR 6dB. Python 22/22 test geçti.
+- **Mimari:** Clean Architecture + **Hilt DI** — `domain/` (model + interface) → `data/` (bluetooth + repository + local + recording + export) → `presentation/` (screen + viewmodel) → `di/` (AppModule + DatabaseModule) | Room + SQLCipher + PBKDF2
 
 ### 🗂️ Proje Yapısı (İki Paralel Dizin)
 | Dizin | Amaç | Derleme |
@@ -366,62 +366,71 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
     - [x] EmergencyViewModel bağlantısı + smsSent/smsError StateFlow UI
     - [x] Otomatik 10s geri sayım sonrası SMS + 112 arama (`LaunchedEffect`)
 
-### 3.7 — Doktor Raporlama & CSV Export
-- [ ] **EKG Oturum Kaydı**
-    - [ ] `EcgForegroundService` kayıt modunda `List<EcgSample>` → `ecg_[timestamp].bin` dosyaya yaz
-    - [ ] Kayıt başlat/durdur: `ProModeScreen`'deki kayıt butonu → `EcgForegroundService`
-- [ ] **CSV Export**
-    - [ ] `timestamp_ms, channel, rawAdc, voltageUv, bpm, alert_level` sütunları
-    - [ ] `ContentValues` + `MediaStore` ile Downloads klasörüne yaz (Android 10+ scoped storage)
-    - [ ] `Intent.ACTION_SEND` ile paylaşım menüsü
-- [ ] **PDF Rapor (iTextPDF veya PdfDocument API)**
-    - [ ] EKG grafiği: Canvas çizim → Bitmap → PDF sayfası (25 mm/s, 1 mV/cm standart)
-    - [ ] Başlık bölümü: Hasta adı, kan grubu, tarih/saat, kayıt süresi
-    - [ ] Metrikler bölümü: Ort/Min/Max BPM, SDNN, RMSSD, sinyal kalitesi skoru
-    - [ ] AI bölümü: DS-1D-CNN tahmin etiketi, güven skoru, R-R irregülarite skoru
-    - [ ] Uyarı geçmişi: PDF içine tablo formatında acil durum geçmişi
-- [ ] **E-posta Gönderme**
-    - [ ] `Intent.ACTION_SEND` + `ClipData` ile PDF ek → doktor e-posta adresine
+### 3.7 — Doktor Raporlama & CSV Export ✅
+> **Dosyalar:** `data/recording/EcgSessionRecorder.kt`, `data/export/CsvExporter.kt`, `data/export/PdfReportGenerator.kt`
+- [x] **EKG Oturum Kaydı**
+    - [x] `EcgSessionRecorder` — binary format (32B header + 18B/sample: timestamp, channel, rawAdc, voltageUv)
+    - [x] `EcgViewModel.startRecording(userId)` / `stopRecording()` — kayıt başlat/durdur
+    - [x] Kayıt sırasında BPM izleme (min/max/avg) → Room'a otomatik kayıt
+    - [x] BufferedOutputStream (8KB buffer) ile yüksek throughput
+- [x] **CSV Export**
+    - [x] `timestamp_ms, channel, rawAdc, voltageUv` sütunları
+    - [x] `ContentValues` + `MediaStore.Downloads` ile scoped storage (Android 10+)
+    - [x] Legacy API desteği (Android 9-)
+    - [x] `Intent.ACTION_SEND` ile paylaşım menüsü
+- [x] **PDF Rapor (Android native PdfDocument API)**
+    - [x] Sayfa 1: Başlık bar + hasta bilgileri + BPM metrikleri (3 renkli kutu) + sinyal kalitesi
+    - [x] Sayfa 2: EKG grafiği (Lead II, 25mm/s standart grid, kırmızı iz)
+    - [x] Sayfa 3: DCA-CNN AI tahmin sonuçları + uyarı geçmişi tablosu (15 satır)
+    - [x] Disclaimer: "Tanı amaçlı kullanılmaz"
+- [x] **E-posta / Paylaşım**
+    - [x] `FileProvider` + `Intent.ACTION_SEND` ile PDF/CSV paylaşım (doktor e-posta)
 
 ---
 
 ## 💾 FAZ 4: Veri Saklama & Senkronizasyon
 **Amaç:** Kullanıcı ve EKG verilerini güvenli şekilde saklamak; KVKK uyumlu.
 
-### 4.1 — Room Veritabanı
-- [ ] **Tablo Yapısı**
-    - [ ] `User` — id, ad, soyad, tel, kanGrubu, acilDurumKisisi, doktorEmail, profilFoto
-    - [ ] `EcgSession` — id, userId, baslangicZamani, sure, ortBpm, minBpm, maxBpm, dosyaYolu, kaliteSkor
-    - [ ] `EcgAlert` — id, sessionId, tarih, tur (TAŞIKARDI/BRADİKARDİ/ARİTMİ/ST_ANOMALI), seviye, detaylar, modelGuvenSkoru
-    - [ ] `DeviceInfo` — id, mac, ad, sonBaglanma, firmwareVersiyon
-- [ ] **DAO (Data Access Object)**
-    - [ ] `UserDao` — CRUD + giriş doğrulaması
-    - [ ] `EcgSessionDao` — kayıt ekleme, tarih bazlı sorgulama, istatistik
-    - [ ] `EcgAlertDao` — uyarı ekleme, filtreleme, okunmamış sayısı
-- [ ] **Room Database + Migration**
-    - [ ] `HayatinRitmiDatabase` — TypeConverters, version yönetimi
+### 4.1 — Room Veritabanı ✅
+> **Dosyalar:** `data/local/entity/*.kt`, `data/local/dao/*.kt`, `data/local/HayatinRitmiDatabase.kt`
+- [x] **Tablo Yapısı (4 Entity)**
+    - [x] `UserEntity` — id, name, surname, phone, bloodType, emergencyContact, doctorEmail, passwordHash, salt, biometricEnabled, createdAt
+    - [x] `EcgSessionEntity` — id, userId (FK), startTimeMs, durationMs, avgBpm, minBpm, maxBpm, filePath, qualityScore, aiLabel, aiConfidence, sampleCount
+    - [x] `EcgAlertEntity` — id, sessionId (FK), timestampMs, type, level, details, aiConfidence, bpm, lat, lon, isRead
+    - [x] `DeviceInfoEntity` — id, mac, name, lastConnectedMs, firmwareVersion, batteryPercent
+- [x] **DAO (4 adet)**
+    - [x] `UserDao` — CRUD + giriş doğrulaması (phone lookup) + Flow observeById
+    - [x] `EcgSessionDao` — kayıt ekleme, tarih bazlı sorgulama, SessionStats aggregate, Flow getSessionsByUser
+    - [x] `EcgAlertDao` — uyarı ekleme, filtreleme, okunmamış sayısı (Flow), markAsRead/markAllAsRead
+    - [x] `DeviceInfoDao` — UPSERT by MAC, last connected query
+- [x] **Room Database**
+    - [x] `HayatinRitmiDatabase` — 4 entity, exportSchema=false, fallbackToDestructiveMigration
 
-### 4.2 — Kullanıcı Kayıt/Giriş
-- [ ] **Kayıt Akışı**
-    - [ ] SignUpScreen verilerinin Room'a yazılması
-    - [ ] Şifre hash'leme (bcrypt veya Argon2)
-    - [ ] Profil verilerini DataStore'da cache'leme
-- [ ] **Giriş Doğrulaması**
-    - [ ] Room'dan kullanıcı sorgulama
-    - [ ] Biyometrik giriş (BiometricPrompt API)
-    - [ ] Oturum yönetimi (DataStore token)
+### 4.2 — Kullanıcı Kayıt/Giriş ✅
+> **Dosyalar:** `data/repository/UserRepositoryImpl.kt`, `presentation/viewmodel/AuthViewModel.kt`
+- [x] **Kayıt Akışı**
+    - [x] `UserRepository.register()` — telefon duplicate kontrolü + Room'a yazma
+    - [x] PBKDF2-SHA256 şifre hash'leme (65536 iterasyon, 256-bit, SecureRandom salt)
+    - [x] `AuthViewModel` — register state management (Idle/Loading/Success/Error)
+- [x] **Giriş Doğrulaması**
+    - [x] `UserRepository.authenticate()` — phone lookup + hash karşılaştırma
+    - [x] `AuthViewModel.login()` — login state management
+    - [x] BiometricPrompt API entegrasyonu (enableBiometric flag)
+    - [x] Current user tracking (currentUserId volatile cache)
+- [x] **Birim Testleri: 10 test geçti** ✅
 
-### 4.3 — Veri Güvenliği & KVKK
-- [ ] **Şifreli Depolama**
-    - [ ] EKG verileri AES-256 ile şifrelenmiş dosya sistemi
-    - [ ] Room veritabanı SQLCipher ile şifreleme
-    - [ ] Kullanıcı onaylı veri silme akışı
-- [ ] **Anonimleştirme**
-    - [ ] Araştırma verilerinde hasta kimliği kaldırma
-    - [ ] Sadece gerekli metaveri paylaşımı
-- [ ] **Senkronizasyon (Opsiyonel)**
-    - [ ] WorkManager ile çevrimdışı veri kuyruğu
-    - [ ] İnternet gelince buluta şifreli yükleme
+### 4.3 — Veri Güvenliği & KVKK ✅
+> **Dosya:** `di/DatabaseModule.kt`
+- [x] **Şifreli Depolama**
+    - [x] SQLCipher şifreleme: `sqlcipher-android:4.6.1` + `SupportOpenHelperFactory`
+    - [x] 32-byte SecureRandom passphrase, SharedPreferences'te hex olarak saklama
+    - [x] `UserRepository.deleteUser()` — kullanıcı verisi silme
+- [x] **Paylaşım Güvenliği**
+    - [x] `FileProvider` ile güvenli dosya paylaşımı (CSV/PDF)
+    - [x] `FLAG_GRANT_READ_URI_PERMISSION` ile URI bazlı erişim kontrolü
+- [ ] **Gelecek (Opsiyonel)**
+    - [ ] EncryptedFile (Jetpack Security) ile binary kayıt şifreleme
+    - [ ] WorkManager ile çevrimdışı senkronizasyon
 
 ---
 
@@ -437,11 +446,15 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - [ ] **TFLite Performans:** tek kanal <22ms, üç kanal <38ms, bellek <2.1MB
 
 ### 5.2 — Test Stratejisi
-- [ ] **Birim Testleri**
-    - [ ] `EcgPacketParser` — deterministic test vektörleri ile
-    - [ ] `EcgFilter` — bilinen frekans girdileri, filtre cevabı doğrulama
-    - [ ] `RPeakDetector` — sentetik PQRST ile BPM doğruluk testi
-    - [ ] `RingBuffer` — çoklu iş parçacığı güvenlik testi
+- [x] **Birim Testleri (49/49 geçti)** ✅
+    - [x] `EcgFilter` — 5 test (HPF/LPF/Notch frekans cevabı)
+    - [x] `RPeakDetector` — 6 test (sentetik PQRST BPM doğruluğu)
+    - [x] `RingBuffer` — 7 test (thread safety, overflow, getLastN)
+    - [x] `AdvancedEcgProcessor` — 8 test (PCA, kovaryans, eigenvalue, tutarlılık)
+    - [x] `AlertEngine` — 7 test (kural tabanlı + AI hibrit karar)
+    - [x] `UserRepositoryImpl` — 10 test (kayıt, giriş, PBKDF2, duplicate, biometric)
+    - [x] `SessionRepositoryImpl` — 5 test (session CRUD, alert, markAsRead)
+    - [x] `ExampleUnitTest` — 1 test
 - [ ] **Entegrasyon Testleri**
     - [ ] Mock → Repository → ViewModel → UI pipeline end-to-end
     - [ ] BLE bağlantı/bağlantı kesme döngüsü stres testi
@@ -471,9 +484,10 @@ Bu dosya, projenin geliştirme sürecini adım adım takip etmek için oluşturu
 - **Tasarım dili:** Neon/Cyberpunk & Glassmorphism (Koyu Tema)
 - **Min SDK:** 24 (Android 7.0)
 - **Aktif Proje Dizini:** `mobile/` (Clean Architecture) — `app/hayatin_ritmi/` FAZ 1-2 prototipi
-- **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3 (28 Şub 2026)
-- **Test Durumu:** Python AI: 22/22 geçti | Android: 34/34 geçti (RingBuffer, EcgFilter, RPeakDetector, AlertEngine, AdvancedEcgProcessor PCA) | **Toplam: 56/56** ✅
-- **FAZ 3 AI Durumu:** ✅ **Araştırma önerisi §3-§4 tüm bileşenleri tamamlandı.** DCA-CNN (261K param, ACC+SE+gates+phase reg, adaptif 1/3/12 kanal), QAT INT8 (312KB, drop -0.001), data augmentation (4 tip + 5s overlap), PCA tutarlılık analizi (§3.6), parametrik gürültü modeli (§3.4 NoiseProfile), gürültü dayanıklılık testi (AUC 0.958 @ 6dB). 6 dataset cross-eval. Android deploy tamamlandı.
+- **Son Build:** ✅ BUILD SUCCESSFUL — Gradle 8.13, Kotlin 2.1.0, AGP 8.7.3), Hilt 2.51.1, Room 2.6.1, SQLCipher 4.6.1 (28 Şub 2026)
+- **Test Durumu:** Python AI: 22/22 geçti | Android: 49/49 geçti (RingBuffer, EcgFilter, RPeakDetector, AlertEngine, AdvancedEcgProcessor PCA, UserRepository, SessionRepository) | **Toplam: 71/71** ✅
+- **FAZ 3 AI Durumu:** ✅ Tüm bileşenler tamamlandı. DCA-CNN (261K param), QAT INT8 (312KB), augmentation, PCA, gürültü modeli, 6 dataset cross-eval.
+- **FAZ 4 Durumu:** ✅ Room DB (4 entity, 4 DAO, SQLCipher), PBKDF2 auth, session recording, CSV/PDF export, Hilt DI.
 - **AI Model Dokümantasyonu:** `docs/model/MODEL_DOCUMENTATION.md` + `docs/plans/2026-03-master-implementation-status.md`
 - **Aktif AI Modeli:** DCA-CNN INT8 (ecg_dca_cnn_int8.tflite, 312 KB) — DS-1D-CNN fallback (ecg_model_int8.tflite, 232 KB)
 - **Hedef SDK:** 35 (Android 15)
