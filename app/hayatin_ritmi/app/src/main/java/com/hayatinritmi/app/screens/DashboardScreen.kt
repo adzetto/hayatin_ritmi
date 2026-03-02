@@ -42,8 +42,6 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
         ?: ConnectionState.DISCONNECTED
     val bpm = ecgViewModel?.bpm?.collectAsState()?.value ?: 0
 
-    // DEĞİŞTİ: Emerald500 yerine temanın tertiary (yeşil) rengini kullanıyoruz.
-    // AmberWarning ve NeutralGray özel uyarı renkleri olduğu için onları sabit bırakabiliriz.
     val statusColor = when (connectionState) {
         ConnectionState.CONNECTED -> MaterialTheme.colorScheme.tertiary
         ConnectionState.SCANNING, ConnectionState.CONNECTING -> AmberWarning
@@ -59,7 +57,6 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // DEĞİŞTİ: Sabit siyah yerine temaya duyarlı arka plan
             .background(MaterialTheme.colorScheme.background)
     ) {
         // ── AMBİYANS IŞIKLARI ──────────────────────────────
@@ -75,7 +72,6 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
                 .align(Alignment.BottomEnd)
                 .offset(x = 50.dp, y = 50.dp)
                 .size(300.dp)
-                // DEĞİŞTİ: NeonBlue yerine temanın ikincil rengi
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), CircleShape)
                 .blur(80.dp)
         )
@@ -88,7 +84,11 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
         ) {
             // ── ÜST BAR ────────────────────────────────────
             Spacer(modifier = Modifier.height(40.dp))
-            TopBarSection(statusText = statusText, statusColor = statusColor)
+            TopBarSection(
+                statusText = statusText,
+                statusColor = statusColor,
+                onModeSwitchClick = { navController.navigate(Screen.ProMode.route) } // PRO moda geçiş
+            )
 
             Spacer(modifier = Modifier.height(60.dp))
 
@@ -104,7 +104,6 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
                         .clip(CircleShape)
                         .clickable(
                             interactionSource = interactionSource,
-                            // DEĞİŞTİ: Tıklama efekti rengi
                             indication = ripple(
                                 bounded = true,
                                 color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
@@ -122,10 +121,9 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // ── BİLGİ KARTLARI (InfoCard from CommonComponents) ─
+            // ── BİLGİ KARTLARI ──────────────────────────────
             InfoCard(
                 icon = Icons.Default.AutoAwesome,
-                // DEĞİŞTİ: İkon rengi temadan alınıyor
                 iconColor = MaterialTheme.colorScheme.secondary,
                 title = "Yapay Zeka Notu",
                 description = "Bugün gayet iyi görünüyorsunuz. Düne göre stresiniz azaldı. İlacınızı aldıysanız günün tadını çıkarabilirsiniz."
@@ -142,18 +140,8 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
                 onClick = { navController.navigate(Screen.ProMode.route) }
             )
 
-            // NavBar ile çakışmaması için alt boşluk
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(120.dp))
         }
-
-        // ── YÜZEN NAVİGASYON ───────────────────────────────
-        FloatingNavBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 30.dp),
-            navController = navController,
-            currentRoute = Screen.Dashboard.route
-        )
 
         // ── GİZLİ ACİL DURUM BUTONU (DEMO) ─────────────────
         IconButton(
@@ -166,7 +154,6 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
             Icon(
                 Icons.Default.Warning,
                 contentDescription = null,
-                // DEĞİŞTİ: Pasif görünüm için temanın outline rengi
                 tint = MaterialTheme.colorScheme.outlineVariant
             )
         }
@@ -174,11 +161,11 @@ fun DashboardScreen(navController: NavHostController, ecgViewModel: EcgViewModel
 }
 
 // ══════════════════════════════════════════════════════
-//  ÜST BAR — Karşılama + Durum badge + Profil ikonu
+//  ÜST BAR — Karşılama + Durum badge + Mod Değiştirici Kapsül
 // ══════════════════════════════════════════════════════
 
 @Composable
-fun TopBarSection(statusText: String, statusColor: Color) {
+fun TopBarSection(statusText: String, statusColor: Color, onModeSwitchClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -188,7 +175,6 @@ fun TopBarSection(statusText: String, statusColor: Color) {
             Text(
                 text = "Merhaba, Ahmet",
                 style = MaterialTheme.typography.headlineSmall,
-                // DEĞİŞTİ: Yazı rengi
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.semantics { heading() }
             )
@@ -199,30 +185,36 @@ fun TopBarSection(statusText: String, statusColor: Color) {
             )
         }
 
-        val interactionSource = remember { MutableInteractionSource() }
+        // Profil ikonu yerine "Sakin / PRO" Kapsülü Eklendi
         Box(
             modifier = Modifier
-                .size(44.dp)
-                // DEĞİŞTİ: Profil arka planı temanın yüzey rengi
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = ripple(bounded = true, color = MaterialTheme.colorScheme.onSurfaceVariant),
-                    role = Role.Button,
-                    onClick = { /* Profil eylemi */ }
-                )
-                .semantics { contentDescription = "Profil" },
-            contentAlignment = Alignment.Center
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(50))
+                .padding(4.dp)
+                .clip(RoundedCornerShape(50))
+                .clickable { onModeSwitchClick() }
         ) {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = null,
-                // DEĞİŞTİ: Profil ikonu rengi
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // SAKİN (Aktif Olan Sekme)
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "Sakin",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                // PRO (Pasif Olan Sekme)
+                Text(
+                    text = "PRO",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+            }
         }
     }
 }
@@ -255,7 +247,6 @@ fun BreathingCircleAnimation(bpm: Int = 0) {
         label = "glow"
     )
 
-    // DEĞİŞTİ: Animasyon rengi temadan (tertiary) alınıyor
     val circleColor = MaterialTheme.colorScheme.tertiary
 
     Box(
@@ -283,13 +274,11 @@ fun BreathingCircleAnimation(bpm: Int = 0) {
                 text = if (bpm > 0) "$bpm" else "Güvendesiniz",
                 style = if (bpm > 0) MaterialTheme.typography.headlineLarge
                 else MaterialTheme.typography.headlineMedium,
-                // DEĞİŞTİ: Yazı rengi
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = if (bpm > 0) "BPM" else "Kalp ritminiz stabil.",
                 style = MaterialTheme.typography.bodyMedium,
-                // DEĞİŞTİ: Alt yazı rengi
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -297,20 +286,19 @@ fun BreathingCircleAnimation(bpm: Int = 0) {
 }
 
 // ══════════════════════════════════════════════════════
-//  YÜZEN NAVİGASYON BARI — Diğer ekranlar da kullanır
+//  YÜZEN NAVİGASYON BARI
 // ══════════════════════════════════════════════════════
 
 @Composable
 fun FloatingNavBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    currentRoute: String = Screen.Dashboard.route
+    currentRoute: String
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth(0.85f)
             .clip(RoundedCornerShape(30.dp))
-            // DEĞİŞTİ: Menü arka planı temanın yüzey rengi
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(30.dp))
             .padding(vertical = 8.dp),
@@ -320,7 +308,7 @@ fun FloatingNavBar(
         NavIcon(
             icon = Icons.Default.Home,
             label = "Ana Sayfa",
-            isActive = currentRoute == Screen.Dashboard.route
+            isActive = currentRoute == Screen.Dashboard.route || currentRoute == Screen.ProMode.route
         ) {
             if (currentRoute != Screen.Dashboard.route) {
                 navController.navigate(Screen.Dashboard.route) {
@@ -328,15 +316,18 @@ fun FloatingNavBar(
                 }
             }
         }
+
         NavIcon(
             icon = Icons.Default.Description,
             label = "Raporlar",
-            isActive = currentRoute == Screen.ProMode.route
+            // DEĞİŞTİ: Artık Reports rotasına bağlı ve ona tıklayınca oraya gidiyor
+            isActive = currentRoute == Screen.Reports.route
         ) {
-            if (currentRoute != Screen.ProMode.route) {
-                navController.navigate(Screen.ProMode.route)
+            if (currentRoute != Screen.Reports.route) {
+                navController.navigate(Screen.Reports.route)
             }
         }
+
         NavIcon(
             icon = Icons.Default.Notifications,
             label = "Bildirimler",
@@ -346,6 +337,7 @@ fun FloatingNavBar(
                 navController.navigate(Screen.Notifications.route)
             }
         }
+
         NavIcon(
             icon = Icons.Default.Settings,
             label = "Ayarlar",
@@ -374,7 +366,6 @@ fun NavIcon(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            // DEĞİŞTİ: Aktif ikon yeşil (tertiary), pasif ikon soluk yazı rengi
             tint = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.size(24.dp)
         )

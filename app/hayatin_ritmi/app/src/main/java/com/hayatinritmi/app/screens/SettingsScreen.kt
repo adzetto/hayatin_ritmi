@@ -51,7 +51,7 @@ fun SettingsScreen(
     deviceScanViewModel: DeviceScanViewModel? = null
 ) {
     val scrollState = rememberScrollState()
-    var isProMode by remember { mutableStateOf(true) }
+    var isProMode by remember { mutableStateOf(false) } // Varsayılan Sakin mod
     val connectionState =
         ecgViewModel?.connectionState?.collectAsState()?.value ?: ConnectionState.DISCONNECTED
     val deviceStatus = ecgViewModel?.deviceStatus?.collectAsState()?.value
@@ -98,8 +98,10 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Profil Kartı ──────────────────────────────────
-            GlassCard {
+            // ── Profil Kartı (TIKLANABİLİR YAPILDI) ──────────────────────────────────
+            GlassCard(
+                onClick = { navController.navigate(Screen.EditProfile.route) } // YENİ EKRANA GİDİŞ
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -140,29 +142,37 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    }
-                    // Kan grubu badge
-                    Box(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.Favorite,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = "A Rh+",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        // Kan grubu badge
+                        Box(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "A Rh+",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         }
                     }
+                    // Tıklanabilir olduğunu belli eden ok ikonu
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = "Profili Düzenle",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
                 }
             }
 
@@ -312,7 +322,11 @@ fun SettingsScreen(
                                     role = Role.Tab,
                                     onClick = {
                                         isProMode = true
-                                        navController.navigate(Screen.ProMode.route)
+                                        // Geri tuşu mantığını bozmamak için popUpTo kullanıldı
+                                        navController.navigate(Screen.ProMode.route) {
+                                            popUpTo(Screen.Dashboard.route)
+                                            launchSingleTop = true
+                                        }
                                     }
                                 )
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
@@ -345,7 +359,9 @@ fun SettingsScreen(
                                     role = Role.Tab,
                                     onClick = {
                                         isProMode = false
-                                        navController.navigate(Screen.Dashboard.route)
+                                        navController.navigate(Screen.Dashboard.route) {
+                                            popUpTo(Screen.Dashboard.route) { inclusive = true }
+                                        }
                                     }
                                 )
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
@@ -369,18 +385,21 @@ fun SettingsScreen(
                     title = "Hayat Kurtarma Profili",
                     subtitle = "Acil durum kişileri ve doktor bilgisi"
                 ) {
-                    navController.navigate(Screen.SignUp.route)
+                    // DEĞİŞTİ: Artık SignUp ekranına değil, yeni yaptığımız EmergencyProfile ekranına gidiyor!
+                    navController.navigate(Screen.EmergencyProfile.route)
                 }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // 3. Veri Paylaşımı
+                // 3. Veri Paylaşımı -> RAPORLAR SAYFASINA BAĞLANDI
                 SettingsMenuItem(
-                    icon = Icons.Default.FileDownload,
+                    icon = Icons.Default.FolderZip,
                     iconColor = MaterialTheme.colorScheme.tertiary,
-                    title = "Veri Paylaşımı",
-                    subtitle = "EKG Raporlarını PDF olarak indir"
-                ) { }
+                    title = "Raporlar ve Arşiv",
+                    subtitle = "Geçmiş EKG kayıtları ve PDF çıktıları"
+                ) {
+                    navController.navigate(Screen.Reports.route) { launchSingleTop = true }
+                }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
@@ -422,7 +441,7 @@ fun SettingsScreen(
                 letterSpacing = 2.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(100.dp)) // Alt bar için boşluk
         }
     }
 }
