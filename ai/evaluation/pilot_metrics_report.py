@@ -20,6 +20,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich import box
+
+console = Console()
+
 
 @dataclass(frozen=True)
 class Targets:
@@ -306,11 +313,32 @@ def main() -> None:
     with args.output.open("w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 
-    print(f"Report written: {args.output}")
-    print(f"All checks passed: {report['all_checks_passed']}")
+    # --- Rich output ---
+    console.print(Panel(
+        f"[bold]Pilot Metrics Report[/]\n"
+        f"Output: [dim]{args.output}[/]",
+        border_style="bright_cyan", expand=False,
+    ))
+
+    overall = "[bold green]PASS[/]" if report["all_checks_passed"] else "[bold red]FAIL[/]"
+    console.print(f"  Overall: {overall}\n")
+
+    checks_tbl = Table(title="Acceptance Checks", box=box.ROUNDED,
+                       border_style="cyan")
+    checks_tbl.add_column("Check", style="cyan")
+    checks_tbl.add_column("Value", justify="right")
+    checks_tbl.add_column("Target", justify="right", style="dim")
+    checks_tbl.add_column("Status", justify="center")
+
     for name, check in report["acceptance_checks"].items():
-        status = "PASS" if check["passed"] else "FAIL"
-        print(f"- {name}: {status} (value={check['value']}, target={check['target']})")
+        passed = check["passed"]
+        status = "[bold green]PASS[/]" if passed else "[bold red]FAIL[/]"
+        val = check["value"]
+        val_str = f"{val:.2f}" if isinstance(val, float) else str(val)
+        val_style = "green" if passed else "red"
+        checks_tbl.add_row(name, f"[{val_style}]{val_str}[/]",
+                           str(check["target"]), status)
+    console.print(checks_tbl)
 
 
 if __name__ == "__main__":

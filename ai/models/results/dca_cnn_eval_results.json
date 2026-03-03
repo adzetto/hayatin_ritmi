@@ -2,9 +2,9 @@
   "model": "DCA-CNN",
   "params": 261091,
   "speed_ms": {
-    "12-lead": 2.464,
-    "3-lead": 2.337,
-    "1-lead": 3.029
+    "12-lead": 4.128,
+    "3-lead": 4.224,
+    "1-lead": 4.368
   },
   "results": {
     "sph": {
@@ -26,7 +26,7 @@
         "n_classes": 37,
         "n_samples": 3960
       },
-      "baseline_12lead": 0.9852
+      "baseline_12lead": 0.9827
     },
     "cpsc2018": {
       "12-lead": {
@@ -47,7 +47,7 @@
         "n_classes": 8,
         "n_samples": 940
       },
-      "baseline_12lead": 0.9289
+      "baseline_12lead": 0.9231
     },
     "cpsc2018-extra": {
       "12-lead": {
@@ -68,7 +68,7 @@
         "n_classes": 22,
         "n_samples": 329
       },
-      "baseline_12lead": 0.7885
+      "baseline_12lead": 0.776
     },
     "georgia": {
       "12-lead": {
@@ -89,7 +89,7 @@
         "n_classes": 27,
         "n_samples": 1218
       },
-      "baseline_12lead": 0.8376
+      "baseline_12lead": 0.8455
     },
     "chapman-shaoxing": {
       "12-lead": {
@@ -110,7 +110,7 @@
         "n_classes": 32,
         "n_samples": 1126
       },
-      "baseline_12lead": 0.9755
+      "baseline_12lead": 0.9748
     },
     "ningbo": {
       "12-lead": {
@@ -131,7 +131,7 @@
         "n_classes": 31,
         "n_samples": 2740
       },
-      "baseline_12lead": 0.9851
+      "baseline_12lead": 0.9833
     }
   }
 }

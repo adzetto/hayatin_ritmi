@@ -1,0 +1,24 @@
+{
+  "NORM": {
+    "auc": 0.7037,
+    "support": 963
+  },
+  "MI": {
+    "auc": 0.7759,
+    "support": 550
+  },
+  "STTC": {
+    "auc": 0.8533,
+    "support": 521
+  },
+  "CD": {
+    "auc": 0.8754,
+    "support": 496
+  },
+  "HYP": {
+    "auc": 0.6624,
+    "support": 262
+  },
+  "macro_auc": 0.7741,
+  "test_records": 2198
+}

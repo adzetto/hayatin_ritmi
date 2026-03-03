@@ -1,0 +1,42 @@
+# ECG Arrhythmia Classifier — Python Dependencies
+# TÜBİTAK 2209-A: Hayatın Ritmi
+# Install: pip install -r requirements.txt
+# For CUDA: pip install torch --index-url https://download.pytorch.org/whl/cu124
+
+# --- Core ML ---
+torch==2.6.0
+tensorflow==2.20.0
+tf_keras==2.20.1
+keras==3.13.2
+scikit-learn==1.8.0
+numpy==1.26.4
+scipy==1.17.1
+pandas==3.0.1
+
+# --- ECG / Signal Processing ---
+wfdb==4.3.1
+
+# --- Model Export ---
+onnx==1.16.2
+onnxruntime==1.24.2
+onnx2tf==1.28.8
+onnxsim==0.4.36
+onnx-graphsurgeon==0.3.27
+
+# --- Visualization / CLI ---
+matplotlib==3.10.8
+rich==14.3.3
+tqdm==4.67.3
+
+# --- Web / Data ---
+requests==2.32.5
+beautifulsoup4==4.14.3
+huggingface_hub==1.4.1
+
+# --- Testing ---
+pytest==9.0.2
+
+# --- Utilities ---
+h5py==3.15.1
+protobuf==6.33.5
+PyYAML==6.0.3

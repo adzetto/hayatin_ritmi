@@ -1,0 +1,558 @@
+{
+  "start": "2026-03-03T13:44:23.976475",
+  "phases": {
+    "D": {
+      "duplicate_train_val": 10,
+      "duplicate_train_test": 3,
+      "conf_train_mean": 0.9582,
+      "conf_val_mean": 0.9495,
+      "conf_test_mean": 0.9484,
+      "conf_gap_train_val": 0.0087,
+      "conf_gap_train_test": 0.0098,
+      "auc_gaps": [
+        {
+          "class": "CCR",
+          "auc_train": 0.9651,
+          "auc_val": 0.8726,
+          "gap": 0.0925
+        },
+        {
+          "class": "LVQRSAL",
+          "auc_train": 0.9839,
+          "auc_val": 0.9131,
+          "gap": 0.0708
+        },
+        {
+          "class": "STE",
+          "auc_train": 0.9791,
+          "auc_val": 0.9377,
+          "gap": 0.0413
+        },
+        {
+          "class": "STTU",
+          "auc_train": 0.9929,
+          "auc_val": 0.9584,
+          "gap": 0.0345
+        },
+        {
+          "class": "ERV",
+          "auc_train": 0.9893,
+          "auc_val": 0.9587,
+          "gap": 0.0306
+        },
+        {
+          "class": "STTC",
+          "auc_train": 0.9726,
+          "auc_val": 0.9473,
+          "gap": 0.0253
+        },
+        {
+          "class": "QTIE",
+          "auc_train": 0.997,
+          "auc_val": 0.9779,
+          "gap": 0.0191
+        },
+        {
+          "class": "ARS",
+          "auc_train": 0.9956,
+          "auc_val": 0.9801,
+          "gap": 0.0155
+        },
+        {
+          "class": "TWC",
+          "auc_train": 0.9608,
+          "auc_val": 0.9453,
+          "gap": 0.0155
+        },
+        {
+          "class": "TWO",
+          "auc_train": 0.9851,
+          "auc_val": 0.9696,
+          "gap": 0.0155
+        },
+        {
+          "class": "STDD",
+          "auc_train": 0.9894,
+          "auc_val": 0.9755,
+          "gap": 0.0139
+        },
+        {
+          "class": "LVH",
+          "auc_train": 0.9812,
+          "auc_val": 0.9925,
+          "gap": -0.0114
+        },
+        {
+          "class": "IVB",
+          "auc_train": 0.9868,
+          "auc_val": 0.9764,
+          "gap": 0.0105
+        },
+        {
+          "class": "ALS",
+          "auc_train": 0.9962,
+          "auc_val": 0.99,
+          "gap": 0.0062
+        },
+        {
+          "class": "AQW",
+          "auc_train": 0.978,
+          "auc_val": 0.9722,
+          "gap": 0.0058
+        }
+      ],
+      "entropy_train": 0.021400000900030136,
+      "entropy_val": 0.022600000724196434,
+      "entropy_test": 0.022199999541044235,
+      "duration_s": 24.2
+    },
+    "E": {
+      "total_epochs": 37,
+      "best_epoch": 27,
+      "best_val_auc": 0.962531,
+      "final_train_loss": 0.033641,
+      "final_val_loss": 0.031132,
+      "loss_gap": 0.002509,
+      "loss_gap_last5": 0.002614,
+      "auc_decline_after_best": 0.0061,
+      "lr_restarts": 2,
+      "duration_s": 1.3
+    },
+    "F": {
+      "clean_auc": 0.9763,
+      "noise_tests": {
+        "gaussian": [
+          {
+            "snr_db": 40,
+            "auc": 0.9764,
+            "auc_drop": -0.0,
+            "top1_agree": 0.997
+          },
+          {
+            "snr_db": 30,
+            "auc": 0.9761,
+            "auc_drop": 0.0003,
+            "top1_agree": 0.993
+          },
+          {
+            "snr_db": 20,
+            "auc": 0.977,
+            "auc_drop": -0.0006,
+            "top1_agree": 0.978
+          },
+          {
+            "snr_db": 15,
+            "auc": 0.9733,
+            "auc_drop": 0.003,
+            "top1_agree": 0.964
+          },
+          {
+            "snr_db": 10,
+            "auc": 0.9647,
+            "auc_drop": 0.0116,
+            "top1_agree": 0.937
+          },
+          {
+            "snr_db": 5,
+            "auc": 0.9386,
+            "auc_drop": 0.0377,
+            "top1_agree": 0.885
+          }
+        ],
+        "baseline_wander": [
+          {
+            "amplitude": 0.05,
+            "auc": 0.9762,
+            "auc_drop": 0.0002
+          },
+          {
+            "amplitude": 0.1,
+            "auc": 0.9757,
+            "auc_drop": 0.0007
+          },
+          {
+            "amplitude": 0.2,
+            "auc": 0.9743,
+            "auc_drop": 0.002
+          },
+          {
+            "amplitude": 0.5,
+            "auc": 0.9709,
+            "auc_drop": 0.0054
+          },
+          {
+            "amplitude": 1.0,
+            "auc": 0.9529,
+            "auc_drop": 0.0234
+          }
+        ],
+        "powerline_50hz": [
+          {
+            "amplitude": 0.01,
+            "auc": 0.9765,
+            "auc_drop": -0.0002
+          },
+          {
+            "amplitude": 0.05,
+            "auc": 0.9758,
+            "auc_drop": 0.0005
+          },
+          {
+            "amplitude": 0.1,
+            "auc": 0.9733,
+            "auc_drop": 0.003
+          },
+          {
+            "amplitude": 0.2,
+            "auc": 0.9646,
+            "auc_drop": 0.0117
+          },
+          {
+            "amplitude": 0.5,
+            "auc": 0.8929,
+            "auc_drop": 0.0834
+          }
+        ]
+      },
+      "duration_s": 10.2
+    },
+    "G": {
+      "clean_auc": 0.9763,
+      "lead_importance": [
+        {
+          "lead": "I",
+          "idx": 0,
+          "auc_without": 0.9693,
+          "importance": 0.007
+        },
+        {
+          "lead": "II",
+          "idx": 1,
+          "auc_without": 0.973,
+          "importance": 0.0034
+        },
+        {
+          "lead": "V1",
+          "idx": 6,
+          "auc_without": 0.9733,
+          "importance": 0.003
+        },
+        {
+          "lead": "aVR",
+          "idx": 3,
+          "auc_without": 0.9746,
+          "importance": 0.0017
+        },
+        {
+          "lead": "III",
+          "idx": 2,
+          "auc_without": 0.9748,
+          "importance": 0.0015
+        },
+        {
+          "lead": "V6",
+          "idx": 11,
+          "auc_without": 0.9756,
+          "importance": 0.0007
+        },
+        {
+          "lead": "aVL",
+          "idx": 4,
+          "auc_without": 0.9759,
+          "importance": 0.0005
+        },
+        {
+          "lead": "V5",
+          "idx": 10,
+          "auc_without": 0.9761,
+          "importance": 0.0002
+        },
+        {
+          "lead": "V2",
+          "idx": 7,
+          "auc_without": 0.9764,
+          "importance": -0.0001
+        },
+        {
+          "lead": "V4",
+          "idx": 9,
+          "auc_without": 0.9765,
+          "importance": -0.0002
+        },
+        {
+          "lead": "aVF",
+          "idx": 5,
+          "auc_without": 0.9767,
+          "importance": -0.0004
+        },
+        {
+          "lead": "V3",
+          "idx": 8,
+          "auc_without": 0.9767,
+          "importance": -0.0004
+        }
+      ],
+      "dropout_sweep": [
+        {
+          "rate": 0.0,
+          "auc_mean": 0.9763,
+          "auc_std": 0.0
+        },
+        {
+          "rate": 0.1,
+          "auc_mean": 0.9747,
+          "auc_std": 0.0011
+        },
+        {
+          "rate": 0.2,
+          "auc_mean": 0.9702,
+          "auc_std": 0.0014
+        },
+        {
+          "rate": 0.3,
+          "auc_mean": 0.9678,
+          "auc_std": 0.0037
+        },
+        {
+          "rate": 0.4,
+          "auc_mean": 0.9554,
+          "auc_std": 0.0069
+        },
+        {
+          "rate": 0.5,
+          "auc_mean": 0.9451,
+          "auc_std": 0.0045
+        },
+        {
+          "rate": 0.6,
+          "auc_mean": 0.9258,
+          "auc_std": 0.0046
+        },
+        {
+          "rate": 0.7,
+          "auc_mean": 0.8888,
+          "auc_std": 0.0067
+        },
+        {
+          "rate": 0.8,
+          "auc_mean": 0.8584,
+          "auc_std": 0.008
+        },
+        {
+          "rate": 0.9,
+          "auc_mean": 0.8314,
+          "auc_std": 0.0057
+        }
+      ],
+      "shuffled_auc": 0.8546,
+      "shuffle_drop": 0.1218,
+      "duration_s": 15.5
+    },
+    "H": {
+      "sph": {
+        "n": 2000,
+        "active_classes": 25,
+        "macro_auc": 0.9763,
+        "mean_conf": 0.9384,
+        "pred_rate": 0.9685
+      },
+      "cpsc2018": {
+        "n": 2000,
+        "active_classes": 8,
+        "macro_auc": 0.9602,
+        "mean_conf": 0.8059,
+        "pred_rate": 0.9065
+      },
+      "cpsc2018-extra": {
+        "n": 2000,
+        "active_classes": 20,
+        "macro_auc": 0.8731,
+        "mean_conf": 0.6372,
+        "pred_rate": 0.708
+      },
+      "georgia": {
+        "n": 2000,
+        "active_classes": 23,
+        "macro_auc": 0.888,
+        "mean_conf": 0.7287,
+        "pred_rate": 0.813
+      },
+      "chapman-shaoxing": {
+        "n": 2000,
+        "active_classes": 24,
+        "macro_auc": 0.9593,
+        "mean_conf": 0.9623,
+        "pred_rate": 0.9905
+      },
+      "ningbo": {
+        "n": 2000,
+        "active_classes": 16,
+        "macro_auc": 0.9805,
+        "mean_conf": 0.9563,
+        "pred_rate": 0.9895
+      },
+      "ptb-xl": {
+        "n": 2000,
+        "active_classes": 16,
+        "macro_auc": 0.9552,
+        "mean_conf": 0.8603,
+        "pred_rate": 0.961
+      },
+      "duration_s": 93.1
+    },
+    "I": {
+      "per_class_calibration": [
+        {
+          "class": "SR",
+          "support": 1165,
+          "brier": 0.0157,
+          "ece": 0.0226
+        },
+        {
+          "class": "TWC",
+          "support": 538,
+          "brier": 0.0592,
+          "ece": 0.0179
+        },
+        {
+          "class": "SB",
+          "support": 2378,
+          "brier": 0.0064,
+          "ece": 0.0138
+        },
+        {
+          "class": "TWO",
+          "support": 191,
+          "brier": 0.0244,
+          "ece": 0.01
+        },
+        {
+          "class": "STTC",
+          "support": 105,
+          "brier": 0.0174,
+          "ece": 0.0096
+        },
+        {
+          "class": "LVH",
+          "support": 21,
+          "brier": 0.0036,
+          "ece": 0.0082
+        },
+        {
+          "class": "STE",
+          "support": 72,
+          "brier": 0.0147,
+          "ece": 0.0079
+        },
+        {
+          "class": "RBBB",
+          "support": 69,
+          "brier": 0.0093,
+          "ece": 0.0077
+        },
+        {
+          "class": "STDD",
+          "support": 100,
+          "brier": 0.0163,
+          "ece": 0.0075
+        },
+        {
+          "class": "AQW",
+          "support": 68,
+          "brier": 0.01,
+          "ece": 0.0074
+        },
+        {
+          "class": "LVQRSAL",
+          "support": 71,
+          "brier": 0.0145,
+          "ece": 0.0064
+        },
+        {
+          "class": "STTU",
+          "support": 15,
+          "brier": 0.0036,
+          "ece": 0.0059
+        },
+        {
+          "class": "ALS",
+          "support": 99,
+          "brier": 0.0108,
+          "ece": 0.0058
+        },
+        {
+          "class": "1AVB",
+          "support": 129,
+          "brier": 0.0075,
+          "ece": 0.0051
+        },
+        {
+          "class": "APB",
+          "support": 83,
+          "brier": 0.0057,
+          "ece": 0.0051
+        },
+        {
+          "class": "ARS",
+          "support": 38,
+          "brier": 0.0066,
+          "ece": 0.0038
+        },
+        {
+          "class": "MISW",
+          "support": 11,
+          "brier": 0.0016,
+          "ece": 0.0038
+        },
+        {
+          "class": "QTIE",
+          "support": 30,
+          "brier": 0.0049,
+          "ece": 0.0037
+        },
+        {
+          "class": "IVB",
+          "support": 35,
+          "brier": 0.0069,
+          "ece": 0.0035
+        },
+        {
+          "class": "ERV",
+          "support": 53,
+          "brier": 0.0094,
+          "ece": 0.0034
+        },
+        {
+          "class": "AFIB",
+          "support": 281,
+          "brier": 0.0006,
+          "ece": 0.0031
+        },
+        {
+          "class": "VPB",
+          "support": 33,
+          "brier": 0.0041,
+          "ece": 0.003
+        },
+        {
+          "class": "LFBBB",
+          "support": 15,
+          "brier": 0.0032,
+          "ece": 0.0023
+        },
+        {
+          "class": "CCR",
+          "support": 19,
+          "brier": 0.0047,
+          "ece": 0.0003
+        }
+      ],
+      "overall_brier": 0.0109,
+      "overall_ece": 0.007,
+      "duration_s": 2.0
+    }
+  },
+  "updated": "2026-03-03T13:46:50.500632",
+  "total_s": 146.5,
+  "end": "2026-03-03T13:46:50.500632"
+}

@@ -1144,230 +1144,230 @@
       "dataset": "SPH (retrained)",
       "n_records": 3960,
       "n_classes_with_support": 37,
-      "macro_auc": 0.9852,
+      "macro_auc": 0.9827,
       "micro_auc": 0.9959,
       "per_class": [
         {
+          "idx": 40,
+          "condition": "STTU",
+          "auc": 0.9084991522285669,
+          "support": 13
+        },
+        {
           "idx": 16,
           "condition": "IVB",
-          "auc": 0.9497006565576538,
+          "auc": 0.9606961026792789,
           "support": 37
         },
         {
-          "idx": 1,
-          "condition": "2AVB",
-          "auc": 0.9536382011116725,
-          "support": 2
-        },
-        {
-          "idx": 40,
-          "condition": "STTU",
-          "auc": 0.9542008536181326,
-          "support": 13
+          "idx": 32,
+          "condition": "PWC",
+          "auc": 0.9608486991664562,
+          "support": 1
         },
         {
           "idx": 17,
           "condition": "JEB",
-          "auc": 0.9685030512669084,
+          "auc": 0.9614443600776175,
           "support": 9
-        },
-        {
-          "idx": 23,
-          "condition": "LVQRSAL",
-          "auc": 0.968685347324517,
-          "support": 62
         },
         {
           "idx": 47,
           "condition": "VPB",
-          "auc": 0.9687277353689568,
+          "auc": 0.9652756573367259,
           "support": 30
         },
         {
           "idx": 11,
           "condition": "CCR",
-          "auc": 0.9692485483961892,
+          "auc": 0.9661762218839844,
           "support": 18
-        },
-        {
-          "idx": 39,
-          "condition": "STTC",
-          "auc": 0.9704591528640442,
-          "support": 96
         },
         {
           "idx": 41,
           "condition": "TWC",
-          "auc": 0.9739031233016222,
+          "auc": 0.96769634268349,
           "support": 537
+        },
+        {
+          "idx": 23,
+          "condition": "LVQRSAL",
+          "auc": 0.9682881212863502,
+          "support": 62
+        },
+        {
+          "idx": 43,
+          "condition": "UW",
+          "auc": 0.9702365890688258,
+          "support": 8
+        },
+        {
+          "idx": 39,
+          "condition": "STTC",
+          "auc": 0.9734407349896481,
+          "support": 96
+        },
+        {
+          "idx": 7,
+          "condition": "APB",
+          "auc": 0.9738960666092449,
+          "support": 90
+        },
+        {
+          "idx": 1,
+          "condition": "2AVB",
+          "auc": 0.9752400202122283,
+          "support": 2
+        },
+        {
+          "idx": 38,
+          "condition": "STE",
+          "auc": 0.9758290006650141,
+          "support": 68
+        },
+        {
+          "idx": 8,
+          "condition": "AQW",
+          "auc": 0.9775111799105607,
+          "support": 84
         },
         {
           "idx": 42,
           "condition": "TWO",
-          "auc": 0.976687394948958,
+          "auc": 0.9815351816946714,
           "support": 198
         },
         {
           "idx": 46,
           "condition": "VFW",
-          "auc": 0.9767745742707806,
+          "auc": 0.9817062889900523,
           "support": 6
-        },
-        {
-          "idx": 7,
-          "condition": "APB",
-          "auc": 0.9772380132070054,
-          "support": 90
-        },
-        {
-          "idx": 8,
-          "condition": "AQW",
-          "auc": 0.9787888839746425,
-          "support": 84
-        },
-        {
-          "idx": 22,
-          "condition": "LVH",
-          "auc": 0.9816751269035533,
-          "support": 20
-        },
-        {
-          "idx": 38,
-          "condition": "STE",
-          "auc": 0.9850182878906958,
-          "support": 68
-        },
-        {
-          "idx": 21,
-          "condition": "LFBBB",
-          "auc": 0.987528158613179,
-          "support": 17
-        },
-        {
-          "idx": 13,
-          "condition": "ERV",
-          "auc": 0.9880418120015108,
-          "support": 46
         },
         {
           "idx": 37,
           "condition": "STDD",
-          "auc": 0.9905181092407463,
+          "auc": 0.982059660658682,
           "support": 77
         },
         {
-          "idx": 12,
-          "condition": "CR",
-          "auc": 0.9909291315818005,
-          "support": 7
+          "idx": 22,
+          "condition": "LVH",
+          "auc": 0.9846319796954315,
+          "support": 20
         },
         {
-          "idx": 43,
-          "condition": "UW",
-          "auc": 0.9914283906882592,
-          "support": 8
+          "idx": 13,
+          "condition": "ERV",
+          "auc": 0.9864977449956678,
+          "support": 46
         },
         {
-          "idx": 6,
-          "condition": "ALS",
-          "auc": 0.9932353050566751,
-          "support": 119
+          "idx": 2,
+          "condition": "2AVB1",
+          "auc": 0.9900202122283982,
+          "support": 2
         },
         {
           "idx": 45,
           "condition": "VEB",
-          "auc": 0.9942351453855878,
+          "auc": 0.9909481668773704,
           "support": 5
+        },
+        {
+          "idx": 31,
+          "condition": "PRIE",
+          "auc": 0.992591521809837,
+          "support": 7
+        },
+        {
+          "idx": 12,
+          "condition": "CR",
+          "auc": 0.9934588558418561,
+          "support": 7
+        },
+        {
+          "idx": 6,
+          "condition": "ALS",
+          "auc": 0.995009615405652,
+          "support": 119
+        },
+        {
+          "idx": 35,
+          "condition": "RBBB",
+          "auc": 0.9958675663772151,
+          "support": 47
         },
         {
           "idx": 33,
           "condition": "QTIE",
-          "auc": 0.9943908629441623,
+          "auc": 0.9960279187817259,
           "support": 20
         },
         {
           "idx": 0,
           "condition": "1AVB",
-          "auc": 0.9951009802451054,
+          "auc": 0.996168573924245,
           "support": 118
         },
         {
-          "idx": 9,
-          "condition": "ARS",
-          "auc": 0.9961971741344195,
-          "support": 32
-        },
-        {
-          "idx": 31,
-          "condition": "PRIE",
-          "auc": 0.9964945249539229,
-          "support": 7
-        },
-        {
-          "idx": 2,
-          "condition": "2AVB1",
-          "auc": 0.9968418393127843,
-          "support": 2
-        },
-        {
-          "idx": 53,
-          "condition": "SR",
-          "auc": 0.996845349772179,
-          "support": 1230
-        },
-        {
-          "idx": 35,
-          "condition": "RBBB",
-          "auc": 0.9969278618462191,
-          "support": 47
+          "idx": 21,
+          "condition": "LFBBB",
+          "auc": 0.9969118765944115,
+          "support": 17
         },
         {
           "idx": 30,
           "condition": "MISW",
-          "auc": 0.9973114878542509,
+          "auc": 0.9981338562753037,
           "support": 8
         },
         {
-          "idx": 32,
-          "condition": "PWC",
-          "auc": 0.997726698661278,
-          "support": 1
+          "idx": 9,
+          "condition": "ARS",
+          "auc": 0.9981463212830958,
+          "support": 32
+        },
+        {
+          "idx": 53,
+          "condition": "SR",
+          "auc": 0.9981637332856845,
+          "support": 1230
         },
         {
           "idx": 52,
           "condition": "SB",
-          "auc": 0.9977284796573876,
+          "auc": 0.9982015483445891,
           "support": 2335
         },
         {
           "idx": 48,
           "condition": "VPE",
-          "auc": 0.998989388580091,
+          "auc": 0.9983577564426478,
           "support": 2
         },
         {
-          "idx": 54,
-          "condition": "AFIB",
-          "auc": 0.9997154393385888,
-          "support": 245
+          "idx": 51,
+          "condition": "WPW",
+          "auc": 0.9995448798988622,
+          "support": 5
         },
         {
           "idx": 4,
           "condition": "3AVB",
-          "auc": 1.0,
+          "auc": 0.9997474109623643,
           "support": 1
+        },
+        {
+          "idx": 54,
+          "condition": "AFIB",
+          "auc": 0.9998725519817617,
+          "support": 245
         },
         {
           "idx": 34,
           "condition": "RAH",
           "auc": 1.0,
           "support": 1
-        },
-        {
-          "idx": 51,
-          "condition": "WPW",
-          "auc": 1.0,
-          "support": 5
         }
       ]
     },
@@ -1375,55 +1375,55 @@
       "dataset": "cpsc2018 (retrained)",
       "n_records": 6265,
       "n_classes_with_support": 8,
-      "macro_auc": 0.986,
-      "micro_auc": 0.9889,
+      "macro_auc": 0.9824,
+      "micro_auc": 0.986,
       "per_class": [
-        {
-          "idx": 7,
-          "condition": "APB",
-          "auc": 0.9700740045933886,
-          "support": 616
-        },
         {
           "idx": 40,
           "condition": "STTU",
-          "auc": 0.9720896307993083,
+          "auc": 0.9613986013986013,
           "support": 220
+        },
+        {
+          "idx": 7,
+          "condition": "APB",
+          "auc": 0.9668209291151405,
+          "support": 616
         },
         {
           "idx": 37,
           "condition": "STDD",
-          "auc": 0.98402765147731,
+          "auc": 0.9780115510494395,
           "support": 868
         },
         {
           "idx": 53,
           "condition": "SR",
-          "auc": 0.9847376392112858,
+          "auc": 0.978198228151473,
           "support": 918
         },
         {
           "idx": 21,
           "condition": "LFBBB",
-          "auc": 0.9925409953585917,
+          "auc": 0.9925557545310659,
           "support": 236
         },
         {
           "idx": 35,
           "condition": "RBBB",
-          "auc": 0.9932135729519501,
+          "auc": 0.9925802122357755,
           "support": 1853
         },
         {
           "idx": 0,
           "condition": "1AVB",
-          "auc": 0.9952646721202105,
+          "auc": 0.9931542516003065,
           "support": 722
         },
         {
           "idx": 54,
           "condition": "AFIB",
-          "auc": 0.9964008778441767,
+          "auc": 0.9968238550712777,
           "support": 1221
         }
       ]
@@ -1432,194 +1432,194 @@
       "dataset": "cpsc2018-extra (retrained)",
       "n_records": 2192,
       "n_classes_with_support": 32,
-      "macro_auc": 0.9228,
-      "micro_auc": 0.9572,
+      "macro_auc": 0.917,
+      "micro_auc": 0.9536,
       "per_class": [
         {
-          "idx": 8,
-          "condition": "AQW",
-          "auc": 0.5504335919671384,
-          "support": 1
+          "idx": 18,
+          "condition": "JPT",
+          "auc": 0.6715753424657535,
+          "support": 2
         },
         {
           "idx": 16,
           "condition": "IVB",
-          "auc": 0.6239716636197441,
+          "auc": 0.6957266910420475,
           "support": 4
         },
         {
           "idx": 33,
           "condition": "QTIE",
-          "auc": 0.7080858839652809,
+          "auc": 0.7894015532206486,
           "support": 3
         },
         {
-          "idx": 37,
-          "condition": "STDD",
-          "auc": 0.8077492805146437,
-          "support": 44
+          "idx": 49,
+          "condition": "VET",
+          "auc": 0.7944266788487893,
+          "support": 3
+        },
+        {
+          "idx": 53,
+          "condition": "SR",
+          "auc": 0.8185557586837295,
+          "support": 4
         },
         {
           "idx": 38,
           "condition": "STE",
-          "auc": 0.8533898372433085,
+          "auc": 0.837820135842499,
           "support": 428
+        },
+        {
+          "idx": 37,
+          "condition": "STDD",
+          "auc": 0.841808447604537,
+          "support": 44
         },
         {
           "idx": 39,
           "condition": "STTC",
-          "auc": 0.8694853433499384,
+          "auc": 0.8632735082221866,
           "support": 1176
         },
         {
           "idx": 41,
           "condition": "TWC",
-          "auc": 0.8936464088397791,
+          "auc": 0.8687615101289135,
           "support": 20
         },
         {
-          "idx": 18,
-          "condition": "JPT",
-          "auc": 0.896689497716895,
-          "support": 2
+          "idx": 47,
+          "condition": "VPB",
+          "auc": 0.890934736200061,
+          "support": 6
         },
         {
           "idx": 22,
           "condition": "LVH",
-          "auc": 0.9067291907701864,
+          "auc": 0.8925418164071167,
           "support": 143
-        },
-        {
-          "idx": 1,
-          "condition": "2AVB",
-          "auc": 0.9254486884491485,
-          "support": 19
-        },
-        {
-          "idx": 7,
-          "condition": "APB",
-          "auc": 0.9281755926251098,
-          "support": 67
         },
         {
           "idx": 30,
           "condition": "MISW",
-          "auc": 0.9333530696922965,
+          "auc": 0.9171355964358278,
           "support": 356
+        },
+        {
+          "idx": 8,
+          "condition": "AQW",
+          "auc": 0.9183021451392058,
+          "support": 1
         },
         {
           "idx": 40,
           "condition": "STTU",
-          "auc": 0.9492065353345841,
+          "auc": 0.9290220450281425,
           "support": 60
         },
         {
-          "idx": 53,
-          "condition": "SR",
-          "auc": 0.9506398537477148,
-          "support": 4
+          "idx": 7,
+          "condition": "APB",
+          "auc": 0.9297559262510975,
+          "support": 67
+        },
+        {
+          "idx": 42,
+          "condition": "TWO",
+          "auc": 0.9429355281207134,
+          "support": 5
+        },
+        {
+          "idx": 1,
+          "condition": "2AVB",
+          "auc": 0.9442681715794317,
+          "support": 19
+        },
+        {
+          "idx": 10,
+          "condition": "AVB",
+          "auc": 0.9555555555555555,
+          "support": 5
         },
         {
           "idx": 52,
           "condition": "SB",
-          "auc": 0.9621317927882174,
+          "auc": 0.9583968173353647,
           "support": 44
         },
         {
           "idx": 21,
           "condition": "LFBBB",
-          "auc": 0.9623551228558181,
+          "auc": 0.9620637128286642,
           "support": 35
-        },
-        {
-          "idx": 42,
-          "condition": "TWO",
-          "auc": 0.9643347050754458,
-          "support": 5
         },
         {
           "idx": 17,
           "condition": "JEB",
-          "auc": 0.9666933272394881,
+          "auc": 0.9786905850091407,
           "support": 4
         },
         {
-          "idx": 47,
-          "condition": "VPB",
-          "auc": 0.9684736200060995,
-          "support": 6
+          "idx": 0,
+          "condition": "1AVB",
+          "auc": 0.986175272401224,
+          "support": 98
         },
         {
-          "idx": 49,
-          "condition": "VET",
-          "auc": 0.9736561595858079,
+          "idx": 36,
+          "condition": "RVH",
+          "auc": 0.9885110294117647,
+          "support": 16
+        },
+        {
+          "idx": 45,
+          "condition": "VEB",
+          "auc": 0.9896451956753465,
           "support": 3
         },
         {
-          "idx": 10,
-          "condition": "AVB",
-          "auc": 0.984087791495199,
-          "support": 5
+          "idx": 34,
+          "condition": "RAH",
+          "auc": 0.9928177882723338,
+          "support": 14
+        },
+        {
+          "idx": 54,
+          "condition": "AFIB",
+          "auc": 0.9944153715256221,
+          "support": 149
+        },
+        {
+          "idx": 4,
+          "condition": "3AVB",
+          "auc": 0.9961508852963818,
+          "support": 27
+        },
+        {
+          "idx": 44,
+          "condition": "VB",
+          "auc": 0.9979433272394881,
+          "support": 4
+        },
+        {
+          "idx": 35,
+          "condition": "RBBB",
+          "auc": 0.9981743496120494,
+          "support": 1
         },
         {
           "idx": 48,
           "condition": "VPE",
-          "auc": 0.9913845684659958,
+          "auc": 0.9986276303751144,
           "support": 6
         },
         {
           "idx": 9,
           "condition": "ARS",
-          "auc": 0.9936102236421724,
+          "auc": 0.9990871748060247,
           "support": 1
-        },
-        {
-          "idx": 36,
-          "condition": "RVH",
-          "auc": 0.99365234375,
-          "support": 16
-        },
-        {
-          "idx": 4,
-          "condition": "3AVB",
-          "auc": 0.9944401676503294,
-          "support": 27
-        },
-        {
-          "idx": 54,
-          "condition": "AFIB",
-          "auc": 0.9948851373325843,
-          "support": 149
-        },
-        {
-          "idx": 35,
-          "condition": "RBBB",
-          "auc": 0.9949794614331355,
-          "support": 1
-        },
-        {
-          "idx": 0,
-          "condition": "1AVB",
-          "auc": 0.995302418961854,
-          "support": 98
-        },
-        {
-          "idx": 44,
-          "condition": "VB",
-          "auc": 0.9958866544789763,
-          "support": 4
-        },
-        {
-          "idx": 34,
-          "condition": "RAH",
-          "auc": 0.9978027023481568,
-          "support": 14
-        },
-        {
-          "idx": 45,
-          "condition": "VEB",
-          "auc": 0.9984772346581391,
-          "support": 3
         },
         {
           "idx": 43,
@@ -1633,199 +1633,199 @@
       "dataset": "georgia (retrained)",
       "n_records": 8118,
       "n_classes_with_support": 32,
-      "macro_auc": 0.9503,
-      "micro_auc": 0.9777,
+      "macro_auc": 0.943,
+      "micro_auc": 0.9749,
       "per_class": [
         {
           "idx": 30,
           "condition": "MISW",
-          "auc": 0.7760108481262327,
+          "auc": 0.7297419460881,
           "support": 6
-        },
-        {
-          "idx": 10,
-          "condition": "AVB",
-          "auc": 0.8018916110396815,
-          "support": 7
         },
         {
           "idx": 42,
           "condition": "TWO",
-          "auc": 0.821180124416893,
+          "auc": 0.8135040149706904,
           "support": 645
         },
         {
           "idx": 39,
           "condition": "STTC",
-          "auc": 0.8729490879832441,
+          "auc": 0.8406228087255766,
           "support": 1421
         },
         {
-          "idx": 16,
-          "condition": "IVB",
-          "auc": 0.8843882251710673,
-          "support": 172
+          "idx": 10,
+          "condition": "AVB",
+          "auc": 0.860876763478169,
+          "support": 7
         },
         {
           "idx": 37,
           "condition": "STDD",
-          "auc": 0.8884072655381194,
+          "auc": 0.8725466452489806,
           "support": 25
+        },
+        {
+          "idx": 16,
+          "condition": "IVB",
+          "auc": 0.8961353964844092,
+          "support": 172
         },
         {
           "idx": 22,
           "condition": "LVH",
-          "auc": 0.9122092089616457,
+          "auc": 0.9029601347024925,
           "support": 1043
-        },
-        {
-          "idx": 41,
-          "condition": "TWC",
-          "auc": 0.937626270501569,
-          "support": 1831
         },
         {
           "idx": 8,
           "condition": "AQW",
-          "auc": 0.9382227280806092,
+          "auc": 0.915314179073869,
           "support": 378
-        },
-        {
-          "idx": 40,
-          "condition": "STTU",
-          "auc": 0.9401675293269129,
-          "support": 94
         },
         {
           "idx": 47,
           "condition": "VPB",
-          "auc": 0.9415908089854648,
+          "auc": 0.9155254367934225,
           "support": 278
+        },
+        {
+          "idx": 41,
+          "condition": "TWC",
+          "auc": 0.9249782196008042,
+          "support": 1831
+        },
+        {
+          "idx": 40,
+          "condition": "STTU",
+          "auc": 0.92743180034365,
+          "support": 94
+        },
+        {
+          "idx": 48,
+          "condition": "VPE",
+          "auc": 0.9428289797930015,
+          "support": 2
         },
         {
           "idx": 23,
           "condition": "LVQRSAL",
-          "auc": 0.9578690940203443,
+          "auc": 0.9504325506226827,
           "support": 268
         },
         {
           "idx": 7,
           "condition": "APB",
-          "auc": 0.9587498003752946,
+          "auc": 0.9518385435381482,
           "support": 528
         },
         {
           "idx": 38,
           "condition": "STE",
-          "auc": 0.9632970823602742,
+          "auc": 0.9614034885800578,
           "support": 917
         },
         {
           "idx": 13,
           "condition": "ERV",
-          "auc": 0.969466423534665,
+          "auc": 0.9652393878115662,
           "support": 117
         },
         {
           "idx": 33,
           "condition": "QTIE",
-          "auc": 0.9728736681347318,
+          "auc": 0.9732894711058098,
           "support": 1257
         },
         {
           "idx": 53,
           "condition": "SR",
-          "auc": 0.9781362478607099,
+          "auc": 0.9749592763783629,
           "support": 1752
-        },
-        {
-          "idx": 9,
-          "condition": "ARS",
-          "auc": 0.9805081804660387,
-          "support": 50
         },
         {
           "idx": 36,
           "condition": "RVH",
-          "auc": 0.983443235938059,
+          "auc": 0.9757052521518603,
           "support": 67
-        },
-        {
-          "idx": 54,
-          "condition": "AFIB",
-          "auc": 0.9860385159373567,
-          "support": 534
-        },
-        {
-          "idx": 6,
-          "condition": "ALS",
-          "auc": 0.9870477332477636,
-          "support": 774
         },
         {
           "idx": 1,
           "condition": "2AVB",
-          "auc": 0.9877139350987896,
+          "auc": 0.9789641075538968,
           "support": 17
+        },
+        {
+          "idx": 9,
+          "condition": "ARS",
+          "auc": 0.9810287555775905,
+          "support": 50
+        },
+        {
+          "idx": 6,
+          "condition": "ALS",
+          "auc": 0.9847923809202119,
+          "support": 774
+        },
+        {
+          "idx": 54,
+          "condition": "AFIB",
+          "auc": 0.9868805211839631,
+          "support": 534
         },
         {
           "idx": 21,
           "condition": "LFBBB",
-          "auc": 0.990055086646771,
+          "auc": 0.9881171230568806,
           "support": 199
-        },
-        {
-          "idx": 0,
-          "condition": "1AVB",
-          "auc": 0.9932409891525482,
-          "support": 703
-        },
-        {
-          "idx": 35,
-          "condition": "RBBB",
-          "auc": 0.9941792456379339,
-          "support": 447
-        },
-        {
-          "idx": 52,
-          "condition": "SB",
-          "auc": 0.9966925837884006,
-          "support": 1552
-        },
-        {
-          "idx": 44,
-          "condition": "VB",
-          "auc": 0.9980285855101035,
-          "support": 2
         },
         {
           "idx": 17,
           "condition": "JEB",
-          "auc": 0.9990141712877387,
+          "auc": 0.9881289792565208,
           "support": 3
         },
         {
-          "idx": 4,
-          "condition": "3AVB",
-          "auc": 0.9990841361819046,
-          "support": 7
+          "idx": 35,
+          "condition": "RBBB",
+          "auc": 0.9900613513750763,
+          "support": 447
+        },
+        {
+          "idx": 0,
+          "condition": "1AVB",
+          "auc": 0.9904046716269452,
+          "support": 703
+        },
+        {
+          "idx": 52,
+          "condition": "SB",
+          "auc": 0.996832420843395,
+          "support": 1552
         },
         {
           "idx": 51,
           "condition": "WPW",
-          "auc": 0.9992607195662888,
+          "auc": 0.997227698373583,
           "support": 2
         },
         {
-          "idx": 48,
-          "condition": "VPE",
-          "auc": 0.9997535731887629,
+          "idx": 44,
+          "condition": "VB",
+          "auc": 0.9979669788072942,
           "support": 2
+        },
+        {
+          "idx": 4,
+          "condition": "3AVB",
+          "auc": 0.9996477446853478,
+          "support": 7
         },
         {
           "idx": 49,
           "condition": "VET",
-          "auc": 1.0,
+          "auc": 0.9998768017740545,
           "support": 1
         }
       ]
@@ -1834,211 +1834,235 @@
       "dataset": "chapman-shaoxing (retrained)",
       "n_records": 7505,
       "n_classes_with_support": 40,
-      "macro_auc": 0.9944,
-      "micro_auc": 0.9981,
+      "macro_auc": 0.9914,
+      "micro_auc": 0.9978,
       "per_class": [
         {
-          "idx": 16,
-          "condition": "IVB",
-          "auc": 0.9727403659624303,
-          "support": 191
-        },
-        {
-          "idx": 13,
-          "condition": "ERV",
-          "auc": 0.9758543607935564,
-          "support": 22
+          "idx": 38,
+          "condition": "STE",
+          "auc": 0.9582167133146742,
+          "support": 2
         },
         {
           "idx": 32,
           "condition": "PWC",
-          "auc": 0.9832798931195724,
+          "auc": 0.969879759519038,
           "support": 20
+        },
+        {
+          "idx": 16,
+          "condition": "IVB",
+          "auc": 0.971260023450687,
+          "support": 191
+        },
+        {
+          "idx": 40,
+          "condition": "STTU",
+          "auc": 0.9787204012975534,
+          "support": 117
+        },
+        {
+          "idx": 12,
+          "condition": "CR",
+          "auc": 0.9804331550802139,
+          "support": 25
+        },
+        {
+          "idx": 42,
+          "condition": "TWO",
+          "auc": 0.9808887497418749,
+          "support": 122
+        },
+        {
+          "idx": 22,
+          "condition": "LVH",
+          "auc": 0.9823093350856298,
+          "support": 13
         },
         {
           "idx": 39,
           "condition": "STTC",
-          "auc": 0.9848769810828981,
+          "auc": 0.9826391195459793,
           "support": 694
         },
         {
           "idx": 11,
           "condition": "CCR",
-          "auc": 0.9860531593886268,
+          "auc": 0.982670818298219,
           "support": 121
         },
         {
           "idx": 41,
           "condition": "TWC",
-          "auc": 0.9864802984676263,
+          "auc": 0.9836094623056971,
           "support": 1415
-        },
-        {
-          "idx": 22,
-          "condition": "LVH",
-          "auc": 0.9869809848453736,
-          "support": 13
-        },
-        {
-          "idx": 42,
-          "condition": "TWO",
-          "auc": 0.9873801799881429,
-          "support": 122
-        },
-        {
-          "idx": 12,
-          "condition": "CR",
-          "auc": 0.9878502673796791,
-          "support": 25
-        },
-        {
-          "idx": 47,
-          "condition": "VPB",
-          "auc": 0.9909735236853929,
-          "support": 203
         },
         {
           "idx": 23,
           "condition": "LVQRSAL",
-          "auc": 0.991211325286218,
+          "auc": 0.985755680903012,
           "support": 171
-        },
-        {
-          "idx": 40,
-          "condition": "STTU",
-          "auc": 0.9914842271366365,
-          "support": 117
-        },
-        {
-          "idx": 37,
-          "condition": "STDD",
-          "auc": 0.9935349969226204,
-          "support": 276
-        },
-        {
-          "idx": 21,
-          "condition": "LFBBB",
-          "auc": 0.995194517871509,
-          "support": 113
-        },
-        {
-          "idx": 8,
-          "condition": "AQW",
-          "auc": 0.9952112626070347,
-          "support": 169
-        },
-        {
-          "idx": 31,
-          "condition": "PRIE",
-          "auc": 0.9955327376983597,
-          "support": 6
-        },
-        {
-          "idx": 33,
-          "condition": "QTIE",
-          "auc": 0.995680077379552,
-          "support": 41
-        },
-        {
-          "idx": 7,
-          "condition": "APB",
-          "auc": 0.9960434584724291,
-          "support": 139
         },
         {
           "idx": 43,
           "condition": "UW",
-          "auc": 0.9961742709904474,
+          "auc": 0.9885463800904978,
           "support": 17
         },
         {
-          "idx": 38,
-          "condition": "STE",
-          "auc": 0.9964680794348927,
-          "support": 2
+          "idx": 51,
+          "condition": "WPW",
+          "auc": 0.9886727078891258,
+          "support": 1
+        },
+        {
+          "idx": 31,
+          "condition": "PRIE",
+          "auc": 0.9889985331377517,
+          "support": 6
+        },
+        {
+          "idx": 47,
+          "condition": "VPB",
+          "auc": 0.9894704602153671,
+          "support": 203
+        },
+        {
+          "idx": 13,
+          "condition": "ERV",
+          "auc": 0.9911921567674608,
+          "support": 22
+        },
+        {
+          "idx": 37,
+          "condition": "STDD",
+          "auc": 0.992078003051317,
+          "support": 276
+        },
+        {
+          "idx": 7,
+          "condition": "APB",
+          "auc": 0.9929297940957579,
+          "support": 139
         },
         {
           "idx": 45,
           "condition": "VEB",
-          "auc": 0.9966662221629551,
+          "auc": 0.9930657420989466,
           "support": 6
         },
         {
-          "idx": 9,
-          "condition": "ARS",
-          "auc": 0.9976895610165932,
-          "support": 99
+          "idx": 8,
+          "condition": "AQW",
+          "auc": 0.9936682518890387,
+          "support": 169
         },
         {
-          "idx": 49,
-          "condition": "VET",
-          "auc": 0.9977669644047461,
-          "support": 4
+          "idx": 21,
+          "condition": "LFBBB",
+          "auc": 0.9946294487223691,
+          "support": 113
+        },
+        {
+          "idx": 33,
+          "condition": "QTIE",
+          "auc": 0.9968139753744805,
+          "support": 41
         },
         {
           "idx": 6,
           "condition": "ALS",
-          "auc": 0.9979964981345053,
+          "auc": 0.9974545935075882,
           "support": 259
         },
         {
           "idx": 30,
           "condition": "MISW",
-          "auc": 0.9990086758440316,
+          "auc": 0.9986571424553904,
           "support": 19
         },
         {
-          "idx": 1,
-          "condition": "2AVB",
-          "auc": 0.9990669154892027,
-          "support": 3
-        },
-        {
-          "idx": 17,
-          "condition": "JEB",
-          "auc": 0.9990991592152676,
-          "support": 12
-        },
-        {
-          "idx": 53,
-          "condition": "SR",
-          "auc": 0.999472509449024,
-          "support": 1826
-        },
-        {
-          "idx": 0,
-          "condition": "1AVB",
-          "auc": 0.999527477544279,
-          "support": 188
+          "idx": 9,
+          "condition": "ARS",
+          "auc": 0.9990698232664206,
+          "support": 99
         },
         {
           "idx": 35,
           "condition": "RBBB",
-          "auc": 0.9995879527874875,
+          "auc": 0.9990796818328622,
           "support": 291
+        },
+        {
+          "idx": 49,
+          "condition": "VET",
+          "auc": 0.9991667777629649,
+          "support": 4
+        },
+        {
+          "idx": 5,
+          "condition": "ABI",
+          "auc": 0.999333599893376,
+          "support": 2
         },
         {
           "idx": 14,
           "condition": "FQRS",
-          "auc": 0.9997334399573503,
+          "auc": 0.999333599893376,
           "support": 2
         },
         {
-          "idx": 52,
-          "condition": "SB",
-          "auc": 0.9998444873650782,
-          "support": 3887
+          "idx": 17,
+          "condition": "JEB",
+          "auc": 0.9995885048267272,
+          "support": 12
         },
         {
           "idx": 2,
           "condition": "2AVB1",
-          "auc": 0.9998667377398721,
+          "auc": 0.9996002132196162,
           "support": 1
+        },
+        {
+          "idx": 0,
+          "condition": "1AVB",
+          "auc": 0.9996009002643218,
+          "support": 188
+        },
+        {
+          "idx": 53,
+          "condition": "SR",
+          "auc": 0.9996580472589103,
+          "support": 1826
+        },
+        {
+          "idx": 10,
+          "condition": "AVB",
+          "auc": 0.999666799946688,
+          "support": 2
+        },
+        {
+          "idx": 48,
+          "condition": "VPE",
+          "auc": 0.9996889718297343,
+          "support": 3
+        },
+        {
+          "idx": 1,
+          "condition": "2AVB",
+          "auc": 0.9997778370212388,
+          "support": 3
+        },
+        {
+          "idx": 52,
+          "condition": "SB",
+          "auc": 0.999879472374855,
+          "support": 3887
         },
         {
           "idx": 54,
           "condition": "AFIB",
-          "auc": 0.9999963691673618,
+          "auc": 0.999999411216329,
           "support": 1780
         },
         {
@@ -2048,34 +2072,10 @@
           "support": 1
         },
         {
-          "idx": 5,
-          "condition": "ABI",
-          "auc": 1.0,
-          "support": 2
-        },
-        {
-          "idx": 10,
-          "condition": "AVB",
-          "auc": 1.0,
-          "support": 2
-        },
-        {
           "idx": 44,
           "condition": "VB",
           "auc": 1.0,
           "support": 2
-        },
-        {
-          "idx": 48,
-          "condition": "VPE",
-          "auc": 1.0,
-          "support": 3
-        },
-        {
-          "idx": 51,
-          "condition": "WPW",
-          "auc": 1.0,
-          "support": 1
         }
       ]
     },
@@ -2083,203 +2083,203 @@
       "dataset": "ningbo (retrained)",
       "n_records": 18263,
       "n_classes_with_support": 32,
-      "macro_auc": 0.9969,
-      "micro_auc": 0.999,
+      "macro_auc": 0.9956,
+      "micro_auc": 0.9989,
       "per_class": [
         {
-          "idx": 38,
-          "condition": "STE",
-          "auc": 0.9905901671367006,
-          "support": 479
-        },
-        {
-          "idx": 41,
-          "condition": "TWC",
-          "auc": 0.9912115004750262,
-          "support": 2172
+          "idx": 2,
+          "condition": "2AVB1",
+          "auc": 0.9741747101602437,
+          "support": 14
         },
         {
           "idx": 17,
           "condition": "JEB",
-          "auc": 0.9917887387336276,
+          "auc": 0.9859130158514031,
           "support": 29
         },
         {
           "idx": 23,
           "condition": "LVQRSAL",
-          "auc": 0.9922653200520445,
+          "auc": 0.9888066282841576,
           "support": 271
         },
         {
-          "idx": 13,
-          "condition": "ERV",
-          "auc": 0.9928484749879979,
-          "support": 306
+          "idx": 41,
+          "condition": "TWC",
+          "auc": 0.9891048986696634,
+          "support": 2172
         },
         {
           "idx": 8,
           "condition": "AQW",
-          "auc": 0.993470367509645,
+          "auc": 0.9892120746969073,
           "support": 342
         },
         {
-          "idx": 2,
-          "condition": "2AVB1",
-          "auc": 0.9936552296407631,
-          "support": 14
+          "idx": 38,
+          "condition": "STE",
+          "auc": 0.990011546585,
+          "support": 479
         },
         {
           "idx": 42,
           "condition": "TWO",
-          "auc": 0.993812522049019,
+          "auc": 0.9937479445829671,
           "support": 1070
+        },
+        {
+          "idx": 31,
+          "condition": "PRIE",
+          "auc": 0.9940900451413638,
+          "support": 24
+        },
+        {
+          "idx": 13,
+          "condition": "ERV",
+          "auc": 0.9949519931601308,
+          "support": 306
+        },
+        {
+          "idx": 43,
+          "condition": "UW",
+          "auc": 0.9951822080524568,
+          "support": 34
+        },
+        {
+          "idx": 37,
+          "condition": "STDD",
+          "auc": 0.9954791148713,
+          "support": 297
+        },
+        {
+          "idx": 16,
+          "condition": "IVB",
+          "auc": 0.9956794864761068,
+          "support": 36
         },
         {
           "idx": 7,
           "condition": "APB",
-          "auc": 0.9943979021558933,
+          "auc": 0.9958431733612902,
           "support": 462
-        },
-        {
-          "idx": 1,
-          "condition": "2AVB",
-          "auc": 0.9944109589041096,
-          "support": 13
         },
         {
           "idx": 46,
           "condition": "VFW",
-          "auc": 0.9961644637013474,
+          "auc": 0.9968427210735114,
           "support": 30
         },
         {
           "idx": 22,
           "condition": "LVH",
-          "auc": 0.9963545492956137,
+          "auc": 0.9969635835575975,
           "support": 145
+        },
+        {
+          "idx": 1,
+          "condition": "2AVB",
+          "auc": 0.9972518440463646,
+          "support": 13
         },
         {
           "idx": 6,
           "condition": "ALS",
-          "auc": 0.9975927407159095,
+          "auc": 0.9979508298166815,
           "support": 477
-        },
-        {
-          "idx": 37,
-          "condition": "STDD",
-          "auc": 0.9976526930217234,
-          "support": 297
-        },
-        {
-          "idx": 9,
-          "condition": "ARS",
-          "auc": 0.9978804797353185,
-          "support": 128
         },
         {
           "idx": 35,
           "condition": "RBBB",
-          "auc": 0.9985144820596211,
+          "auc": 0.9981385778010435,
           "support": 79
-        },
-        {
-          "idx": 43,
-          "condition": "UW",
-          "auc": 0.998554339723711,
-          "support": 34
-        },
-        {
-          "idx": 16,
-          "condition": "IVB",
-          "auc": 0.9986101205171815,
-          "support": 36
         },
         {
           "idx": 33,
           "condition": "QTIE",
-          "auc": 0.9986961770086988,
+          "auc": 0.9983071420155569,
           "support": 149
         },
         {
           "idx": 0,
           "condition": "1AVB",
-          "auc": 0.9987337951495759,
+          "auc": 0.9984070080479465,
           "support": 672
-        },
-        {
-          "idx": 31,
-          "condition": "PRIE",
-          "auc": 0.9988349141948571,
-          "support": 24
-        },
-        {
-          "idx": 30,
-          "condition": "MISW",
-          "auc": 0.99901740278096,
-          "support": 34
         },
         {
           "idx": 32,
           "condition": "PWC",
-          "auc": 0.9990830045301767,
+          "auc": 0.9985678795849774,
           "support": 15
+        },
+        {
+          "idx": 18,
+          "condition": "JPT",
+          "auc": 0.9986671778861076,
+          "support": 6
         },
         {
           "idx": 45,
           "condition": "VEB",
-          "auc": 0.9992848970251715,
+          "auc": 0.9988772883295194,
           "support": 23
+        },
+        {
+          "idx": 30,
+          "condition": "MISW",
+          "auc": 0.9989464105352492,
+          "support": 34
+        },
+        {
+          "idx": 9,
+          "condition": "ARS",
+          "auc": 0.9992762613730356,
+          "support": 128
+        },
+        {
+          "idx": 51,
+          "condition": "WPW",
+          "auc": 0.9993776622626526,
+          "support": 38
         },
         {
           "idx": 53,
           "condition": "SR",
-          "auc": 0.9993516705487128,
+          "auc": 0.9995102922705935,
           "support": 6064
         },
         {
           "idx": 52,
           "condition": "SB",
-          "auc": 0.9995636029798418,
+          "auc": 0.9996254732993344,
           "support": 11940
         },
         {
           "idx": 4,
           "condition": "3AVB",
-          "auc": 0.9996315581133339,
+          "auc": 0.9996589628817636,
           "support": 18
         },
         {
           "idx": 21,
           "condition": "LFBBB",
-          "auc": 0.9998356164383562,
+          "auc": 0.9997976817702846,
           "support": 13
-        },
-        {
-          "idx": 18,
-          "condition": "JPT",
-          "auc": 0.9998904529769403,
-          "support": 6
-        },
-        {
-          "idx": 36,
-          "condition": "RVH",
-          "auc": 0.9999360975698819,
-          "support": 6
-        },
-        {
-          "idx": 51,
-          "condition": "WPW",
-          "auc": 0.9999898924265396,
-          "support": 38
         },
         {
           "idx": 34,
           "condition": "RAH",
-          "auc": 0.999992174784024,
+          "auc": 0.9998356704645048,
           "support": 7
+        },
+        {
+          "idx": 36,
+          "condition": "RVH",
+          "auc": 0.9999634843256467,
+          "support": 6
         }
       ]
     }
   },
-  "retrained_best_auc": 0.9620972692176818
+  "retrained_best_auc": 0.9585000133987996
 }

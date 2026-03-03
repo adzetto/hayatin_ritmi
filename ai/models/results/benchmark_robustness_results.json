@@ -1,19 +1,19 @@
 {
   "speed_benchmark": {
     "DCA-CNN INT8": {
-      "avg_ms": 0.905,
+      "avg_ms": 0.266,
       "size_kb": 312.3
     },
     "DCA-CNN FP32": {
-      "avg_ms": 1.22,
+      "avg_ms": 0.422,
       "size_kb": 1032.9
     },
     "DS-1D-CNN INT8": {
-      "avg_ms": 0.552,
+      "avg_ms": 0.24,
       "size_kb": 231.6
     },
     "Combined INT8": {
-      "avg_ms": 0.686,
+      "avg_ms": 0.237,
       "size_kb": 231.6
     }
   },

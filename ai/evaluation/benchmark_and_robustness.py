@@ -10,6 +10,13 @@ import os, sys, time, json
 import numpy as np
 from pathlib import Path
 
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich import box
+
+console = Console()
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "ai" / "training"))
 
@@ -29,7 +36,7 @@ def load_class_names():
 def load_test_data(n_samples=1000):
     cache = CACHE_DIR / "dataset_cache.npz"
     if not cache.exists():
-        print(f"  Cache not found: {cache}")
+        console.print(f"  [red]Cache not found:[/] {cache}")
         return None, None
 
     data = np.load(cache, allow_pickle=True)
@@ -46,9 +53,9 @@ def load_test_data(n_samples=1000):
 def benchmark_tflite():
     """Speed benchmark for all TFLite variants."""
     import tensorflow as tf
-    print("\n" + "=" * 60)
-    print("  TFLITE SPEED BENCHMARK")
-    print("=" * 60)
+
+    console.print(Panel("[bold]TFLITE SPEED BENCHMARK[/]",
+                        border_style="bright_cyan", expand=False))
 
     models = {
         "DCA-CNN INT8":  TFLITE_DIR / "ecg_dca_cnn_int8.tflite",
@@ -59,11 +66,18 @@ def benchmark_tflite():
 
     X, _ = load_test_data(200)
     if X is None:
-        print("  No test data available")
+        console.print("  [yellow]No test data available[/]")
         return {}
 
-    X_cl = np.transpose(X[:100], (0, 2, 1)).astype(np.float32)  # channels-last
+    X_cl = np.transpose(X[:100], (0, 2, 1)).astype(np.float32)
     results = {}
+
+    speed_tbl = Table(title="TFLite Inference Speed", box=box.ROUNDED,
+                      border_style="cyan")
+    speed_tbl.add_column("Model", style="cyan", min_width=20)
+    speed_tbl.add_column("Size", justify="right")
+    speed_tbl.add_column("Avg Latency", justify="right", style="bold")
+    speed_tbl.add_column("Throughput", justify="right", style="green")
 
     for name, path in models.items():
         if not path.exists():
@@ -100,25 +114,28 @@ def benchmark_tflite():
 
         avg = np.mean(times)
         size_kb = path.stat().st_size / 1024
-        print(f"  {name:20s} | {size_kb:7.0f} KB | avg={avg:.2f}ms | {1000/avg:.0f} ECG/s")
+        speed_tbl.add_row(
+            name, f"{size_kb:.0f} KB",
+            f"{avg:.2f} ms", f"{1000/avg:.0f} ECG/s",
+        )
         results[name] = {"avg_ms": round(avg, 3), "size_kb": round(size_kb, 1)}
 
+    console.print(speed_tbl)
     return results
 
 
 def confusion_matrix_analysis():
     """Per-class confusion matrix and weak class identification."""
-    print("\n" + "=" * 60)
-    print("  PER-CLASS CONFUSION MATRIX ANALYSIS")
-    print("=" * 60)
+    console.print(Panel("[bold]PER-CLASS CONFUSION MATRIX ANALYSIS[/]",
+                        border_style="bright_cyan", expand=False))
 
     import torch
     from train_dca_cnn import DcaCNN
-    from sklearn.metrics import roc_auc_score, classification_report
+    from sklearn.metrics import roc_auc_score
 
     CKPT = PROJECT_ROOT / "ai" / "models" / "checkpoints" / "ecg_dca_cnn_best.pt"
     if not CKPT.exists():
-        print("  DCA-CNN checkpoint not found")
+        console.print("  [red]DCA-CNN checkpoint not found[/]")
         return {}
 
     X, Y = load_test_data(3960)
@@ -148,7 +165,7 @@ def confusion_matrix_analysis():
         if Y[:, c].sum() > 0 and Y[:, c].sum() < len(Y):
             valid_cols.append(c)
 
-    print(f"\n  Active classes: {len(valid_cols)} / {Y.shape[1]}")
+    console.print(f"  Active classes: [cyan]{len(valid_cols)}[/] / {Y.shape[1]}")
 
     per_class = []
     for c in valid_cols:
@@ -170,27 +187,54 @@ def confusion_matrix_analysis():
 
     per_class.sort(key=lambda x: x["auc"])
 
-    print(f"\n  {'Class':>8s}  {'AUC':>6s}  {'Prec':>6s}  {'Rec':>6s}  {'F1':>6s}  {'Sup':>5s}")
-    print("  " + "-" * 50)
+    # Bottom 10
+    bottom_tbl = Table(title="Bottom 10 Classes", box=box.ROUNDED,
+                       border_style="yellow")
+    bottom_tbl.add_column("Class", style="yellow")
+    bottom_tbl.add_column("AUC", justify="right", style="bold")
+    bottom_tbl.add_column("Prec", justify="right")
+    bottom_tbl.add_column("Rec", justify="right")
+    bottom_tbl.add_column("F1", justify="right")
+    bottom_tbl.add_column("Sup", justify="right")
+
     for row in per_class[:10]:
-        print(f"  {row['name']:>8s}  {row['auc']:.4f}  {row['precision']:.4f}  "
-              f"{row['recall']:.4f}  {row['f1']:.4f}  {row['support']:5d}")
-    print("  ...")
+        auc_style = "red" if row["auc"] < 0.90 else "yellow"
+        bottom_tbl.add_row(
+            row["name"], f"[{auc_style}]{row['auc']:.4f}[/]",
+            f"{row['precision']:.4f}", f"{row['recall']:.4f}",
+            f"{row['f1']:.4f}", str(row["support"]),
+        )
+    console.print(bottom_tbl)
+
+    # Top 5
+    top_tbl = Table(title="Top 5 Classes", box=box.ROUNDED,
+                    border_style="green")
+    top_tbl.add_column("Class", style="green")
+    top_tbl.add_column("AUC", justify="right", style="bold green")
+    top_tbl.add_column("Prec", justify="right")
+    top_tbl.add_column("Rec", justify="right")
+    top_tbl.add_column("F1", justify="right")
+    top_tbl.add_column("Sup", justify="right")
+
     for row in per_class[-5:]:
-        print(f"  {row['name']:>8s}  {row['auc']:.4f}  {row['precision']:.4f}  "
-              f"{row['recall']:.4f}  {row['f1']:.4f}  {row['support']:5d}")
+        top_tbl.add_row(
+            row["name"], f"{row['auc']:.4f}",
+            f"{row['precision']:.4f}", f"{row['recall']:.4f}",
+            f"{row['f1']:.4f}", str(row["support"]),
+        )
+    console.print(top_tbl)
 
     weak = [r for r in per_class if r["auc"] < 0.90]
-    print(f"\n  Weak classes (AUC < 0.90): {len(weak)}")
+    console.print(f"  Weak classes (AUC < 0.90): [bold {'red' if weak else 'green'}]"
+                  f"{len(weak)}[/]")
 
     return {"per_class": per_class, "n_weak": len(weak), "n_active": len(valid_cols)}
 
 
 def noise_robustness_test():
     """Test model performance at different SNR levels (6-18 dB)."""
-    print("\n" + "=" * 60)
-    print("  NOISE ROBUSTNESS TEST (SNR 6-18 dB)")
-    print("=" * 60)
+    console.print(Panel("[bold]NOISE ROBUSTNESS TEST (SNR 6-40 dB)[/]",
+                        border_style="bright_cyan", expand=False))
 
     import torch
     from train_dca_cnn import DcaCNN
@@ -198,7 +242,7 @@ def noise_robustness_test():
 
     CKPT = PROJECT_ROOT / "ai" / "models" / "checkpoints" / "ecg_dca_cnn_best.pt"
     if not CKPT.exists():
-        print("  DCA-CNN checkpoint not found")
+        console.print("  [red]DCA-CNN checkpoint not found[/]")
         return {}
 
     X, Y = load_test_data(2000)
@@ -209,9 +253,15 @@ def noise_robustness_test():
     model.load_state_dict(torch.load(CKPT, map_location="cpu", weights_only=True))
     model.eval()
 
-    snr_levels = [6, 9, 12, 15, 18, 25, 40, None]  # None = clean
+    snr_levels = [6, 9, 12, 15, 18, 25, 40, None]
     results = {}
     rng = np.random.RandomState(123)
+
+    noise_tbl = Table(title="Noise Robustness", box=box.ROUNDED,
+                      border_style="cyan")
+    noise_tbl.add_column("SNR", style="cyan", justify="right", min_width=12)
+    noise_tbl.add_column("Macro AUC", justify="right", style="bold")
+    noise_tbl.add_column("Bar", min_width=30)
 
     for snr_db in snr_levels:
         X_noisy = X.copy()
@@ -243,8 +293,10 @@ def noise_robustness_test():
             Y[:, valid_cols], preds[:, valid_cols], average="macro"
         )
         results[label] = round(macro_auc, 4)
-        print(f"  {label:>12s}  Macro AUC = {macro_auc:.4f}")
+        bar = "[green]" + "█" * int(macro_auc * 30) + "[/]"
+        noise_tbl.add_row(label, f"{macro_auc:.4f}", bar)
 
+    console.print(noise_tbl)
     return results
 
 
@@ -264,4 +316,8 @@ if __name__ == "__main__":
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
-    print(f"\n  Results saved: {out_path}")
+
+    console.print(Panel(
+        f"[bold green]Results saved:[/] [dim]{out_path}[/]",
+        border_style="green", expand=False,
+    ))

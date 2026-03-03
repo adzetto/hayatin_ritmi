@@ -1,0 +1,408 @@
+{
+  "mhd-effect-ecg-mri": {
+    "meta": {
+      "total_hea": 53,
+      "loaded": 39,
+      "skipped_few_leads": 14,
+      "skipped_blacklist": 0,
+      "skipped_error": 0,
+      "native_fs": 1024,
+      "lead_counts": {
+        "12": 39,
+        "3": 14
+      },
+      "mapped_leads": {
+        "I": 39,
+        "II": 39,
+        "III": 39,
+        "aVR": 39,
+        "aVL": 39,
+        "aVF": 39,
+        "V1": 39,
+        "V2": 39,
+        "V3": 39,
+        "V4": 39,
+        "V5": 39,
+        "V6": 39
+      }
+    },
+    "signal_quality": {
+      "n_records": 39,
+      "avg_flatline_leads": 0.0,
+      "snr_db_mean": 18.4,
+      "snr_db_std": 3.1,
+      "snr_db_min": 11.9,
+      "snr_db_p25": 16.0,
+      "snr_db_p50": 18.5
+    },
+    "confidence": {
+      "n_records": 39,
+      "max_sigmoid": {
+        "mean": 0.5426,
+        "std": 0.3206,
+        "min": 0.0695,
+        "max": 0.9956,
+        "p25": 0.2236,
+        "p50": 0.4883,
+        "p75": 0.9098
+      },
+      "mean_sigmoid": {
+        "mean": 0.0221,
+        "std": 0.0083
+      },
+      "top_predicted_classes": [
+        {
+          "class": "AFIB",
+          "count": 9,
+          "pct": 23.1
+        },
+        {
+          "class": "SR",
+          "count": 7,
+          "pct": 17.9
+        },
+        {
+          "class": "APB",
+          "count": 2,
+          "pct": 5.1
+        },
+        {
+          "class": "SB",
+          "count": 1,
+          "pct": 2.6
+        }
+      ],
+      "top_confident_classes": [
+        {
+          "class": "AFIB",
+          "mean_prob": 0.2953
+        },
+        {
+          "class": "SR",
+          "mean_prob": 0.1638
+        },
+        {
+          "class": "RBBB",
+          "mean_prob": 0.139
+        },
+        {
+          "class": "LVQRSAL",
+          "mean_prob": 0.0837
+        },
+        {
+          "class": "APB",
+          "mean_prob": 0.0787
+        }
+      ],
+      "records_with_any_prediction": 19,
+      "avg_predictions_per_record": 0.49
+    },
+    "lead_reduction": {
+      "top1_agreement_12v3": 0.6923,
+      "top1_agreement_12v1": 0.5641,
+      "top1_agreement_3v1": 0.641,
+      "cosine_sim_12v3": 0.8417,
+      "cosine_sim_12v1": 0.7963,
+      "mean_confidence_12lead": 0.5426,
+      "mean_confidence_3lead": 0.5019,
+      "mean_confidence_1lead": 0.5141
+    },
+    "inference_time_s": 0.104
+  },
+  "twadb": {
+    "meta": {
+      "total_hea": 100,
+      "loaded": 72,
+      "skipped_few_leads": 27,
+      "skipped_blacklist": 1,
+      "skipped_error": 0,
+      "native_fs": 500,
+      "lead_counts": {
+        "12": 72,
+        "0": 27
+      },
+      "mapped_leads": {
+        "I": 72,
+        "II": 72,
+        "III": 72,
+        "aVR": 72,
+        "aVL": 72,
+        "aVF": 72,
+        "V1": 72,
+        "V2": 72,
+        "V3": 72,
+        "V4": 72,
+        "V5": 72,
+        "V6": 72
+      }
+    },
+    "signal_quality": {
+      "n_records": 72,
+      "avg_flatline_leads": 0.0,
+      "snr_db_mean": 13.5,
+      "snr_db_std": 2.6,
+      "snr_db_min": 7.7,
+      "snr_db_p25": 11.6,
+      "snr_db_p50": 13.3
+    },
+    "confidence": {
+      "n_records": 72,
+      "max_sigmoid": {
+        "mean": 0.6508,
+        "std": 0.2347,
+        "min": 0.1152,
+        "max": 0.9921,
+        "p25": 0.4488,
+        "p50": 0.6472,
+        "p75": 0.888
+      },
+      "mean_sigmoid": {
+        "mean": 0.0345,
+        "std": 0.0151
+      },
+      "top_predicted_classes": [
+        {
+          "class": "AFIB",
+          "count": 20,
+          "pct": 27.8
+        },
+        {
+          "class": "SR",
+          "count": 10,
+          "pct": 13.9
+        },
+        {
+          "class": "TWC",
+          "count": 10,
+          "pct": 13.9
+        },
+        {
+          "class": "AQW",
+          "count": 6,
+          "pct": 8.3
+        },
+        {
+          "class": "SB",
+          "count": 4,
+          "pct": 5.6
+        }
+      ],
+      "top_confident_classes": [
+        {
+          "class": "AFIB",
+          "mean_prob": 0.2942
+        },
+        {
+          "class": "TWC",
+          "mean_prob": 0.228
+        },
+        {
+          "class": "SR",
+          "mean_prob": 0.206
+        },
+        {
+          "class": "RBBB",
+          "mean_prob": 0.1383
+        },
+        {
+          "class": "STTC",
+          "mean_prob": 0.1178
+        }
+      ],
+      "records_with_any_prediction": 46,
+      "avg_predictions_per_record": 0.9
+    },
+    "lead_reduction": {
+      "top1_agreement_12v3": 0.4028,
+      "top1_agreement_12v1": 0.4306,
+      "top1_agreement_3v1": 0.4583,
+      "cosine_sim_12v3": 0.7665,
+      "cosine_sim_12v1": 0.7166,
+      "mean_confidence_12lead": 0.6508,
+      "mean_confidence_3lead": 0.4341,
+      "mean_confidence_1lead": 0.5159
+    },
+    "inference_time_s": 0.042
+  },
+  "mghdb": {
+    "meta": {
+      "total_hea": 251,
+      "loaded": 1,
+      "skipped_few_leads": 246,
+      "skipped_blacklist": 0,
+      "skipped_error": 4,
+      "native_fs": 360,
+      "lead_counts": {
+        "0": 242,
+        "3": 1,
+        "1": 4
+      },
+      "mapped_leads": {
+        "I": 1,
+        "II": 1,
+        "V1": 1
+      }
+    },
+    "signal_quality": {
+      "n_records": 1,
+      "avg_flatline_leads": 9.0,
+      "snr_db_mean": 15.2,
+      "snr_db_std": 3.7,
+      "snr_db_min": 10.2,
+      "snr_db_p25": 13.3,
+      "snr_db_p50": 16.4
+    },
+    "confidence": {
+      "n_records": 1,
+      "max_sigmoid": {
+        "mean": 0.7172,
+        "std": 0.0,
+        "min": 0.7172,
+        "max": 0.7172,
+        "p25": 0.7172,
+        "p50": 0.7172,
+        "p75": 0.7172
+      },
+      "mean_sigmoid": {
+        "mean": 0.0416,
+        "std": 0.0
+      },
+      "top_predicted_classes": [
+        {
+          "class": "AFIB",
+          "count": 1,
+          "pct": 100.0
+        }
+      ],
+      "top_confident_classes": [
+        {
+          "class": "AFIB",
+          "mean_prob": 0.7172
+        },
+        {
+          "class": "VPB",
+          "mean_prob": 0.291
+        },
+        {
+          "class": "TWC",
+          "mean_prob": 0.2371
+        },
+        {
+          "class": "RBBB",
+          "mean_prob": 0.2179
+        },
+        {
+          "class": "STTC",
+          "mean_prob": 0.1836
+        }
+      ],
+      "records_with_any_prediction": 1,
+      "avg_predictions_per_record": 1.0
+    },
+    "lead_reduction": {},
+    "inference_time_s": 0.016
+  },
+  "ltstdb": {
+    "meta": {
+      "total_hea": 86,
+      "loaded": 49,
+      "skipped_few_leads": 37,
+      "skipped_blacklist": 0,
+      "skipped_error": 0,
+      "native_fs": 250,
+      "lead_counts": {
+        "2": 47,
+        "1": 22,
+        "3": 2,
+        "0": 15
+      },
+      "mapped_leads": {
+        "II": 18,
+        "V2": 18,
+        "III": 29,
+        "V4": 27,
+        "V3": 2,
+        "V5": 4,
+        "V6": 2
+      }
+    },
+    "signal_quality": {
+      "n_records": 49,
+      "avg_flatline_leads": 10.0,
+      "snr_db_mean": 15.0,
+      "snr_db_std": 2.0,
+      "snr_db_min": 11.6,
+      "snr_db_p25": 13.3,
+      "snr_db_p50": 15.1
+    },
+    "confidence": {
+      "n_records": 49,
+      "max_sigmoid": {
+        "mean": 0.6141,
+        "std": 0.2408,
+        "min": 0.2209,
+        "max": 0.9914,
+        "p25": 0.3923,
+        "p50": 0.5727,
+        "p75": 0.8488
+      },
+      "mean_sigmoid": {
+        "mean": 0.0246,
+        "std": 0.0076
+      },
+      "top_predicted_classes": [
+        {
+          "class": "SR",
+          "count": 11,
+          "pct": 22.4
+        },
+        {
+          "class": "SB",
+          "count": 10,
+          "pct": 20.4
+        },
+        {
+          "class": "AFIB",
+          "count": 3,
+          "pct": 6.1
+        },
+        {
+          "class": "TWC",
+          "count": 2,
+          "pct": 4.1
+        },
+        {
+          "class": "RBBB",
+          "count": 2,
+          "pct": 4.1
+        }
+      ],
+      "top_confident_classes": [
+        {
+          "class": "SR",
+          "mean_prob": 0.2828
+        },
+        {
+          "class": "SB",
+          "mean_prob": 0.1935
+        },
+        {
+          "class": "STTC",
+          "mean_prob": 0.1204
+        },
+        {
+          "class": "RBBB",
+          "mean_prob": 0.1141
+        },
+        {
+          "class": "TWC",
+          "mean_prob": 0.1107
+        }
+      ],
+      "records_with_any_prediction": 28,
+      "avg_predictions_per_record": 0.63
+    },
+    "lead_reduction": {},
+    "inference_time_s": 0.631
+  }
+}

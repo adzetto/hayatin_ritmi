@@ -1,0 +1,16 @@
+{
+  "title": "SPH 12-Lead ECG Arrhythmia (45K, 500Hz)",
+  "id": "muhammetyaciolu/ecg-arrhythmia",
+  "licenses": [
+    {
+      "name": "other"
+    }
+  ],
+  "keywords": [
+    "ecg",
+    "physionet",
+    "hayatin-ritmi",
+    "arrhythmia",
+    "12-lead"
+  ]
+}
