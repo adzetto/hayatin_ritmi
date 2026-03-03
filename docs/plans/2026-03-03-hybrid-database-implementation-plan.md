@@ -962,11 +962,3 @@ gantt
 > **Not**: Sadece metadata sync edildigi senaryoda (EKG waveform haric), prototip ve pilot asamalarinda maliyet tamamen sifirdir. Firebase Spark (ucretsiz) plani yeterlidir.
 
 ---
-
-## Hemen Baslanabilecek Adimlar
-
-- [ ] Firebase Console'da proje olustur
-- [ ] `google-services.json` dosyasini al
-- [ ] Faz 1.1-1.3: Yeni Room entity'leri olustur
-- [ ] Faz 1.4: Migration yaz ve test et
-- [ ] Faz 2.2: Gradle bagimliliklerini ekle
