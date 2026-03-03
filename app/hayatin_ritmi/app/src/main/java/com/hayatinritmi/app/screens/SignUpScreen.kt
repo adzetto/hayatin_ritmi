@@ -13,10 +13,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info // EKLENDİ
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,7 +63,7 @@ fun BloodTypeDropdown(
             readOnly = true,
             label = { Text("Kan Grubu", fontSize = 14.sp, fontFamily = JakartaFont, fontWeight = FontWeight.Medium) },
             leadingIcon = {
-                Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(),
@@ -71,7 +73,6 @@ fun BloodTypeDropdown(
                 unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                // DEĞİŞTİ: outlineVariant silikti, onSurfaceVariant'ın saydam hali kullanıldı
                 unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -114,7 +115,7 @@ fun UnderlineInput(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, fontSize = 15.sp, fontFamily = JakartaFont, fontWeight = FontWeight.Medium) },
+        label = { Text(label, fontSize = 14.sp, fontFamily = JakartaFont, fontWeight = FontWeight.Medium) },
         leadingIcon = {
             Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
         },
@@ -128,7 +129,6 @@ fun UnderlineInput(
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
             cursorColor = MaterialTheme.colorScheme.primary,
             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            // DEĞİŞTİ: Çizginin silikleşmesini önlemek için belirgin bir gri (onSurfaceVariant) kullanıldı
             unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             focusedLabelColor = MaterialTheme.colorScheme.primary,
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -143,8 +143,10 @@ fun UnderlineInput(
 @Composable
 fun SignUpScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var bloodType by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var emergencyPhone by remember { mutableStateOf("") }
     var doctorEmail by remember { mutableStateOf("") }
     var isChecked by remember { mutableStateOf(false) }
@@ -154,7 +156,7 @@ fun SignUpScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Ambiyans Işıkları (HTML'deki orb-1 ve orb-2)
+        // Ambiyans Işıkları
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-60).dp)
@@ -180,12 +182,12 @@ fun SignUpScreen(navController: NavHostController) {
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
-            // GERİ BUTONU (HTML'deki gibi cam buton)
+            // GERİ BUTONU
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), CircleShape) // DEĞİŞTİ: outlineVariant düzeltildi
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), CircleShape)
                     .clickable { navController.popBackStack() },
                 contentAlignment = Alignment.Center
             ) {
@@ -220,9 +222,29 @@ fun SignUpScreen(navController: NavHostController) {
                 lineHeight = 20.sp
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // EKLENDİ: Bilgilendirme Notu
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Bu bilgileri daha sonra Ayarlar menüsünden güncelleyebilirsiniz.",
+                    fontFamily = JakartaFont,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
-            // FORM ALANLARI
+            // 1. AD SOYAD
             UnderlineInput(
                 value = name,
                 onValueChange = { name = it },
@@ -232,16 +254,36 @@ fun SignUpScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // 2. TELEFON VE KAN GRUBU (Yan yana)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Bottom
             ) {
+                UnderlineInput(
+                    value = phone,
+                    onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 11) phone = it },
+                    label = "Telefon No",
+                    icon = Icons.Default.Phone,
+                    keyboardType = KeyboardType.Phone,
+                    modifier = Modifier.weight(1.2f)
+                )
+
                 BloodTypeDropdown(
                     selectedOption = bloodType,
                     onOptionSelected = { bloodType = it },
                     modifier = Modifier.weight(1f)
                 )
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 3. ŞİFRE VE ŞİFRE TEKRAR (Yan yana)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
                 UnderlineInput(
                     value = password,
                     onValueChange = { password = it },
@@ -251,11 +293,21 @@ fun SignUpScreen(navController: NavHostController) {
                     keyboardType = KeyboardType.Password,
                     modifier = Modifier.weight(1f)
                 )
+
+                UnderlineInput(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = "Şifre Tekrar",
+                    icon = Icons.Default.Lock,
+                    isPassword = true,
+                    keyboardType = KeyboardType.Password,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Acil Durum Kişisi
+            // 4. ACİL DURUM KİŞİSİ
             UnderlineInput(
                 value = emergencyPhone,
                 onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 11) emergencyPhone = it },
@@ -267,7 +319,7 @@ fun SignUpScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Doktor E-Postası (Opsiyonel badge ile)
+            // 5. DOKTOR E-POSTASI
             UnderlineInput(
                 value = doctorEmail,
                 onValueChange = { doctorEmail = it },
@@ -282,7 +334,7 @@ fun SignUpScreen(navController: NavHostController) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         letterSpacing = 1.sp,
                         modifier = Modifier
-                            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(50)) // DEĞİŞTİ: outlineVariant düzeltildi
+                            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(50))
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -300,7 +352,6 @@ fun SignUpScreen(navController: NavHostController) {
                     onCheckedChange = { isChecked = it },
                     colors = CheckboxDefaults.colors(
                         checkedColor = MaterialTheme.colorScheme.primary,
-                        // DEĞİŞTİ: Checkbox'ın boş hali için belirgin bir gri/beyaz tonu (onSurfaceVariant) kullanıldı
                         uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         checkmarkColor = MaterialTheme.colorScheme.onPrimary
                     )
@@ -335,12 +386,11 @@ fun SignUpScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // KAYIT BUTONU (HTML'deki glass-btn)
+            // KAYIT BUTONU
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    // DEĞİŞTİ: Kodu Gönder butonundaki gibi glow efektini geri ekledik
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent),
@@ -363,14 +413,12 @@ fun SignUpScreen(navController: NavHostController) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            // DEĞİŞTİ: Buton üstündeki cam parlama efekti
                             .border(
                                 1.dp,
                                 Brush.verticalGradient(listOf(Color.White.copy(0.3f), Color.Transparent)),
                                 RoundedCornerShape(16.dp)
                             )
                             .background(
-                                // DEĞİŞTİ: Soluk primaryContainer yerine ana rengin güçlü hali kullanıldı
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                                 ),
@@ -384,7 +432,7 @@ fun SignUpScreen(navController: NavHostController) {
                                 fontFamily = JakartaFont,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White // Zemin koyu kırmızı/pembe olduğu için yazı tam beyaz kalmalı
+                                color = Color.White
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Icon(

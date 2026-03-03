@@ -1,5 +1,6 @@
 package com.hayatinritmi.app.screens
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -16,6 +17,8 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -149,24 +152,45 @@ fun EkgAnimation(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(
+    navController: NavHostController,
+    isDarkMode: Boolean,
+    onThemeToggle: () -> Unit
+) {
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showBiometricSheet by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState()
 
+    // 1. ARKA PLAN İÇİN YUMUŞAK RENK GEÇİŞ ANİMASYONLARI
+    val animatedBgColor by animateColorAsState(
+        targetValue = MaterialTheme.colorScheme.background,
+        animationSpec = tween(durationMillis = 500),
+        label = "bgColor"
+    )
+    val animatedAmbient1 by animateColorAsState(
+        targetValue = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+        animationSpec = tween(durationMillis = 500),
+        label = "ambient1"
+    )
+    val animatedAmbient2 by animateColorAsState(
+        targetValue = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+        animationSpec = tween(durationMillis = 500),
+        label = "ambient2"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(animatedBgColor)
     ) {
         // Ambiyans Işıkları
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-100).dp)
                 .size(350.dp)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
+                .background(animatedAmbient1, CircleShape)
                 .blur(100.dp)
         )
         Box(
@@ -174,9 +198,89 @@ fun LoginScreen(navController: NavHostController) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 80.dp, y = 100.dp)
                 .size(300.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), CircleShape)
+                .background(animatedAmbient2, CircleShape)
                 .blur(90.dp)
         )
+
+        // --- YENİ ANİMASYONLU KAPSÜL TEMA BUTONU ---
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 48.dp, end = 24.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(50)
+                )
+                .padding(4.dp)
+        ) {
+            // 2. KAYAN TOP ANİMASYONU (Slider)
+            // Çarpma hissini kaldırdık, yerine sakin bir geçiş ekledik
+            val indicatorOffset by animateDpAsState(
+                targetValue = if (isDarkMode) 40.dp else 0.dp,
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing
+                ),
+                label = "indicatorOffset"
+            )
+
+            // Kayan arka plan topu
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .size(36.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+            )
+
+            // İkonların kendisi
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Gündüz (Güneş) Tıklama Alanı
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { if (isDarkMode) onThemeToggle() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    val lightIconColor by animateColorAsState(
+                        targetValue = if (!isDarkMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "lightIcon"
+                    )
+                    Icon(
+                        imageVector = Icons.Default.LightMode,
+                        contentDescription = "Gündüz Modu",
+                        tint = lightIconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Gece (Ay) Tıklama Alanı
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { if (!isDarkMode) onThemeToggle() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    val darkIconColor by animateColorAsState(
+                        targetValue = if (isDarkMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "darkIcon"
+                    )
+                    Icon(
+                        imageVector = Icons.Default.DarkMode,
+                        contentDescription = "Gece Modu",
+                        tint = darkIconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -247,7 +351,6 @@ fun LoginScreen(navController: NavHostController) {
                 text = "Giriş Yap",
                 onClick = { showBiometricSheet = true },
                 modifier = Modifier.padding(horizontal = 24.dp),
-                // DEĞİŞTİ: Şeffaf (primaryContainer) renk yerine tok ve tam kapalı (solid) bir gradient verildi.
                 colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
             )
 
@@ -263,7 +366,6 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.padding(horizontal = 24.dp),
                 icon = Icons.Default.Code,
                 height = 48.dp,
-                // DEĞİŞTİ: Butonun rengi arka planla karışmasın diye temanın ana zıt rengine (siyah/beyaz) bağlandı.
                 accentColor = MaterialTheme.colorScheme.onBackground
             )
 
@@ -362,7 +464,6 @@ fun LoginScreen(navController: NavHostController) {
                         }
                     },
                     icon = Icons.Default.Check,
-                    // DEĞİŞTİ: Burada da silikleşmeyi önlemek için tok renkler verdik.
                     colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF9F1239))
                 )
 
