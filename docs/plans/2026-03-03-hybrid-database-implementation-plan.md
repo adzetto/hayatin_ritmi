@@ -247,7 +247,7 @@ Bu hesaplar, EKG dalga verisinin sadece metadata degerinde oldugunu ve bulut yed
 ## 4. Faz 1 — Lokal Katman Iyilestirmeleri
 
 **Sure tahmini**: 3-4 gun  
-**Bagimlilik**: Yok (hemen baslanabilir)
+**Bagimlilik**: Yok
 
 ### 4.1 Yeni Room Entity Tanimlari
 
