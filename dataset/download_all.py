@@ -166,69 +166,93 @@ def crawl_physionet(session, start_url, progress, task_id):
 # ---------------------------------------------------------------------------
 # Sadece stream: Bilgisayara kaydetmeden Rclone rcat kullanarak Drive'a basar
 # ---------------------------------------------------------------------------
-def stream_file_to_rclone(session, file_url, base_url, remote_dest, existing_files, progress, task_id):
+def process_single_file(session, file_url, base_url, dest_dir, existing_files, is_local, progress, task_id):
     rel = file_url.replace(base_url, "")
-    # Rclone path (unix style)
     rel_unix = rel.replace("\\", "/")
-    remote_file_path = f"{remote_dest}/{rel_unix}"
     
-    # Boyutu ogren
     try:
         head = session.head(file_url, timeout=15, allow_redirects=True)
         remote_size = int(head.headers.get("Content-Length", 0))
     except Exception:
         remote_size = 0
 
-    # Dosya zaten Google Drive'da (tamamen) var mi?
-    if rel_unix in existing_files:
-        # Boyut hesabi rclone uzerinden tek tek yapilabilir ama yavastir.
-        # Basitce var diyorsak atliyoruz (resume).
-        progress.advance(task_id, remote_size or 0)
-        return True
-
-    # Rclone sub-process uzerinden rcat (pipe stream) baslat
-    try:
-        resp = session.get(file_url, stream=True, timeout=60)
-        resp.raise_for_status()
+    if is_local:
+        local_path = os.path.join(dest_dir, rel.lstrip("/"))
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
         
-        proc = subprocess.Popen(
-            RCLONE_CMD + ["rcat", remote_file_path],
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        
-        for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
-            if chunk:
-                try:
-                    proc.stdin.write(chunk)
-                    proc.stdin.flush()
-                except BrokenPipeError:
-                    break   # Rclone kapandi
-                progress.advance(task_id, len(chunk))
+        if os.path.exists(local_path):
+            curr_size = os.path.getsize(local_path)
+            if remote_size > 0 and curr_size == remote_size:
+                progress.advance(task_id, remote_size)
+                return True
+            if remote_size == 0 and curr_size > 0:
+                progress.advance(task_id, curr_size)
+                return True
                 
-        proc.stdin.close()
-        proc.wait()
-        
-        if proc.returncode != 0:
-            err = proc.stderr.read().decode('utf-8')
-            logger.error(f"Rclone rcat basarisiz {file_url}: {err}")
+        try:
+            resp = session.get(file_url, stream=True, timeout=60)
+            resp.raise_for_status()
+            with open(local_path, "wb") as f:
+                for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
+                    if chunk:
+                        f.write(chunk)
+                        progress.advance(task_id, len(chunk))
+            return True
+        except Exception as e:
+            logger.error(f"Yerel indirme hatasi {file_url}: {e}")
             return False
-        return True
 
-    except Exception as e:
-        logger.error(f"Baglanti hatasi {file_url}: {e}")
-        return False
+    else:
+        # RCLONE RCAT STREAM
+        remote_file_path = f"{dest_dir}/{rel_unix}"
+        if rel_unix in existing_files:
+            progress.advance(task_id, remote_size or 0)
+            return True
+
+        try:
+            resp = session.get(file_url, stream=True, timeout=60)
+            resp.raise_for_status()
+            
+            proc = subprocess.Popen(
+                RCLONE_CMD + ["rcat", remote_file_path],
+                stdin=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            
+            for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    try:
+                        proc.stdin.write(chunk)
+                        proc.stdin.flush()
+                    except BrokenPipeError:
+                        break
+                    progress.advance(task_id, len(chunk))
+                    
+            proc.stdin.close()
+            proc.wait()
+            
+            if proc.returncode != 0:
+                err = proc.stderr.read().decode('utf-8')
+                logger.error(f"Rcat hatasi {file_url}: {err}")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Rclone stream hatasi {file_url}: {e}")
+            return False
 
 # ---------------------------------------------------------------------------
 # PhysioNet - Direkt Buluta Indirme (Streaming)
 # ---------------------------------------------------------------------------
-def download_physionet_rclone(key, ds, remote_base):
+def download_physionet_worker(key, ds, args):
     base_url = ds["url"]
-    remote_dir = f"{remote_base}/{ds['dir']}"
-
     session = create_session()
 
-    # Faz 1: Dizin tarama
+    if args.local_dir:
+        dest_dir = os.path.join(args.local_dir, ds['dir'])
+        os.makedirs(dest_dir, exist_ok=True)
+    else:
+        dest_dir = f"{args.remote}/{ds['dir']}"
+
     console.print(f"\n  [bold]Faz 1/3[/bold] — Dizin yapisi taraniyor...")
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console, transient=True) as progress:
         tid = progress.add_task("  Tarama basliyor...", total=None)
@@ -239,17 +263,20 @@ def download_physionet_rclone(key, ds, remote_base):
     if total_files == 0:
         return
 
-    # Faz 2: Rclone icindeki mevcut dosyalari listele (Hizli Resume icin)
-    console.print(f"  [bold]Faz 2/3[/bold] — Google Drive mevcut dosyalar sorgulaniyor...")
-    existing = get_existing_rclone_files(remote_dir)
-    if existing:
-        console.print(f"  Bulunan Google Drive dosyasi: [bold green]{len(existing):,}[/bold green] (Bunlar atlanacak)")
+    existing = set()
+    if args.local_dir:
+        console.print(f"  [bold]Faz 2/3[/bold] — Yerel disk atlandi (os.path.exists kullanilacak)")
+    else:
+        console.print(f"  [bold]Faz 2/3[/bold] — Google Drive mevcut dosyalar sorgulaniyor...")
+        existing = get_existing_rclone_files(dest_dir)
+        if existing:
+            console.print(f"  Bulunan Drive dosyasi: [bold green]{len(existing):,}[/bold green] (Atlanacak)")
 
-    # Tahmini boyut
     est_bytes = int(ds["size_gb"] * 1024 * 1024 * 1024)
 
-    # Faz 3: Paralel Stream to GDrive
-    console.print(f"  [bold]Faz 3/3[/bold] — Google Drive'a dogrudan stream yapiliyor ({MAX_DL_WORKERS} baglanti)...")
+    msg = "Yerel diske indiriliyor" if args.local_dir else "Drive'a dogrudan stream yapiliyor"
+    console.print(f"  [bold]Faz 3/3[/bold] — {msg} ({MAX_DL_WORKERS} baglanti)...")
+    
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]{task.description}[/bold blue]"),
@@ -260,11 +287,11 @@ def download_physionet_rclone(key, ds, remote_base):
         TimeRemainingColumn(),
         console=console,
     ) as progress:
-        tid = progress.add_task(f"  {key} -> GDrive", total=est_bytes)
+        tid = progress.add_task(f"  {key}", total=est_bytes)
 
         with ThreadPoolExecutor(max_workers=MAX_DL_WORKERS) as pool:
             futs = [
-                pool.submit(stream_file_to_rclone, session, u, base_url, remote_dir, existing, progress, tid)
+                pool.submit(process_single_file, session, u, base_url, dest_dir, existing, args.local_dir, progress, tid)
                 for u in file_urls
             ]
             ok, fail = 0, 0
@@ -275,64 +302,59 @@ def download_physionet_rclone(key, ds, remote_base):
         progress.update(tid, completed=est_bytes)
 
     console.print(f"  Basarili: [green]{ok}[/green]  |  Hatali: [red]{fail}[/red]")
-    console.print(f"  Konum: [dim]{remote_dir}[/dim]")
+    console.print(f"  Konum: [dim]{dest_dir}[/dim]")
 
 # ---------------------------------------------------------------------------
 # Kaggle - Temp Folder + Rclone Move (Kaggle API zorunlulugu)
 # ---------------------------------------------------------------------------
-def download_kaggle_rclone(key, ds, remote_base):
+def download_kaggle_worker(key, ds, args):
     kaggle_id = ds["kaggle_id"]
-    remote_dir = f"{remote_base}/{ds['dir']}"
+    
+    if args.local_dir:
+        dest_dir = os.path.join(args.local_dir, ds['dir'])
+        os.makedirs(dest_dir, exist_ok=True)
+    else:
+        dest_dir = f"{args.remote}/{ds['dir']}"
 
     try:
         from kaggle.api.kaggle_api_extended import KaggleApi
-    except ImportError:
-        console.print("  [red]HATA[/red] — kaggle paketi yuklu degil: pip install kaggle")
-        return
-
-    try:
         api = KaggleApi()
         api.authenticate()
     except Exception as e:
-        console.print(f"  [red]HATA[/red] — Kaggle auth basarisiz: {e}")
+        console.print(f"  [red]HATA[/red] — Kaggle hazirlanamadi: {e} (Kaggle paketini kurun ve kaggle.json ekleyin)")
         return
 
-    # Gecici klasor olustur
-    tmp_dir = tempfile.mkdtemp(prefix=f"kaggle_{key}_")
-    console.print(f"  [bold]Faz 1/2[/bold] — Kaggle -> Gecici Disk (Local zip extraction)...")
-    
     with Progress(SpinnerColumn(), TextColumn("[bold magenta]{task.description}[/bold magenta]"), console=console) as progress:
         tid = progress.add_task(f"  {key} indiriliyor", total=None)
-        try:
-            api.dataset_download_files(kaggle_id, path=tmp_dir, unzip=True, quiet=True)
-            progress.update(tid, description=f"  {key} — Gecici diske alindi")
-        except Exception as e:
-            console.print(f"  [red]HATA[/red] — Kaggle Indirme: {e}")
-            shutil.rmtree(tmp_dir, ignore_errors=True)
-            return
-
-    # Rclone Move to Google Drive (and delete from temp)
-    console.print(f"  [bold]Faz 2/2[/bold] — Rclone Move (Gecici Disk -> Google Drive)...")
-    try:
-        proc = subprocess.run(
-            RCLONE_CMD + ["move", tmp_dir, remote_dir, "--transfers", "10", "--stats", "2s"],
-            capture_output=True, text=True
-        )
-        if proc.returncode == 0:
-            console.print(f"  Google Drive aktarimi [bold green]BAŞARILI[/bold green]. Gecici dosyalar silindi.")
+        
+        if args.local_dir:
+            try:
+                api.dataset_download_files(kaggle_id, path=dest_dir, unzip=True, quiet=True)
+                progress.update(tid, description=f"  {key} dizine cikarildi: {dest_dir}")
+                console.print(f"  Kaggle indirmesi [bold green]BAŞARILI[/bold green].")
+            except Exception as e:
+                console.print(f"  [red]HATA[/red] — Kaggle Indirme: {e}")
         else:
-            console.print(f"  [red]Rclone Hatasi:[/red] {proc.stderr}")
-    except Exception as e:
-        console.print(f"  [red]HATA[/red] — Rclone calistirilirken: {e}")
-    finally:
-        shutil.rmtree(tmp_dir, ignore_errors=True)
-
-    console.print(f"  Konum: [dim]{remote_dir}[/dim]")
+            tmp_dir = tempfile.mkdtemp(prefix=f"kaggle_{key}_")
+            try:
+                api.dataset_download_files(kaggle_id, path=tmp_dir, unzip=True, quiet=True)
+                progress.update(tid, description=f"  Gecici diske alindi, rclone move basliyor...")
+                proc = subprocess.run(RCLONE_CMD + ["move", tmp_dir, dest_dir, "--transfers", "10", "--stats", "2s"], capture_output=True, text=True)
+                if proc.returncode == 0:
+                    console.print(f"  Google Drive aktarimi [bold green]BAŞARILI[/bold green]. Gecici dosyalar silindi.")
+                else:
+                    console.print(f"  [red]Rclone Hatasi:[/red] {proc.stderr}")
+            except Exception as e:
+                console.print(f"  [red]HATA[/red] — Rclone: {e}")
+            finally:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+                
+    console.print(f"  Konum: [dim]{dest_dir}[/dim]")
 
 # ---------------------------------------------------------------------------
 # Ana İndirme Yoneticisi
 # ---------------------------------------------------------------------------
-def download_dataset(key, remote_base):
+def download_dataset(key, args):
     ds = DATASETS[key]
     source = ds["source"]
 
@@ -346,9 +368,9 @@ def download_dataset(key, remote_base):
     ))
 
     if source == "kaggle":
-        download_kaggle_rclone(key, ds, remote_base)
+        download_kaggle_worker(key, ds, args)
     else:
-        download_physionet_rclone(key, ds, remote_base)
+        download_physionet_worker(key, ds, args)
 
 # ---------------------------------------------------------------------------
 # UI & Main
@@ -388,18 +410,21 @@ def main():
     parser.add_argument("--dataset", "-d", type=str, default=None)
     parser.add_argument("--bundle", "-b", type=str, default=None)
     parser.add_argument("--remote", "-r", type=str, default=DEFAULT_RCLONE_REMOTE, help="Ornek: gdrive:TUBITAK_Datasets")
+    parser.add_argument("--local-dir", "-L", type=str, default=None, help="Eger bu parametre verilirse Rclone deaktif olur, dogrudan diske kaydedilir (Google Colab icin)")
     parser.add_argument("--list", "-l", action="store_true")
     args = parser.parse_args()
 
-    if not check_rclone():
-        console.print("[bold red]HATA:[/bold red] Rclone bulunamadi. WSL'de kurulu oldugundan emin olun.")
+    if not args.local_dir and not check_rclone():
+        console.print("[bold red]HATA:[/bold red] Rclone bulunamadi. WSL'de kurulu oldugundan emin olun (veya --local-dir kullanin).")
         sys.exit(1)
 
+    if args.local_dir:
+        target_info = f"Yerel Disk   : [bold yellow]{args.local_dir}[/bold yellow]\nMod          : [bold green]LOCAL (Colab/Disk)[/bold green]"
+    else:
+        target_info = f"Hedef Rclone : [bold yellow]{args.remote}[/bold yellow]\nMod          : [bold blue]RCLONE DIRECT STREAM[/bold blue]"
+
     console.print(Panel(
-        f"[bold]HAYATIN RITMI — Direct-to-Drive Downloader[/bold]\n\n"
-        f"Hedef Rclone : [bold yellow]{args.remote}[/bold yellow]\n"
-        f"Gecici Disk  : Kullanilmiyor (Sadece Kaggle icin min. seviyede)\n"
-        f"Paralel is   : {MAX_DL_WORKERS} baglanti",
+        f"[bold]HAYATIN RITMI — Dataset Downloader[/bold]\n\n{target_info}\nParalel is   : {MAX_DL_WORKERS} baglanti",
         title="[bold cyan]download_all.py[/bold cyan]",
         border_style="cyan",
         width=70,
@@ -426,7 +451,7 @@ def main():
     
     for idx, key in enumerate(targets, 1):
         console.rule(f"[bold]{idx}/{len(targets)}[/bold] — {key}")
-        download_dataset(key, remote_base=args.remote)
+        download_dataset(key, args)
 
     dt = str(timedelta(seconds=int(time.time() - t0)))
     console.print(Panel(
