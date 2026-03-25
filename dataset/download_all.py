@@ -21,6 +21,7 @@ import logging
 import requests
 import tempfile
 import shutil
+import json
 from pathlib import Path
 from datetime import timedelta
 from bs4 import BeautifulSoup
@@ -122,6 +123,56 @@ def get_existing_rclone_files(remote_path):
         pass
     return set()
 
+def get_existing_local_files(local_dir):
+    """Yerel dizindeki tum dosyalari tek seferde tarar (batch scan).
+    os.walk() tek bir FUSE listdir cagrisini kullanir — dosya basina ayri
+    os.path.exists() + os.path.getsize() yapmaktan kat kat hizlidir.
+    Donus: {relative_path: file_size} sozlugu.
+    """
+    result = {}
+    if not os.path.isdir(local_dir):
+        return result
+    for root, _dirs, files in os.walk(local_dir):
+        for fname in files:
+            if fname.startswith('.'):
+                continue
+            full = os.path.join(root, fname)
+            rel = os.path.relpath(full, local_dir).replace("\\", "/")
+            try:
+                result[rel] = os.path.getsize(full)
+            except OSError:
+                pass
+    return result
+
+MARKER_FILE = ".download_complete"
+
+def write_completion_marker(dest_dir, is_local, file_count):
+    """Basarili indirme sonrasi isaretci dosyasi yazar."""
+    marker_data = json.dumps({
+        "completed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "file_count": file_count,
+    })
+    if is_local:
+        marker_path = os.path.join(dest_dir, MARKER_FILE)
+        with open(marker_path, "w") as f:
+            f.write(marker_data)
+    else:
+        subprocess.run(
+            RCLONE_CMD + ["rcat", f"{dest_dir}/{MARKER_FILE}"],
+            input=marker_data.encode(), capture_output=True
+        )
+
+def check_completion_marker(dest_dir, is_local):
+    """Isaretci dosyasi var mi kontrol eder. Tek bir FUSE/rclone cagrisi."""
+    if is_local:
+        return os.path.exists(os.path.join(dest_dir, MARKER_FILE))
+    else:
+        res = subprocess.run(
+            RCLONE_CMD + ["lsf", f"{dest_dir}/{MARKER_FILE}"],
+            capture_output=True, text=True
+        )
+        return res.returncode == 0 and MARKER_FILE in res.stdout
+
 def create_session():
     s = requests.Session()
     retries = Retry(total=10, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
@@ -168,8 +219,19 @@ def crawl_physionet(session, start_url, progress, task_id):
 # ---------------------------------------------------------------------------
 def process_single_file(session, file_url, base_url, dest_dir, existing_files, is_local, progress, task_id):
     rel = file_url.replace(base_url, "")
-    rel_unix = rel.replace("\\", "/")
-    
+    rel_unix = rel.replace("\\", "/").lstrip("/")
+
+    # --- Hizli atlama: batch scan sonucundan in-memory kontrol ---
+    # HEAD request YOK, os.path.exists YOK, os.path.getsize YOK
+    if rel_unix in existing_files:
+        if isinstance(existing_files, dict):
+            skip_size = existing_files.get(rel_unix, 0)
+        else:
+            skip_size = 0
+        progress.advance(task_id, skip_size or 0)
+        return True
+
+    # Dosya mevcut degil — HEAD ile boyut al
     try:
         head = session.head(file_url, timeout=15, allow_redirects=True)
         remote_size = int(head.headers.get("Content-Length", 0))
@@ -177,18 +239,9 @@ def process_single_file(session, file_url, base_url, dest_dir, existing_files, i
         remote_size = 0
 
     if is_local:
-        local_path = os.path.join(dest_dir, rel.lstrip("/"))
+        local_path = os.path.join(dest_dir, rel_unix)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        
-        if os.path.exists(local_path):
-            curr_size = os.path.getsize(local_path)
-            if remote_size > 0 and curr_size == remote_size:
-                progress.advance(task_id, remote_size)
-                return True
-            if remote_size == 0 and curr_size > 0:
-                progress.advance(task_id, curr_size)
-                return True
-                
+
         try:
             resp = session.get(file_url, stream=True, timeout=60)
             resp.raise_for_status()
@@ -205,20 +258,17 @@ def process_single_file(session, file_url, base_url, dest_dir, existing_files, i
     else:
         # RCLONE RCAT STREAM
         remote_file_path = f"{dest_dir}/{rel_unix}"
-        if rel_unix in existing_files:
-            progress.advance(task_id, remote_size or 0)
-            return True
 
         try:
             resp = session.get(file_url, stream=True, timeout=60)
             resp.raise_for_status()
-            
+
             proc = subprocess.Popen(
                 RCLONE_CMD + ["rcat", remote_file_path],
                 stdin=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
-            
+
             for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
                 if chunk:
                     try:
@@ -227,10 +277,10 @@ def process_single_file(session, file_url, base_url, dest_dir, existing_files, i
                     except BrokenPipeError:
                         break
                     progress.advance(task_id, len(chunk))
-                    
+
             proc.stdin.close()
             proc.wait()
-            
+
             if proc.returncode != 0:
                 err = proc.stderr.read().decode('utf-8')
                 logger.error(f"Rcat hatasi {file_url}: {err}")
@@ -246,12 +296,25 @@ def process_single_file(session, file_url, base_url, dest_dir, existing_files, i
 def download_physionet_worker(key, ds, args):
     base_url = ds["url"]
     session = create_session()
+    is_local = bool(args.local_dir)
+    use_staging = bool(getattr(args, 'staging_dir', None)) and is_local
 
-    if args.local_dir:
-        dest_dir = os.path.join(args.local_dir, ds['dir'])
+    # Hedef dizinleri belirle
+    if is_local:
+        final_dir = os.path.join(args.local_dir, ds['dir'])
+        if use_staging:
+            dest_dir = os.path.join(args.staging_dir, ds['dir'])
+        else:
+            dest_dir = final_dir
         os.makedirs(dest_dir, exist_ok=True)
     else:
         dest_dir = f"{args.remote}/{ds['dir']}"
+        final_dir = dest_dir
+
+    # ---- Marker kontrolu: daha once tamamlanmis mi? ----
+    if not getattr(args, 'force', False) and check_completion_marker(final_dir, is_local):
+        console.print(f"  [bold green]ATLANDI[/bold green] — Onceden tamamlanmis (.download_complete mevcut)")
+        return
 
     console.print(f"\n  [bold]Faz 1/3[/bold] — Dizin yapisi taraniyor...")
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console, transient=True) as progress:
@@ -263,20 +326,34 @@ def download_physionet_worker(key, ds, args):
     if total_files == 0:
         return
 
-    existing = set()
-    if args.local_dir:
-        console.print(f"  [bold]Faz 2/3[/bold] — Yerel disk atlandi (os.path.exists kullanilacak)")
+    # ---- Faz 2: Mevcut dosyalari toplu tara (tek os.walk / rclone lsf) ----
+    existing = {}
+    if is_local:
+        console.print(f"  [bold]Faz 2/3[/bold] — Mevcut dosyalar taraniyor (batch scan)...")
+        existing = get_existing_local_files(final_dir)
+        # Staging dizininde onceki calistirilmadan kalan dosyalar varsa onlari da dahil et
+        if use_staging and os.path.isdir(dest_dir):
+            staging_existing = get_existing_local_files(dest_dir)
+            existing.update(staging_existing)
+        if existing:
+            console.print(f"  Mevcut dosya: [bold green]{len(existing):,}[/bold green] (Atlanacak)")
     else:
         console.print(f"  [bold]Faz 2/3[/bold] — Google Drive mevcut dosyalar sorgulaniyor...")
         existing = get_existing_rclone_files(dest_dir)
         if existing:
             console.print(f"  Bulunan Drive dosyasi: [bold green]{len(existing):,}[/bold green] (Atlanacak)")
 
-    est_bytes = int(ds["size_gb"] * 1024 * 1024 * 1024)
+    # Tum dosyalar zaten mevcutsa isaretle ve atla
+    if len(existing) >= total_files:
+        console.print(f"  [bold green]Tum dosyalar zaten mevcut — atlaniyor.[/bold green]")
+        write_completion_marker(final_dir, is_local, total_files)
+        console.print(f"  Konum: [dim]{final_dir}[/dim]")
+        return
 
-    msg = "Yerel diske indiriliyor" if args.local_dir else "Drive'a dogrudan stream yapiliyor"
-    console.print(f"  [bold]Faz 3/3[/bold] — {msg} ({MAX_DL_WORKERS} baglanti)...")
-    
+    est_bytes = int(ds["size_gb"] * 1024 * 1024 * 1024)
+    dl_label = "Staging diske" if use_staging else ("Yerel diske" if is_local else "Drive'a dogrudan stream")
+    console.print(f"  [bold]Faz 3/3[/bold] — {dl_label} indiriliyor ({MAX_DL_WORKERS} baglanti)...")
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]{task.description}[/bold blue]"),
@@ -291,7 +368,7 @@ def download_physionet_worker(key, ds, args):
 
         with ThreadPoolExecutor(max_workers=MAX_DL_WORKERS) as pool:
             futs = [
-                pool.submit(process_single_file, session, u, base_url, dest_dir, existing, args.local_dir, progress, tid)
+                pool.submit(process_single_file, session, u, base_url, dest_dir, existing, is_local, progress, tid)
                 for u in file_urls
             ]
             ok, fail = 0, 0
@@ -302,19 +379,38 @@ def download_physionet_worker(key, ds, args):
         progress.update(tid, completed=est_bytes)
 
     console.print(f"  Basarili: [green]{ok}[/green]  |  Hatali: [red]{fail}[/red]")
-    console.print(f"  Konum: [dim]{dest_dir}[/dim]")
+
+    # ---- Staging → Google Drive toplu kopyalama ----
+    if use_staging and ok > 0:
+        console.print(f"  [bold]Staging → Google Drive kopyalaniyor...[/bold]")
+        os.makedirs(final_dir, exist_ok=True)
+        shutil.copytree(dest_dir, final_dir, dirs_exist_ok=True)
+        shutil.rmtree(dest_dir, ignore_errors=True)
+        console.print(f"  [bold green]Kopyalama tamamlandi.[/bold green]")
+
+    # Basarili ise tamamlanma markeri yaz
+    if fail == 0:
+        write_completion_marker(final_dir, is_local, ok)
+
+    console.print(f"  Konum: [dim]{final_dir}[/dim]")
 
 # ---------------------------------------------------------------------------
 # Kaggle - Temp Folder + Rclone Move (Kaggle API zorunlulugu)
 # ---------------------------------------------------------------------------
 def download_kaggle_worker(key, ds, args):
     kaggle_id = ds["kaggle_id"]
-    
-    if args.local_dir:
+    is_local = bool(args.local_dir)
+
+    if is_local:
         dest_dir = os.path.join(args.local_dir, ds['dir'])
         os.makedirs(dest_dir, exist_ok=True)
     else:
         dest_dir = f"{args.remote}/{ds['dir']}"
+
+    # Marker kontrolu
+    if not getattr(args, 'force', False) and check_completion_marker(dest_dir, is_local):
+        console.print(f"  [bold green]ATLANDI[/bold green] — Onceden tamamlanmis (.download_complete mevcut)")
+        return
 
     try:
         from kaggle.api.kaggle_api_extended import KaggleApi
@@ -327,11 +423,12 @@ def download_kaggle_worker(key, ds, args):
     with Progress(SpinnerColumn(), TextColumn("[bold magenta]{task.description}[/bold magenta]"), console=console) as progress:
         tid = progress.add_task(f"  {key} indiriliyor", total=None)
         
-        if args.local_dir:
+        if is_local:
             try:
                 api.dataset_download_files(kaggle_id, path=dest_dir, unzip=True, quiet=True)
                 progress.update(tid, description=f"  {key} dizine cikarildi: {dest_dir}")
                 console.print(f"  Kaggle indirmesi [bold green]BAŞARILI[/bold green].")
+                write_completion_marker(dest_dir, is_local, -1)
             except Exception as e:
                 console.print(f"  [red]HATA[/red] — Kaggle Indirme: {e}")
         else:
@@ -342,6 +439,7 @@ def download_kaggle_worker(key, ds, args):
                 proc = subprocess.run(RCLONE_CMD + ["move", tmp_dir, dest_dir, "--transfers", "10", "--stats", "2s"], capture_output=True, text=True)
                 if proc.returncode == 0:
                     console.print(f"  Google Drive aktarimi [bold green]BAŞARILI[/bold green]. Gecici dosyalar silindi.")
+                    write_completion_marker(dest_dir, is_local, -1)
                 else:
                     console.print(f"  [red]Rclone Hatasi:[/red] {proc.stderr}")
             except Exception as e:
@@ -412,6 +510,10 @@ def main():
     parser.add_argument("--remote", "-r", type=str, default=DEFAULT_RCLONE_REMOTE, help="Ornek: gdrive:TUBITAK_Datasets")
     parser.add_argument("--local-dir", "-L", type=str, default=None, help="Eger bu parametre verilirse Rclone deaktif olur, dogrudan diske kaydedilir (Google Colab icin)")
     parser.add_argument("--list", "-l", action="store_true")
+    parser.add_argument("--staging-dir", "-S", type=str, default=None,
+                        help="Staging dizini (orn: /content/staging). Dosyalar once buraya indirilir, sonra --local-dir hedefine kopyalanir. Colab SSD hizini kullanir.")
+    parser.add_argument("--force", "-f", action="store_true",
+                        help="Tamamlanma isaretlerini (.download_complete) yoksay, yeniden kontrol et")
     args = parser.parse_args()
 
     if not args.local_dir and not check_rclone():
@@ -419,7 +521,10 @@ def main():
         sys.exit(1)
 
     if args.local_dir:
-        target_info = f"Yerel Disk   : [bold yellow]{args.local_dir}[/bold yellow]\nMod          : [bold green]LOCAL (Colab/Disk)[/bold green]"
+        target_info = f"Yerel Disk   : [bold yellow]{args.local_dir}[/bold yellow]"
+        if args.staging_dir:
+            target_info += f"\nStaging Disk : [bold yellow]{args.staging_dir}[/bold yellow]"
+        target_info += f"\nMod          : [bold green]LOCAL (Colab/Disk)[/bold green]"
     else:
         target_info = f"Hedef Rclone : [bold yellow]{args.remote}[/bold yellow]\nMod          : [bold blue]RCLONE DIRECT STREAM[/bold blue]"
 
