@@ -1,5 +1,13 @@
 # Hayatın Ritmi — Yapay Zeka Destekli Taşınabilir EKG Analiz Sistemi
 
+<!-- badges -->
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![Jupyter Notebook](https://img.shields.io/badge/Jupyter%20Notebook-F37626?style=for-the-badge&logo=jupyter&logoColor=white) ![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=for-the-badge&logo=powershell&logoColor=white)
+
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white) ![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white) ![pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?style=for-the-badge) ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white) ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=keras&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
+
+![last commit](https://img.shields.io/github/last-commit/adzetto/hayatin_ritmi?style=flat-square&color=informational) ![repo size](https://img.shields.io/github/repo-size/adzetto/hayatin_ritmi?style=flat-square&color=informational) ![top language](https://img.shields.io/github/languages/top/adzetto/hayatin_ritmi?style=flat-square) ![language count](https://img.shields.io/github/languages/count/adzetto/hayatin_ritmi?style=flat-square) ![license](https://img.shields.io/github/license/adzetto/hayatin_ritmi?style=flat-square&color=informational)
+
+
 **TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı**
 
 > Çok Kanallı Adaptif Yapay Zekâ Tabanlı Taşınabilir EKG Analiz Sistemi
